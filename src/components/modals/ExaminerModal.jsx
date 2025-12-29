@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { X, GraduationCap } from 'lucide-react';
 import { callProAI } from '../../lib/api';
 
-const ExaminerModal = ({ isOpen, onClose, essayText, isPaid, onIncrementUsage }) => {
+const ExaminerModal = ({ isOpen, onClose, essayText, isPaid, onIncrementUsage, examinerUsageCount, onLimitReached }) => {
     const [feedback, setFeedback] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -29,63 +29,63 @@ const ExaminerModal = ({ isOpen, onClose, essayText, isPaid, onIncrementUsage })
             let prompt = "";
 
             if (type === 'ielts') {
-                prompt = `Act as a strict IELTS Examiner. Analyze the following essay based on the official 4 marking criteria: Task Response (TR), Coherence & Cohesion (CC), Lexical Resource (LR), and Grammatical Range & Accuracy (GRA). 
-                
-                METADATA:
-                - Exact Word Count: ${wordCount} words. (Use this for length-based penalties if under 250 words).
+                prompt = `Act as a strict IELTS Examiner.Analyze the following essay based on the official 4 marking criteria: Task Response(TR), Coherence & Cohesion(CC), Lexical Resource(LR), and Grammatical Range & Accuracy(GRA).
 
-                Return strictly valid JSON with this structure: 
-                { 
-                    "overallScore": "number (0-9 in 0.5 steps)", 
-                    "breakdown": { "TR": "number", "CC": "number", "LR": "number", "GRA": "number" }, 
-                    "critique": "string (A concise paragraph analyzing the essay against these 4 criteria)", 
-                    "strengths": "string (One specific thing done well)",
-                    "weakness": "string (One specific area for improvement. If score is 9.0, return null)"
-                }.
-                
-                Essay:
-                ${essayText}`;
+    METADATA:
+- Exact Word Count: ${wordCount} words. (Use this for length - based penalties if under 250 words).
+
+                Return strictly valid JSON with this structure:
+{
+    "overallScore": "number (0-9 in 0.5 steps)",
+        "breakdown": { "TR": "number", "CC": "number", "LR": "number", "GRA": "number" },
+    "critique": "string (A concise paragraph analyzing the essay against these 4 criteria)",
+        "strengths": "string (One specific thing done well)",
+            "weakness": "string (One specific area for improvement. If score is 9.0, return null)"
+}.
+
+Essay:
+                ${essayText} `;
             } else {
                 // PTE Prompt - Updated to 7 Official Traits
-                prompt = `Act as a strict PTE Academic Examiner. Analyze the following essay based on the official 7 scoring traits for the 'Write Essay' task.
-                
-                METADATA:
-                - Exact Word Count: ${wordCount} words. 
+                prompt = `Act as a strict PTE Academic Examiner.Analyze the following essay based on the official 7 scoring traits for the 'Write Essay' task.
+
+    METADATA:
+    - Exact Word Count: ${wordCount} words. 
                 - CRITICAL: Use this word count for the 'Form' score.
                 
                 SCORING RULES:
-                1. Content (0-3): 3=Adequate, 0=Irrelevant.
-                2. Form (0-2): 200-300 words = 2. 120-199 or 301-380 = 1. <120 or >380 = 0.
-                3. Structure (0-2): Development and Coherence.
-                4. Grammar (0-2): 2=Consistent/Correct, 1=Some errors but clear, 0=Fails communication.
-                5. Linguistic (0-2): General Linguistic Range (Precision/Emphasis).
-                6. Vocab (0-2): Vocabulary Range (Variety/Synonyms).
-                7. Spelling (0-2): 2=No errors. 1=One error. 0=More than one error.
+1. Content(0 - 3): 3 = Adequate, 0 = Irrelevant.
+                2. Form(0 - 2): 200 - 300 words = 2. 120 - 199 or 301 - 380 = 1. < 120 or > 380 = 0.
+3. Structure(0 - 2): Development and Coherence.
+                4. Grammar(0 - 2): 2 = Consistent / Correct, 1 = Some errors but clear, 0 = Fails communication.
+                5. Linguistic(0 - 2): General Linguistic Range(Precision / Emphasis).
+                6. Vocab(0 - 2): Vocabulary Range(Variety / Synonyms).
+                7. Spelling(0 - 2): 2 = No errors. 1 = One error. 0 = More than one error.
 
                 Return strictly valid JSON with this structure:
-                {
-                    "overallScore": "number (10-90 integer)",
-                    "breakdown": { 
-                        "Content": "score (0-3)", 
-                        "Form": "score (0-2)", 
-                        "Structure": "score (0-2)", 
-                        "Grammar": "score (0-2)", 
+{
+    "overallScore": "number (10-90 integer)",
+        "breakdown": {
+        "Content": "score (0-3)",
+            "Form": "score (0-2)",
+                "Structure": "score (0-2)",
+                    "Grammar": "score (0-2)",
                         "Linguistic": "score (0-2)",
-                        "Vocab": "score (0-2)", 
-                        "Spelling": "score (0-2)" 
-                    },
-                    "critique": "string (A concise paragraph analyzing the essay based on PTE standards)",
-                    "strengths": "string (One specific thing done well)",
-                    "weakness": "string (One specific area for improvement. If score is 90, return null)"
-                }
+                            "Vocab": "score (0-2)",
+                                "Spelling": "score (0-2)"
+    },
+    "critique": "string (A concise paragraph analyzing the essay based on PTE standards)",
+        "strengths": "string (One specific thing done well)",
+            "weakness": "string (One specific area for improvement. If score is 90, return null)"
+}
 
-                Essay:
-                ${essayText}`;
+Essay:
+                ${essayText} `;
             }
 
             const resultText = await callProAI(prompt, "You are a helpful API that returns strictly valid JSON.");
             // Attempt to parse JSON (cleaning potential markdown fences)
-            const cleanJson = resultText.replace(/```json|```/g, '').trim();
+            const cleanJson = resultText.replace(/```json | ```/g, '').trim();
             const data = JSON.parse(cleanJson);
             setFeedback(data);
             if (!isPaid) onIncrementUsage();
@@ -98,6 +98,10 @@ const ExaminerModal = ({ isOpen, onClose, essayText, isPaid, onIncrementUsage })
     };
 
     const handleSelectExam = (type) => {
+        if (!isPaid && examinerUsageCount >= 1) {
+            if (onLimitReached) onLimitReached();
+            return;
+        }
         setExamType(type);
         getFeedback(type);
     };
@@ -180,7 +184,7 @@ const ExaminerModal = ({ isOpen, onClose, essayText, isPaid, onIncrementUsage })
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b-2 border-stone-200 pb-6 gap-6">
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className={`text-[10px] font-black uppercase tracking-widest text-white px-2 py-0.5 ${examType === 'ielts' ? 'bg-red-600' : 'bg-blue-600'}`}>
+                                        <span className={`text - [10px] font - black uppercase tracking - widest text - white px - 2 py - 0.5 ${examType === 'ielts' ? 'bg-red-600' : 'bg-blue-600'} `}>
                                             {examType === 'ielts' ? 'IELTS' : 'PTE'}
                                         </span>
                                         <p className="text-xs font-bold uppercase tracking-widest text-stone-500">Overall Score</p>

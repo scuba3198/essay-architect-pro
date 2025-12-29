@@ -488,6 +488,11 @@ const App = () => {
                     essayText={generateFullEssay()}
                     isPaid={isPaid}
                     onIncrementUsage={incrementExaminerUsage}
+                    examinerUsageCount={examinerUsageCount}
+                    onLimitReached={() => {
+                        setShowExaminer(false);
+                        setShowLimitModal(true);
+                    }}
                 />
             )}
 
