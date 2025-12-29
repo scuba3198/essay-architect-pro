@@ -64,4 +64,5 @@ The Pro version features a tiered access system managed via a manual-verificatio
     ```
 
 ## 📄 License
-Architected for the community. Licensed under [MIT](LICENSE).
+This software and associated documentation files (the "Software") are the 
+exclusive property of Mumukshu D.C.
