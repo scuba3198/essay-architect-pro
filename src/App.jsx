@@ -517,9 +517,12 @@ const App = () => {
                             <div className="mb-16 border-b-4 border-stone-900 pb-12">
                                 <h2 className="text-7xl md:text-8xl font-black font-serif text-stone-900 mb-6 tracking-tighter leading-[0.8]">
                                     MASTER <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-stone-600" style={{ WebkitTextStroke: '2px #1c1917' }}>THE</span>
-                                    <span className="block text-4xl italic font-serif text-stone-900 my-2">like a</span>
-                                    ARCHITECT PRO
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-stone-600" style={{ WebkitTextStroke: '2px #1c1917' }}>THE</span> <br />
+                                    <div className="relative inline-block">
+                                        ARCHITECT
+                                        <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-4xl font-cursive text-stone-600 font-normal lowercase whitespace-nowrap z-10">like a</span>
+                                        <span className="ml-[0.2em]">PRO</span>
+                                    </div>
                                 </h2>
                                 <p className="text-stone-900 text-xl font-serif max-w-2xl border-l-4 border-yellow-400 pl-6 italic">
                                     Essay Architect Pro isn't just a wizard—it's a comprehensive training ground. Here is how to get the most out of it.
