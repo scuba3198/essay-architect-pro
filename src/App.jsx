@@ -371,6 +371,8 @@ const App = () => {
                 <meta property="og:title" content="Essay Architect PRO - AI Essay Writing & Grading" />
                 <meta property="og:description" content="Master your essay writing with real-time AI feedback and professional grading structure." />
                 <meta property="og:url" content="https://pro.essay-architect.uk/" />
+                <meta property="og:image" content="https://pro.essay-architect.uk/og-image.svg" />
+                <meta name="twitter:image" content="https://pro.essay-architect.uk/og-image.svg" />
                 <meta name="keywords" content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder" />
             </Helmet>
             <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-6 py-5 flex justify-between items-center z-50 sticky top-0">
