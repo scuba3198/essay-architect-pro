@@ -9,7 +9,6 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
                 serif: ['Playfair Display', 'serif'],
-                cursive: ['Great Vibes', 'cursive'],
             },
             keyframes: {
                 fadeIn: {
