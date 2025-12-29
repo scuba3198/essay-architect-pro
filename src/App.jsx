@@ -20,6 +20,7 @@ import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/fingerprint';
 import MobileWarning from './components/MobileWarning';
 import PrivacyModal from './components/modals/PrivacyModal';
+import { Helmet } from 'react-helmet-async';
 
 const LearnCard = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -363,6 +364,15 @@ const App = () => {
 
     return (
         <div className="h-screen bg-[#f4f1ea] text-stone-900 font-sans flex flex-col overflow-hidden selection:bg-yellow-300 selection:text-stone-900">
+            <Helmet>
+                <title>{activeTab === 'learn' ? 'Essay Architect PRO • Master Academic Writing' : 'Essay Architect PRO • AI Writing Wizard'}</title>
+                <meta name="description" content="The ultimate AI-powered essay writing and grading tool for IELTS and PTE. Practice with instant feedback, strict scoring, and structural guidance." />
+                <link rel="canonical" href="https://pro.essay-architect.uk/" />
+                <meta property="og:title" content="Essay Architect PRO - AI Essay Writing & Grading" />
+                <meta property="og:description" content="Master your essay writing with real-time AI feedback and professional grading structure." />
+                <meta property="og:url" content="https://pro.essay-architect.uk/" />
+                <meta name="keywords" content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder" />
+            </Helmet>
             <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-6 py-5 flex justify-between items-center z-50 sticky top-0">
                 <div className="flex items-center gap-6">
                     <div className="bg-stone-900 text-white w-10 h-10 flex items-center justify-center font-serif font-black text-xl">
@@ -546,6 +556,43 @@ const App = () => {
                                     desc="No API keys or complex setups. Get instant, centralized AI grading optimized for the Nepali academic market."
                                     number="04"
                                 />
+                            </div>
+
+                            <div className="mb-16 grid md:grid-cols-2 gap-12 text-stone-900">
+                                <div>
+                                    <h3 className="font-serif font-bold text-2xl mb-4">The Ultimate IELTS & PTE Writing Tool</h3>
+                                    <p className="font-medium leading-relaxed opacity-80 mb-6">
+                                        Achieving a high band score in IELTS or PTE requires more than just vocabulary—it requires structure.
+                                        Essay Architect PRO is the specialized tool that forces you to plan your essay paragraph by paragraph
+                                        before you write.
+                                    </p>
+                                    <p className="font-medium leading-relaxed opacity-80">
+                                        Stop practicing blindly. With our <strong className="font-bold text-stone-900">advanced AI examiner</strong>,
+                                        you receive instant feedback on your coherence, cohesion, and lexical resource, tailored specifically
+                                        to the marking criteria of international English exams.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="font-serif font-bold text-2xl mb-4">Why Structure Matters</h3>
+                                    <ul className="space-y-3 font-medium opacity-80">
+                                        <li className="flex gap-3 items-start">
+                                            <span className="text-stone-900 font-bold">•</span>
+                                            <span>Eliminate writer's block with our step-by-step wizard.</span>
+                                        </li>
+                                        <li className="flex gap-3 items-start">
+                                            <span className="text-stone-900 font-bold">•</span>
+                                            <span>Ensure every paragraph has a clear topic sentence and example.</span>
+                                        </li>
+                                        <li className="flex gap-3 items-start">
+                                            <span className="text-stone-900 font-bold">•</span>
+                                            <span>Master opinion, discussion, and advantage/disadvantage essay types.</span>
+                                        </li>
+                                        <li className="flex gap-3 items-start">
+                                            <span className="text-stone-900 font-bold">•</span>
+                                            <span>Get band score estimates instantly.</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <div className="bg-stone-900 text-white p-12 relative overflow-hidden">
