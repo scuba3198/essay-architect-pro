@@ -58,7 +58,6 @@ const App = () => {
     const [aiUsageCount, setAiUsageCount] = useState(0);
     const [examinerUsageCount, setExaminerUsageCount] = useState(0);
     const [showLimitModal, setShowLimitModal] = useState(false);
-    const [limitModalType, setLimitModalType] = useState('exhausted'); // 'exhausted' | 'halfway'
 
     const [tourStep, setTourStep] = useState(-1);
     const [hasSeenTour, setHasSeenTour] = useState(false);
@@ -292,7 +291,6 @@ const App = () => {
 
     const handleExaminerOpen = () => {
         if (!isPaid && examinerUsageCount >= 1) {
-            setLimitModalType('exhausted');
             setShowLimitModal(true);
             return;
         }
@@ -522,7 +520,6 @@ const App = () => {
                 isOpen={showLimitModal}
                 onClose={() => setShowLimitModal(false)}
                 onUpgrade={handleUpgradeFromLimit}
-                type={limitModalType}
             />
 
             <main className="flex-1 overflow-hidden relative">
@@ -686,14 +683,7 @@ const App = () => {
                                     onOpenPricing={() => setShowPricing(true)}
                                     freeUsageCount={aiUsageCount}
                                     onIncrementUsage={incrementFreeUsage}
-                                    onLimitReached={() => {
-                                        setLimitModalType('exhausted');
-                                        setShowLimitModal(true);
-                                    }}
-                                    onHalfwayReached={() => {
-                                        setLimitModalType('halfway');
-                                        setShowLimitModal(true);
-                                    }}
+                                    onLimitReached={() => setShowLimitModal(true)}
                                 />
                             </div>
                         </div>
