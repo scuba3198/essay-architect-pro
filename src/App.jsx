@@ -704,7 +704,7 @@ const App = () => {
 
             <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
-                    Architected by <a href="https://github.com/scuba3198" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
+                    Architected by <a href="https://scuba3198.github.io/mumukshu-portfolio/" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
                 </p>
                 <div className="flex gap-4">
                     <button
