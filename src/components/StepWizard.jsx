@@ -185,7 +185,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
             <div className="flex gap-2">
                 <button
                     onClick={() => handleAutocomplete(section, field, text)}
-                    disabled={generatingField === `${section}-${field}`}
+                    disabled={!!generatingField}
                     className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider disabled:opacity-50 transition-all ${isPaid || canUseFree ? 'text-blue-600 hover:text-blue-700' : 'text-stone-400 hover:text-stone-600'}`}
                     title={isPaid ? "Autocomplete sentence" : canUseFree ? `${freeLeft} Free Uses Left (10 Total)` : "Unlock for AI Autocomplete"}
                 >
@@ -194,7 +194,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                 </button>
                 <button
                     onClick={() => openRefine(section, field, text)}
-                    disabled={!text || text.length < 5}
+                    disabled={!!generatingField || !text || text.length < 5}
                     className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-all ${!text || text.length < 5 ? 'opacity-0' : 'opacity-100'} ${isPaid || canUseFree ? 'text-yellow-600 hover:text-yellow-700' : 'text-stone-400 hover:text-stone-600'}`}
                     title={isPaid ? "Polished by AI" : canUseFree ? `${freeLeft} Free Uses Left (10 Total)` : "Unlock for AI Refinement"}
                 >
