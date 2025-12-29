@@ -2,7 +2,7 @@
 import React from 'react';
 import { X, Zap, Rocket, Award } from 'lucide-react';
 
-const LimitExhaustedModal = ({ isOpen, onClose, onUpgrade }) => {
+const LimitExhaustedModal = ({ isOpen, onClose, onUpgrade, type = 'exhausted' }) => {
     if (!isOpen) return null;
 
     return (
@@ -21,11 +21,13 @@ const LimitExhaustedModal = ({ isOpen, onClose, onUpgrade }) => {
                     </div>
 
                     <h2 className="text-4xl font-serif font-black text-stone-900 mb-4 leading-none tracking-tighter uppercase italic">
-                        You're halfway there!
+                        {type === 'halfway' ? "You're halfway there!" : "Limit Reached"}
                     </h2>
 
                     <p className="text-stone-700 font-medium text-lg leading-relaxed mb-8">
-                        Don't lose your flow. Get 24-hour unlimited access for the price of only <span className="text-stone-900 font-black border-b-4 border-yellow-400">Rs. 50</span>.
+                        {type === 'halfway'
+                            ? <>Don't lose your flow. Get 24-hour unlimited access for the price of only <span className="text-stone-900 font-black border-b-4 border-yellow-400">Rs. 50</span>.</>
+                            : "You've used all your free generations. Upgrade now to continue mastering your essays."}
                     </p>
 
                     <div className="space-y-4">
