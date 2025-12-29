@@ -4,7 +4,7 @@
 
 Essay Architect Pro is a professional-grade AI writing suite designed specifically for students aiming for the highest bands (IELTS 8.5+ / PTE 85+). It transforms the chaotic process of essay writing into a precise, architectural discipline.
 
-![Version](https://img.shields.io/badge/version-0.2_Pro-gold.svg) ![Stack](https://img.shields.io/badge/stack-React%20%7C%20Supabase%20%7C%20Gemini-blue.svg)
+![Version](https://img.shields.io/badge/version-0.3.0--pro-gold.svg) ![License](https://img.shields.io/badge/license-Proprietary-red.svg) ![Stack](https://img.shields.io/badge/stack-React%20%7C%20Supabase%20%7C%20Gemini-blue.svg)
 
 ## 🚀 Live Production Site
 **[https://pro.essay-architect.uk/](https://pro.essay-architect.uk/)**
@@ -31,7 +31,7 @@ The Pro version features a tiered access system managed via a manual-verificatio
 -   **Frontend**: React 18 + Vite (for sub-second HMR and optimized builds).
 -   **Styling**: Custom CSS + Tailwind for a high-contrast, editorial design aesthetic.
 -   **Database & Auth**: [Supabase](https://supabase.com/) for secure payment tracking and real-time access verification.
--   **AI Engine**: [Google Gemini Pro 1.5](https://ai.google.dev/) via centralized secure integration.
+-   **AI Engine**: [Google Gemini 2.5 Flash](https://ai.google.dev/) via centralized secure integration.
 -   **State Management**: Optimized React Hooks for persistent session management.
 
 ## 🛸 UX Enhancements
@@ -44,8 +44,8 @@ The Pro version features a tiered access system managed via a manual-verificatio
 
 1.  **Clone the Architecture**
     ```bash
-    git clone https://github.com/scuba3198/essay-architect.git
-    cd essay-architect
+    git clone https://github.com/scuba3198/essay-architect-pro.git
+    cd essay-architect-pro
     ```
 
 2.  **Environment Setup**
@@ -64,5 +64,4 @@ The Pro version features a tiered access system managed via a manual-verificatio
     ```
 
 ## 📄 License
-This software and associated documentation files (the "Software") are the 
-exclusive property of Mumukshu D.C.
+Architected for the community. Licensed under [Proprietary License](LICENSE).
