@@ -18,6 +18,7 @@ import PreviewSection from './components/PreviewSection';
 import TourTooltip from './components/TourTooltip';
 import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/fingerprint';
+import MobileWarning from './components/MobileWarning';
 
 const LearnCard = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -461,6 +462,8 @@ const App = () => {
                     </div>
                 </div>
             </header>
+
+            <MobileWarning />
 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
             {showExaminer && (
