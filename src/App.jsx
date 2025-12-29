@@ -517,7 +517,8 @@ const App = () => {
                             <div className="mb-16 border-b-4 border-stone-900 pb-12">
                                 <h2 className="text-7xl md:text-8xl font-black font-serif text-stone-900 mb-6 tracking-tighter leading-[0.8]">
                                     MASTER <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-stone-600" style={{ WebkitTextStroke: '2px #1c1917' }}>THE</span> <br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-stone-600" style={{ WebkitTextStroke: '2px #1c1917' }}>THE</span>
+                                    <span className="block text-4xl italic font-serif text-stone-900 my-2">like a</span>
                                     ARCHITECT PRO
                                 </h2>
                                 <p className="text-stone-900 text-xl font-serif max-w-2xl border-l-4 border-yellow-400 pl-6 italic">
