@@ -190,7 +190,7 @@ Essay:
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b-2 border-stone-200 pb-6 gap-6">
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className={`text - [10px] font - black uppercase tracking - widest text - white px - 2 py - 0.5 ${examType === 'ielts' ? 'bg-red-600' : 'bg-blue-600'} `}>
+                                        <span className={`text-[10px] font-black uppercase tracking-widest text-white px-2 py-0.5 ${examType === 'ielts' ? 'bg-red-600' : 'bg-blue-600'}`}>
                                             {examType === 'ielts' ? 'IELTS' : 'PTE'}
                                         </span>
                                         <p className="text-xs font-bold uppercase tracking-widest text-stone-500">Overall Score</p>
