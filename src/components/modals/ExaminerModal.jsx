@@ -84,9 +84,15 @@ Essay:
             }
 
             const resultText = await callProAI(prompt, "You are a helpful API that returns strictly valid JSON.");
-            // Attempt to parse JSON (cleaning potential markdown fences)
-            const cleanJson = resultText.replace(/```json | ```/g, '').trim();
-            const data = JSON.parse(cleanJson);
+
+            // Robust JSON extraction
+            let jsonString = resultText;
+            const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                jsonString = jsonMatch[0];
+            }
+
+            const data = JSON.parse(jsonString);
             setFeedback(data);
             if (!isPaid) onIncrementUsage();
         } catch (err) {
