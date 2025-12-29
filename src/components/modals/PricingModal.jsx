@@ -1,0 +1,170 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Zap, Crown, Flame, Check } from 'lucide-react';
+
+const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) => {
+    const [inputEmail, setInputEmail] = useState(initialEmail);
+    const retrieveAccessRef = useRef(null);
+
+    const plans = [
+        {
+            id: 'day',
+            name: "Crammer's Pass",
+            tier: 1,
+            price: "Rs 50",
+            duration: "24 Hours",
+            description: "Perfect for last-minute mock tests.",
+            features: ["Unlimited UI Feedback", "24h AI Grading", "Instant Critique"],
+            icon: <Flame className="text-orange-500" />,
+            color: "border-orange-200"
+        },
+        {
+            id: 'monthly',
+            name: "Preparation Pack",
+            tier: 2,
+            price: "Rs 499",
+            duration: "30 Days",
+            description: "The most popular choice for serious prep.",
+            features: ["Everything in Day Pass", "30 Days Access", "Academic Structure Tools"],
+            icon: <Zap className="text-yellow-500" />,
+            color: "border-yellow-400",
+            popular: true
+        },
+        {
+            id: 'lifetime',
+            name: "Consultancy Killer",
+            tier: 3,
+            price: "Rs 1,500",
+            duration: "Lifetime",
+            description: "One-time payment, forever yours.",
+            features: ["Lifetime AI Grading", "Prioritized Suggestions", "All Future Updates"],
+            icon: <Crown className="text-purple-500" />,
+            color: "border-purple-500"
+        }
+    ];
+
+    // Auto-scroll to "Retrieve Access" if initialEmail is provided (redirect after payment)
+    useEffect(() => {
+        if (initialEmail && retrieveAccessRef.current) {
+            setTimeout(() => {
+                retrieveAccessRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
+        }
+    }, [initialEmail]);
+
+    const getPlanTier = (name) => {
+        const p = plans.find(pl => pl.name === name);
+        return p ? p.tier : 0;
+    };
+
+    const currentTier = getPlanTier(activePlan);
+
+    return (
+        <div className="fixed inset-0 bg-stone-900/95 z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
+            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-4xl w-full p-8 relative overflow-y-auto max-h-[95vh] custom-scrollbar">
+                <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-900 transition-colors">
+                    <X size={24} strokeWidth={3} />
+                </button>
+
+                <div className="text-center mb-10">
+                    <span className="inline-block px-3 py-1 bg-stone-900 text-white text-[10px] font-black uppercase tracking-widest mb-4">Invest in your band score</span>
+                    <h2 className="text-4xl font-serif font-black text-stone-900">Choose Your Plan</h2>
+                    {activePlan && (
+                        <p className="text-stone-500 mt-2 font-mono text-sm italic">You currently have the <span className="text-stone-900 font-bold">{activePlan}</span> active.</p>
+                    )}
+                    {!activePlan && (
+                        <p className="text-stone-500 mt-2 font-mono text-sm italic">Affordable AI tutoring for the Nepali student.</p>
+                    )}
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                    {plans.map((plan) => {
+                        const isActive = activePlan === plan.name;
+                        const isLower = plan.tier < currentTier;
+                        const isHigher = plan.tier > currentTier;
+
+                        let buttonText = "Select Plan";
+                        if (isActive) buttonText = "Currently Active";
+                        if (isLower) buttonText = "Plan Owned";
+                        if (isHigher && currentTier > 0) buttonText = `Upgrade to ${plan.id === 'lifetime' ? 'Killer' : 'Pack'}`;
+
+                        return (
+                            <div
+                                key={plan.id}
+                                className={`p-6 bg-white border-2 border-stone-900 relative flex flex-col h-full transform transition-transform hover:-translate-y-2 ${plan.popular ? 'shadow-[8px_8px_0px_0px_rgba(250,204,21,1)]' : 'shadow-[8px_8px_0px_0px_rgba(28,25,23,1)]'} ${(isActive || isLower) ? 'opacity-75' : ''}`}
+                            >
+                                {plan.popular && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-stone-900 text-[10px] font-black px-3 py-1 border-2 border-stone-900 uppercase">
+                                        Best Value
+                                    </div>
+                                )}
+
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="p-2 bg-stone-50 border border-stone-100">{plan.icon}</div>
+                                    <div className="text-right">
+                                        <p className="text-3xl font-black text-stone-900 leading-none">{plan.price}</p>
+                                        <p className="text-[10px] text-stone-400 uppercase tracking-widest mt-1">/ {plan.duration}</p>
+                                    </div>
+                                </div>
+
+                                <h3 className="font-serif font-black text-xl mb-1">{plan.name}</h3>
+                                <p className="text-xs text-stone-500 mb-6 leading-relaxed">{plan.description}</p>
+
+                                <ul className="space-y-3 mb-8 flex-1">
+                                    {plan.features.map((feat, i) => (
+                                        <li key={i} className="flex items-center gap-2 text-[11px] font-bold text-stone-700">
+                                            <Check size={12} className="text-green-600" />
+                                            {feat}
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <button
+                                    onClick={() => onSelectPlan(plan)}
+                                    disabled={isActive || isLower}
+                                    className={`w-full py-4 font-black uppercase tracking-widest transition-all border-2 border-stone-900 ${(isActive || isLower) ? 'bg-stone-200 text-stone-500 cursor-not-allowed border-stone-300' :
+                                        plan.popular ? 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white' :
+                                            'bg-stone-50 text-stone-900 hover:bg-stone-900 hover:text-white'
+                                        }`}
+                                >
+                                    {buttonText}
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div
+                    ref={retrieveAccessRef}
+                    className="mt-12 pt-8 border-t-2 border-dashed border-stone-200 text-center"
+                >
+                    <p className="text-sm font-bold text-stone-900 mb-4 uppercase tracking-tighter italic">Already Paid? Retrieve Your Access</p>
+                    <div className="max-w-xs mx-auto flex gap-2">
+                        <input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={inputEmail}
+                            onChange={(e) => setInputEmail(e.target.value)}
+                            className="flex-1 bg-white border-2 border-stone-900 p-3 text-xs outline-none focus:bg-yellow-50"
+                        />
+                        <button
+                            onClick={() => {
+                                if (!inputEmail) return alert("Enter email");
+                                onClose();
+                                window.dispatchEvent(new CustomEvent('check-access', { detail: { email: inputEmail } }));
+                            }}
+                            className="bg-stone-900 text-white px-4 py-2 text-xs font-black uppercase hover:bg-yellow-400 hover:text-stone-900 transition-colors border-2 border-stone-900"
+                        >
+                            Check
+                        </button>
+                    </div>
+                </div>
+
+                <p className="text-center mt-10 text-[10px] text-stone-400 font-mono">
+                    Join a growing number of Nepali students using the Architect.
+                </p>
+            </div>
+        </div>
+    );
+};
+
+export default PricingModal;
