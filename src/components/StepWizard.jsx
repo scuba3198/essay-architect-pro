@@ -190,7 +190,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                     title={isPaid ? "Autocomplete sentence" : canUseFree ? `${freeLeft} Free Uses Left (10 Total)` : "Unlock for AI Autocomplete"}
                 >
                     {generatingField === `${section}-${field}` ? <Wand2 size={10} className="animate-spin" /> : (!isPaid && !canUseFree) ? <Lock size={10} /> : <Zap size={10} />}
-                    {isPaid ? 'Complete' : canUseFree ? `${freeLeft} Free Left` : 'Unlock Pro'}
+                    {isPaid ? 'Complete' : canUseFree ? `${freeLeft} Free Uses Left` : 'Unlock Pro'}
                 </button>
                 <button
                     onClick={() => openRefine(section, field, text)}
