@@ -19,6 +19,7 @@ import TourTooltip from './components/TourTooltip';
 import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/fingerprint';
 import MobileWarning from './components/MobileWarning';
+import PrivacyModal from './components/modals/PrivacyModal';
 
 const LearnCard = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -41,6 +42,7 @@ const App = () => {
     const [timer, setTimer] = useState(0);
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
+    const [showPrivacy, setShowPrivacy] = useState(false);
     const [showExaminer, setShowExaminer] = useState(false);
 
     // Monetization State
@@ -466,6 +468,7 @@ const App = () => {
             <MobileWarning />
 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+            {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
             {showExaminer && (
                 <ExaminerModal
                     isOpen={showExaminer}
@@ -650,10 +653,18 @@ const App = () => {
                 )}
             </main>
 
-            <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-2 text-center shrink-0 z-50">
+            <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
                     Architected by <a href="https://github.com/scuba3198" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
                 </p>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => setShowPrivacy(true)}
+                        className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors"
+                    >
+                        Privacy Policy
+                    </button>
+                </div>
             </footer>
         </div>
     );
