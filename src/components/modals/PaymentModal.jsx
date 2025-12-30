@@ -229,7 +229,7 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
                                 <h3 className="font-serif font-black text-xl text-stone-900 mb-4 tracking-tight leading-none">Send Proof via WhatsApp</h3>
 
                                 <p className="text-xs text-stone-800 font-medium mb-6 leading-relaxed">
-                                    Paid using eSewa/Khalti on your phone? Send the screenshot to us on WhatsApp and we'll unlock your access!
+                                    Paid using eSewa/Khalti on your phone? Send the screenshot to <strong>+977 986-2329617</strong> on WhatsApp and we'll unlock your access!
                                 </p>
 
                                 <a
