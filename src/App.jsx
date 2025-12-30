@@ -283,7 +283,8 @@ const App = () => {
     const tourProps = {
         currentStep: tourStep,
         onNext: nextTourStep,
-        onSkip: skipTour
+        onSkip: skipTour,
+        totalSteps: 6
     };
 
     const getNewRandomTopic = () => {

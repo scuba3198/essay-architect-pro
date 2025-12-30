@@ -1,7 +1,7 @@
 import React, { useRef, useState, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = "bottom" }) => {
+const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = "bottom", totalSteps = 6 }) => {
     const anchorRef = useRef(null);
     const [coords, setCoords] = useState(null);
 
@@ -90,7 +90,7 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
                 ${position === 'top' ? '-bottom-6 left-1/2 w-0.5 h-6 -translate-x-1/2' : ''}
                 ${position === 'left' ? '-right-6 top-1/2 h-0.5 w-6 -translate-y-1/2' : ''}
                 ${position === 'right' ? '-left-6 top-1/2 h-0.5 w-6 -translate-y-1/2' : ''}
-                ${position === 'bottomLeft' ? '-top-6 right-6 w-0.5 h-6' : ''} 
+                ${position === 'bottomLeft' ? '-top-6 right-6 w-0.5 h-6' : ''}
                 ${position === 'bottomRight' ? '-top-6 left-6 w-0.5 h-6' : ''}
             `} />
 
@@ -105,12 +105,12 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
                 <div className="flex justify-between items-center pt-3 border-t border-stone-900/20 mt-1">
                     <button onClick={onSkip} className="text-stone-700 hover:text-stone-900 text-xs font-bold uppercase tracking-wider underline decoration-1 underline-offset-2">End Tour</button>
                     <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-stone-600 font-mono">{stepIndex + 1}/4</span>
+                        <span className="text-[10px] text-stone-600 font-mono">{stepIndex + 1}/{totalSteps}</span>
                         <button
                             onClick={onNext}
                             className="bg-stone-900 text-white px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:bg-white hover:text-stone-900 transition-colors border border-stone-900"
                         >
-                            {stepIndex === 3 ? "Finish" : "Next"}
+                            {stepIndex === totalSteps - 1 ? "Finish" : "Next"}
                         </button>
                     </div>
                 </div>
