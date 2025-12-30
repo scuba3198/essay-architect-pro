@@ -7,7 +7,25 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 // Essay Architect Pro Version Branch
-import { BookOpen, PenTool, RefreshCw, Clock, RotateCcw, HelpCircle, Award, Zap } from 'lucide-react';
+import { BookOpen, PenTool, RefreshCw, Clock, RotateCcw, HelpCircle, Award, Zap, Github, Facebook } from 'lucide-react';
+
+const WhatsAppIcon = ({ size = 24, className = "" }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+        <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+    </svg>
+);
 import ExaminerModal from './components/modals/ExaminerModal';
 import AboutModal from './components/modals/AboutModal';
 import PricingModal from './components/modals/PricingModal';
@@ -739,9 +757,22 @@ const App = () => {
             </main>
 
             <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
-                    Architected by <a href="https://scuba3198.github.io/mumukshu-portfolio/" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
-                </p>
+                <div className="flex items-center gap-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
+                        Architected by <a href="https://scuba3198.github.io/mumukshu-portfolio/" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
+                    </p>
+                    <div className="flex items-center gap-3">
+                        <a href="https://wa.me/979862329617" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-green-500 transition-colors" aria-label="WhatsApp">
+                            <WhatsAppIcon size={16} />
+                        </a>
+                        <a href="https://github.com/scuba3198" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-stone-900 transition-colors" aria-label="GitHub">
+                            <Github size={16} />
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=61585812331891" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-blue-600 transition-colors" aria-label="Facebook">
+                            <Facebook size={16} />
+                        </a>
+                    </div>
+                </div>
                 <div className="flex gap-4">
                     <button
                         onClick={() => setShowPrivacy(true)}
