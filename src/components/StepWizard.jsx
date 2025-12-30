@@ -81,10 +81,6 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
 
     const handleRefineAccept = (newText) => {
         handleInputChange(refineModal.section, refineModal.field, newText);
-        // Special case: increment free usage if they used Refine on Chapter 1
-        if (!isPaid) {
-            onIncrementUsage();
-        }
     };
 
     const handleAutocomplete = async (section, field, currentText) => {
@@ -212,6 +208,9 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                     onClose={() => setRefineModal({ ...refineModal, isOpen: false })}
                     originalText={refineModal.text}
                     onAccept={handleRefineAccept}
+                    onUsage={() => {
+                        if (!isPaid) onIncrementUsage();
+                    }}
                 />
             )}
 

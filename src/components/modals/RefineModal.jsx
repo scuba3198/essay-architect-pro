@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Wand2 } from 'lucide-react';
 import { callProAI } from '../../lib/api';
 
-const RefineModal = ({ isOpen, onClose, originalText, onAccept }) => {
+const RefineModal = ({ isOpen, onClose, originalText, onAccept, onUsage }) => {
     const [suggestion, setSuggestion] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -22,6 +22,9 @@ const RefineModal = ({ isOpen, onClose, originalText, onAccept }) => {
             const prompt = `Rewrite the following sentence to be formal and concise, suitable for an IELTS/PTE essay, using 10th-grade reading level vocabulary (clear and accessible). Do not change the meaning. Return ONLY the rewritten sentence.\n\nOriginal: "${originalText}"`;
             const result = await callProAI(prompt);
             setSuggestion(result ? result.trim() : "Could not generate suggestion.");
+            if (result && onUsage) {
+                onUsage();
+            }
         } catch (err) {
             setError(err.message || "Failed to connect to the wizard AI.");
         } finally {
