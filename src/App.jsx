@@ -106,6 +106,19 @@ const App = () => {
                 let isValid = false;
                 let expiryMessage = "";
 
+                // 1. Calculate Device Fingerprint
+                const currentDeviceID = await getVisitorID();
+
+                // 2. Check Device Lock
+                if (latest.device_id && latest.device_id !== currentDeviceID) {
+                    if (!isSilent) {
+                        alert("Security Alert: This account is locked to another device. Access denied.");
+                    }
+                    // Force logout / deny
+                    setIsPaid(false);
+                    return;
+                }
+
                 if (latest.plan_name === "Consultancy Killer") {
                     isValid = true;
                     expiryMessage = "Welcome back! Your Lifetime access is active.";
@@ -128,6 +141,20 @@ const App = () => {
                 }
 
                 if (isValid) {
+                    // 3. Bind Device if not set
+                    if (!latest.device_id) {
+                        const { error: updateError } = await supabase
+                            .from('payments')
+                            .update({ device_id: currentDeviceID })
+                            .eq('id', latest.id);
+
+                        if (updateError) {
+                            console.error("Failed to bind device:", updateError);
+                            // Proceed anyway for now, but log it. 
+                            // Or potentially block? standard policy is to be lenient if system fails.
+                        }
+                    }
+
                     setIsPaid(true);
                     setUserEmail(email);
                     setActivePlan(latest.plan_name);
