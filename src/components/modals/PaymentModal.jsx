@@ -113,7 +113,7 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
                                 onClick={() => setPaymentMethod('gbime')}
                                 className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest border-2 border-stone-900 transition-all ${paymentMethod === 'gbime' ? 'bg-stone-900 text-white' : 'bg-white text-stone-900 hover:bg-stone-50'}`}
                             >
-                                GBIME (Universal)
+                                FonePay/Khalti/eSewa
                             </button>
                             <button
                                 onClick={() => setPaymentMethod('esewa')}
@@ -133,7 +133,7 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
                             </div>
 
                             <p className="text-[10px] font-mono mb-2 text-stone-500 uppercase tracking-widest text-center">
-                                {paymentMethod === 'gbime' ? 'Global IME Bank (Nepal Universal)' : 'eSewa Direct Payment'}
+                                {paymentMethod === 'gbime' ? 'FonePay / Khalti / eSewa' : 'eSewa Direct Payment'}
                             </p>
 
                             <div className="border-t border-stone-100 pt-4 mt-4">
