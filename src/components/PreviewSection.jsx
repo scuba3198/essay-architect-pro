@@ -48,15 +48,20 @@ const PreviewSection = ({ essay, totalWordCount, setShowExaminer, copyToClipboar
             <div className="p-0 z-20 flex border-t-2 border-stone-900">
                 <button
                     onClick={() => setShowExaminer(true)}
-                    disabled={totalWordCount < 50}
-                    className={`w-1/2 flex items-center justify-center gap-2 py-6 font-black uppercase tracking-widest transition-colors text-sm border-r-2 border-stone-900 disabled:opacity-50 ${isPaid ? 'bg-stone-900 text-white hover:bg-yellow-400 hover:text-stone-900' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
+                    disabled={totalWordCount < 30}
+                    title={totalWordCount < 30 ? "Write at least 30 words to unlock" : ""}
+                    className={`w-1/2 flex items-center justify-center gap-2 py-6 font-black uppercase tracking-widest transition-colors text-sm border-r-2 border-stone-900 disabled:opacity-50 disabled:cursor-not-allowed ${isPaid ? 'bg-stone-900 text-white hover:bg-yellow-400 hover:text-stone-900' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
                 >
                     {!isPaid && (
                         <>
                             {examinerUsageCount < 1 ? <Type size={14} /> : <Lock size={14} />}
                         </>
                     )}
-                    {isPaid ? 'Get Feedback' : (examinerUsageCount < 1 ? 'Free Examiner' : 'Unlock Examiner')}
+                    {isPaid ? 'Get Feedback' : (
+                        examinerUsageCount < 1
+                            ? (totalWordCount < 30 ? 'Free Examiner (Min 30 Words)' : 'Free Examiner')
+                            : 'Unlock Examiner'
+                    )}
                 </button>
                 <button
                     id="copyBtn"
