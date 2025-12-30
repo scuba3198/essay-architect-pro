@@ -7,6 +7,7 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
     const [fileName, setFileName] = useState("");
     const [email, setEmail] = useState("");
     const [isUploading, setIsUploading] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('gbime'); // 'gbime' or 'esewa'
 
     const sendDiscordNotification = async (imageUrl, planName, price) => {
         // ... rest of the function (no changes until step 3 button)
@@ -99,35 +100,65 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
                 {step === 1 && (
                     <div className="animate-in slide-in-from-right-4 duration-300">
                         <h2 className="text-2xl font-serif font-black text-stone-900 mb-6 uppercase tracking-tight italic">
-                            Pay via eSewa / Khalti
+                            Select Payment Method
                         </h2>
 
-                        <div className="bg-white border-2 border-stone-900 p-6 mb-6">
-                            <p className="text-xs font-mono mb-2 text-stone-500 uppercase tracking-widest">Recipient eSewa/Khalti ID</p>
-                            <p className="text-xl font-black text-stone-900 flex items-center gap-2 mb-6 border-b border-stone-200 pb-4">
-                                9862329617 <Phone size={16} className="text-stone-300" />
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                onClick={() => setPaymentMethod('gbime')}
+                                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest border-2 border-stone-900 transition-all ${paymentMethod === 'gbime' ? 'bg-stone-900 text-white' : 'bg-white text-stone-900 hover:bg-stone-50'}`}
+                            >
+                                GBIME (Universal)
+                            </button>
+                            <button
+                                onClick={() => setPaymentMethod('esewa')}
+                                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest border-2 border-stone-900 transition-all ${paymentMethod === 'esewa' ? 'bg-stone-900 text-white' : 'bg-white text-stone-900 hover:bg-stone-50'}`}
+                            >
+                                eSewa QR
+                            </button>
+                        </div>
+
+                        <div className="bg-white border-2 border-stone-900 p-4 mb-6">
+                            <div className="aspect-square w-full max-w-[240px] mx-auto bg-stone-50 border border-stone-100 mb-4 overflow-hidden">
+                                <img
+                                    src={paymentMethod === 'gbime' ? '/qrs/gbime_qr.jpg' : '/qrs/esewa_qr.jpg'}
+                                    alt={`${paymentMethod} QR Code`}
+                                    className="w-full h-full object-contain"
+                                />
+                            </div>
+
+                            <p className="text-[10px] font-mono mb-2 text-stone-500 uppercase tracking-widest text-center">
+                                {paymentMethod === 'gbime' ? 'Global IME Bank (Nepal Universal)' : 'eSewa Direct Payment'}
                             </p>
 
-                            <p className="text-xs font-mono mb-2 text-stone-500 uppercase tracking-widest">Your Email (To unlock access)</p>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="student@example.com"
-                                className="w-full bg-stone-50 border-2 border-stone-900 p-3 text-sm mb-6 outline-none focus:bg-yellow-50 transition-colors"
-                                required
-                            />
+                            <div className="border-t border-stone-100 pt-4 mt-4">
+                                <p className="text-xs font-mono mb-2 text-stone-500 uppercase tracking-widest">Your Email (To unlock access)</p>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="student@example.com"
+                                    className="w-full bg-stone-50 border-2 border-stone-900 p-3 text-sm mb-4 outline-none focus:bg-yellow-50 transition-colors"
+                                    required
+                                />
 
-                            <div className="border-t border-stone-100 pt-4">
-                                <p className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                <p className="text-xl font-bold text-stone-900">{plan.price} <span className="text-xs font-normal text-stone-400">({plan.name})</span></p>
+                                <div className="flex justify-between items-end">
+                                    <div>
+                                        <p className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Total Amount</p>
+                                        <p className="text-xl font-bold text-stone-900">{plan.price} <span className="text-xs font-normal text-stone-400">({plan.name})</span></p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Recipient</p>
+                                        <p className="text-xs font-bold text-stone-900">Mumukshu D.C</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <div className="flex gap-3 items-start">
                                 <div className="w-5 h-5 rounded-full bg-stone-900 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</div>
-                                <p className="text-xs text-stone-600">Send the exact amount to the number above via eSewa or Khalti.</p>
+                                <p className="text-xs text-stone-600">Scan the QR code above using your preferred banking app or eSewa.</p>
                             </div>
                             <div className="flex gap-3 items-start">
                                 <div className="w-5 h-5 rounded-full bg-stone-900 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</div>
