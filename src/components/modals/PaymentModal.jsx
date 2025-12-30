@@ -91,8 +91,13 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-stone-900/95 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-300">
-            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-md w-full p-8 relative">
+        <div
+            className="fixed inset-0 bg-stone-900/95 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-300"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) onClose();
+            }}
+        >
+            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-md w-full p-8 relative max-h-[90vh] overflow-y-auto">
                 <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-900 transition-colors">
                     <X size={24} strokeWidth={3} />
                 </button>
