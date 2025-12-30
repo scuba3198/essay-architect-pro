@@ -45,7 +45,7 @@ const PreviewSection = ({ essay, totalWordCount, setShowExaminer, copyToClipboar
                 </div>
             </div>
 
-            <div className="p-0 z-20 flex border-t-2 border-stone-900">
+            <div className="p-0 z-20 flex border-t-2 border-stone-900 relative">
                 <button
                     onClick={() => setShowExaminer(true)}
                     disabled={totalWordCount < 30}
@@ -70,15 +70,15 @@ const PreviewSection = ({ essay, totalWordCount, setShowExaminer, copyToClipboar
                 >
                     Copy
                 </button>
+                {tourProps && (
+                    <TourTooltip
+                        stepIndex={4}
+                        text="Get AI feedback on your writing, or copy it to clipboard."
+                        position="top"
+                        {...tourProps}
+                    />
+                )}
             </div>
-            {tourProps && (
-                <TourTooltip
-                    stepIndex={4}
-                    text="Get AI feedback on your writing, or copy it to clipboard."
-                    position="top"
-                    {...tourProps}
-                />
-            )}
         </div>
     );
 };

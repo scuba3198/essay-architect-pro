@@ -26,17 +26,27 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
                 const centerX = rect.left + (rect.width / 2);
                 // const centerY = rect.top + (rect.height / 2); // Not used in the new logic
 
-                // Determine Vertical Position (Top/Bottom)
-                if (position.toLowerCase().includes('top')) {
-                    top = rect.top + window.scrollY - 24; // Shift up (will subtract height later via CSS or further calculation if needed)
-                    // Note: If using bottom-anchored content, we might need actual height.
-                    // For now, assuming CSS handles 'bottom' anchored positioning relative to this 'top' is tricky without height.
-                    // simpler: Top means 'Above target'.
-                    // Let's assume height is roughly fixed or auto.
-                    // Actually, easiest way is:
-                    // top = rect.top + scrollY - offset.
-                    // But we don't know height. Use 'bottom' style in CSS?
-                    // Let's stick to 'top' coord and translate Y if needed.
+                // Determine Vertical Position (Top/Bottom) with auto-flip
+                let isTop = position.toLowerCase().includes('top');
+
+                // Preliminary calculation to check for overflow
+                if (isTop) {
+                    // Check if there's enough space above
+                    // We need roughly 150-200px. Let's start with check.
+                    // rect.top is the distance from viewport top to element top.
+                    if (rect.top < 200) {
+                        isTop = false; // Flip to bottom
+                    }
+                } else {
+                    // Check if there's enough space below
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    if (spaceBelow < 200) {
+                        isTop = true; // Flip to top
+                    }
+                }
+
+                if (isTop) {
+                    top = rect.top + window.scrollY - 24;
                 } else {
                     top = rect.bottom + window.scrollY + 24;
                 }
@@ -69,7 +79,7 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
                 // Clamp arrow to be inside tooltip (don't detach)
                 arrowLeft = clamp(arrowLeft, 10, TOOLTIP_WIDTH - 10);
 
-                setLayout({ top, left, arrowLeft });
+                setLayout({ top, left, arrowLeft, isTop });
             }
         };
 
@@ -96,8 +106,8 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
             style={{
                 top: layout?.top,
                 left: layout?.left,
-                // Handle Vertical transform
-                transform: position.includes('top') ? 'translateY(-100%)' : 'none'
+                // Handle Vertical transform based on calculated state, not prop
+                transform: layout?.isTop ? 'translateY(-100%)' : 'none'
             }}
         >
             {/* Connector Line */}
@@ -105,8 +115,8 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
                 className={`absolute bg-stone-900 w-0.5 h-6`}
                 style={{
                     left: layout?.arrowLeft,
-                    top: position.includes('top') ? '100%' : 'auto',
-                    bottom: position.includes('top') ? 'auto' : '100%',
+                    top: layout?.isTop ? '100%' : 'auto',
+                    bottom: layout?.isTop ? 'auto' : '100%',
                     transform: 'translateX(-50%)' // Center the arrow horizontally
                 }}
             />
