@@ -174,7 +174,7 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
                         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-6 mb-2">
                             <p className="text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-1">⚠️ Important Device Policy</p>
                             <p className="text-xs text-stone-700 leading-relaxed">
-                                Please complete this process on your <strong>Personal Device (Laptop/PC)</strong>. Your account will be <strong>permanently locked</strong> to the device you use to verify this payment.
+                                Please complete this process on your <strong>Personal Device (Laptop/PC)</strong>. Your account will be <strong>permanently locked</strong> to the device on which you enter your email.
                             </p>
                         </div>
 
