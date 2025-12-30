@@ -138,7 +138,7 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
     return (
         <>
             <div ref={anchorRef} className="absolute inset-0 pointer-events-none" />
-            {coords && createPortal(tooltipContent, document.body)}
+            {layout && createPortal(tooltipContent, document.body)}
         </>
     );
 };
