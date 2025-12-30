@@ -81,6 +81,15 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
             // 4. Notify Discord
             await sendDiscordNotification(publicUrl, plan.name, plan.price);
 
+            // 5. Track Facebook Pixel
+            if (window.fbq) {
+                window.fbq('track', 'Purchase', {
+                    value: plan.price,
+                    currency: 'NPR', // Assuming NPR as per the context of eSewa/Khalti, or use 'USD' if that's the base
+                    content_name: plan.name
+                });
+            }
+
             setStep(3);
         } catch (error) {
             console.error("Upload failed:", error);
