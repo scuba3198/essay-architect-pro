@@ -97,7 +97,7 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-md w-full p-8 relative max-h-[90vh] overflow-y-auto">
+            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-md w-full p-8 relative max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-stone-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-stone-400">
                 <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-900 transition-colors">
                     <X size={24} strokeWidth={3} />
                 </button>
