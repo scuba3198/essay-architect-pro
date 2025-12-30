@@ -404,8 +404,8 @@ const App = () => {
                 <meta name="twitter:image" content="https://pro.essay-architect.uk/og-image.svg" />
                 <meta name="keywords" content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder" />
             </Helmet>
-            <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-6 py-5 flex justify-between items-center z-50 sticky top-0">
-                <div className="flex items-center gap-6">
+            <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-6 py-5 flex justify-between items-center z-50 sticky top-0 overflow-x-auto">
+                <div className="flex items-center gap-6 shrink-0">
                     <div className="bg-stone-900 text-white w-10 h-10 flex items-center justify-center font-serif font-black text-xl">
                         E
                     </div>
@@ -423,7 +423,7 @@ const App = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-8 shrink-0">
                     <div className="flex items-center">
                         <button
                             onClick={() => setActiveTab('learn')}
