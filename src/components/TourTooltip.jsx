@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 
 const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = "bottom", totalSteps = 6 }) => {
     const anchorRef = useRef(null);
-    const [coords, setCoords] = useState(null);
+    const [layout, setLayout] = useState(null);
 
     // Update position on mount, resize, scroll, and when step changes
     useLayoutEffect(() => {
@@ -12,53 +12,71 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
         const updatePosition = () => {
             if (anchorRef.current) {
                 const rect = anchorRef.current.getBoundingClientRect();
-                const scrollX = window.scrollX;
-                const scrollY = window.scrollY;
+                const TOOLTIP_WIDTH = 288; // w-72 = 18rem = 288px
+                const PADDING = 16; // Screen edge padding
 
-                // Basic center positioning
                 let top = 0;
                 let left = 0;
+                let arrowLeft = 0;
+                // let arrowTop = 0; // Not used in the new logic
 
-                // Adjust based on requested position
-                switch (position) {
-                    case 'bottom':
-                        top = rect.bottom + window.scrollY + 24; // mt-6 = 24px
-                        left = rect.left + (rect.width / 2) + window.scrollX;
-                        break;
-                    case 'top':
-                        top = rect.top + window.scrollY - 24;
-                        left = rect.left + (rect.width / 2) + window.scrollX;
-                        break;
-                    case 'left':
-                        top = rect.top + (rect.height / 2) + window.scrollY;
-                        left = rect.left + window.scrollX - 24;
-                        break;
-                    case 'right':
-                        top = rect.top + (rect.height / 2) + window.scrollY;
-                        left = rect.right + window.scrollX + 24;
-                        break;
-                    case 'bottomLeft':
-                        top = rect.bottom + window.scrollY + 24;
-                        left = rect.right + window.scrollX; // Align to right edge
-                        break;
-                    case 'bottomRight':
-                        top = rect.bottom + window.scrollY + 24;
-                        left = rect.left + window.scrollX; // Align to left edge
-                        break;
-                    default:
-                        // Default to bottom
-                        top = rect.bottom + window.scrollY + 24;
-                        left = rect.left + (rect.width / 2) + window.scrollX;
+                // Helper to clamp value
+                const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+                const centerX = rect.left + (rect.width / 2);
+                // const centerY = rect.top + (rect.height / 2); // Not used in the new logic
+
+                // Determine Vertical Position (Top/Bottom)
+                if (position.toLowerCase().includes('top')) {
+                    top = rect.top + window.scrollY - 24; // Shift up (will subtract height later via CSS or further calculation if needed)
+                    // Note: If using bottom-anchored content, we might need actual height.
+                    // For now, assuming CSS handles 'bottom' anchored positioning relative to this 'top' is tricky without height.
+                    // simpler: Top means 'Above target'.
+                    // Let's assume height is roughly fixed or auto.
+                    // Actually, easiest way is:
+                    // top = rect.top + scrollY - offset.
+                    // But we don't know height. Use 'bottom' style in CSS?
+                    // Let's stick to 'top' coord and translate Y if needed.
+                } else {
+                    top = rect.bottom + window.scrollY + 24;
                 }
 
-                setCoords({ top, left });
+                // Determine Horizontal Position
+                // Default preference: Center aligned
+                let preferredLeft = centerX - (TOOLTIP_WIDTH / 2);
+
+                // Adjust preference based on props if needed (e.g. left/right specific)
+                if (position === 'bottomLeft' || position === 'topLeft') {
+                    // Align right edge of tooltip to right edge of target
+                    preferredLeft = rect.right - TOOLTIP_WIDTH;
+                } else if (position === 'bottomRight' || position === 'topRight') {
+                    // Align left edge of tooltip to lift edge of target
+                    preferredLeft = rect.left;
+                }
+
+                // Clamp to Viewport
+                const maxLeft = window.innerWidth - TOOLTIP_WIDTH - PADDING;
+                const clampedLeft = clamp(preferredLeft, PADDING, maxLeft);
+
+                left = clampedLeft + window.scrollX;
+
+                // Calculate Arrow Position (relative to tooltip)
+                // Arrow should point to centerX
+                // tooltip is at clampedLeft.
+                // arrowX = centerX - clampedLeft
+                arrowLeft = centerX - clampedLeft;
+
+                // Clamp arrow to be inside tooltip (don't detach)
+                arrowLeft = clamp(arrowLeft, 10, TOOLTIP_WIDTH - 10);
+
+                setLayout({ top, left, arrowLeft });
             }
         };
 
         updatePosition();
 
         window.addEventListener('resize', updatePosition);
-        window.addEventListener('scroll', updatePosition, true); // Capture for scrolling in containers
+        window.addEventListener('scroll', updatePosition, true);
 
         return () => {
             window.removeEventListener('resize', updatePosition);
@@ -76,23 +94,22 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
         <div
             className="fixed z-[100] w-72 bg-yellow-400 border-2 border-stone-900 text-stone-900 shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] p-0 animate-in fade-in zoom-in duration-300"
             style={{
-                top: coords?.top,
-                left: coords?.left,
-                transform: position === 'left' || position === 'right' ? 'translateY(-50%)'
-                    : position === 'bottomLeft' ? 'translateX(-100%)' // Align right edge
-                        : position === 'bottomRight' ? 'translateX(0)'
-                            : 'translateX(-50%)' // Center by default
+                top: layout?.top,
+                left: layout?.left,
+                // Handle Vertical transform
+                transform: position.includes('top') ? 'translateY(-100%)' : 'none'
             }}
         >
             {/* Connector Line */}
-            <div className={`absolute bg-stone-900
-                ${position === 'bottom' ? '-top-6 left-1/2 w-0.5 h-6 -translate-x-1/2' : ''}
-                ${position === 'top' ? '-bottom-6 left-1/2 w-0.5 h-6 -translate-x-1/2' : ''}
-                ${position === 'left' ? '-right-6 top-1/2 h-0.5 w-6 -translate-y-1/2' : ''}
-                ${position === 'right' ? '-left-6 top-1/2 h-0.5 w-6 -translate-y-1/2' : ''}
-                ${position === 'bottomLeft' ? '-top-6 right-6 w-0.5 h-6' : ''}
-                ${position === 'bottomRight' ? '-top-6 left-6 w-0.5 h-6' : ''}
-            `} />
+            <div
+                className={`absolute bg-stone-900 w-0.5 h-6`}
+                style={{
+                    left: layout?.arrowLeft,
+                    top: position.includes('top') ? '100%' : 'auto',
+                    bottom: position.includes('top') ? 'auto' : '100%',
+                    transform: 'translateX(-50%)' // Center the arrow horizontally
+                }}
+            />
 
             <div className="relative z-10 p-5">
                 <div className="flex gap-3 mb-3 items-start">
