@@ -296,6 +296,7 @@ const App = () => {
     };
 
     const handleInputChange = (section, field, value) => {
+        if (!isTimerRunning) setIsTimerRunning(true);
         setEssay(prev => ({
             ...prev,
             [section]: {
@@ -306,6 +307,7 @@ const App = () => {
     };
 
     const handleTopicChange = (e) => {
+        if (!isTimerRunning) setIsTimerRunning(true);
         const newQuestion = e.target.value;
         setTopic(prev => ({ ...prev, question: newQuestion }));
     };
