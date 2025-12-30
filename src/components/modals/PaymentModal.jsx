@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, CheckCircle2, QrCode, Phone, Loader2 } from 'lucide-react';
+import { X, Upload, CheckCircle2, QrCode, Phone, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const PaymentModal = ({ onClose, plan, onSuccess }) => {
@@ -195,6 +195,14 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
 
                 {step === 2 && (
                     <div className="animate-in slide-in-from-right-4 duration-300">
+                        <button
+                            onClick={() => setStep(1)}
+                            className="absolute top-8 left-8 text-stone-400 hover:text-stone-900 transition-colors"
+                            title="Go Back"
+                        >
+                            <ArrowLeft size={24} strokeWidth={3} />
+                        </button>
+
                         <h2 className="text-2xl font-serif font-black text-stone-900 mb-6 uppercase tracking-tight italic text-center">
                             Verify Payment
                         </h2>
