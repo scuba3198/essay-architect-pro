@@ -728,6 +728,7 @@ const App = () => {
                                 copyToClipboard={copyToClipboard}
                                 tourProps={tourProps}
                                 isPaid={isPaid}
+                                examinerUsageCount={examinerUsageCount}
                             />
                         </div>
                     </div>

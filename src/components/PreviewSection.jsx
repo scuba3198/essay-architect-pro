@@ -3,7 +3,7 @@ import React from 'react';
 import { Type, Lock } from 'lucide-react';
 import TourTooltip from './TourTooltip';
 
-const PreviewSection = ({ essay, totalWordCount, setShowExaminer, copyToClipboard, tourProps, isPaid }) => {
+const PreviewSection = ({ essay, totalWordCount, setShowExaminer, copyToClipboard, tourProps, isPaid, examinerUsageCount }) => {
 
     const generateFullEssay = () => {
         const { intro, body1, body2, conclusion } = essay;
@@ -51,8 +51,12 @@ const PreviewSection = ({ essay, totalWordCount, setShowExaminer, copyToClipboar
                     disabled={totalWordCount < 50}
                     className={`w-1/2 flex items-center justify-center gap-2 py-6 font-black uppercase tracking-widest transition-colors text-sm border-r-2 border-stone-900 disabled:opacity-50 ${isPaid ? 'bg-stone-900 text-white hover:bg-yellow-400 hover:text-stone-900' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
                 >
-                    {!isPaid && <Lock size={14} />}
-                    {isPaid ? 'Get Feedback' : 'Unlock Examiner'}
+                    {!isPaid && (
+                        <>
+                            {examinerUsageCount < 1 ? <Type size={14} /> : <Lock size={14} />}
+                        </>
+                    )}
+                    {isPaid ? 'Get Feedback' : (examinerUsageCount < 1 ? 'Free Examiner' : 'Unlock Examiner')}
                 </button>
                 <button
                     id="copyBtn"
