@@ -11,6 +11,39 @@ const FeedbackModal = ({ onClose, initialEmail = "" }) => {
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState(null);
 
+    const sendDiscordNotification = async (feedbackData) => {
+        const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
+        if (!webhookUrl) return;
+
+        const stars = feedbackData.rating ? "⭐".repeat(feedbackData.rating) : "No rating";
+
+        const embed = {
+            title: "🏗️ New Feedback Received!",
+            color: 0xFACC15, // Yellow matches yellow-400
+            fields: [
+                { name: "Rating", value: stars, inline: true },
+                { name: "Email", value: feedbackData.email || "Anonymous", inline: true },
+                { name: "Comment", value: feedbackData.comment || "No comment provided" },
+                { name: "Visitor ID", value: `\`${feedbackData.visitor_id}\`` }
+            ],
+            footer: { text: "Essay Architect Pro Notification System" },
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: "🔔 **New feedback architected!** @here",
+                    embeds: [embed]
+                })
+            });
+        } catch (err) {
+            console.error("Failed to send Discord notification:", err);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (rating === 0 && !comment.trim()) {
@@ -23,18 +56,21 @@ const FeedbackModal = ({ onClose, initialEmail = "" }) => {
 
         try {
             const visitorID = await getVisitorID();
+            const feedbackRecord = {
+                visitor_id: visitorID,
+                rating: rating > 0 ? rating : null,
+                comment: comment.trim() || null,
+                email: email.trim() || null
+            };
+
             const { error: supabaseError } = await supabase
                 .from('feedback')
-                .insert([
-                    {
-                        visitor_id: visitorID,
-                        rating: rating > 0 ? rating : null,
-                        comment: comment.trim() || null,
-                        email: email.trim() || null
-                    }
-                ]);
+                .insert([feedbackRecord]);
 
             if (supabaseError) throw supabaseError;
+
+            // Send Discord Notification (Fire and forget)
+            sendDiscordNotification(feedbackRecord);
 
             setSubmitted(true);
             setTimeout(() => {
@@ -145,8 +181,8 @@ const FeedbackModal = ({ onClose, initialEmail = "" }) => {
                             type="submit"
                             disabled={isSubmitting}
                             className={`w-full py-5 flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] transition-all border-2 border-stone-900 ${isSubmitting
-                                    ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
-                                    : 'bg-stone-900 text-white hover:bg-yellow-400 hover:text-stone-900 shadow-[6px_6px_0px_0px_rgba(28,25,23,1)] hover:shadow-none'
+                                ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                                : 'bg-stone-900 text-white hover:bg-yellow-400 hover:text-stone-900 shadow-[6px_6px_0px_0px_rgba(28,25,23,1)] hover:shadow-none'
                                 }`}
                         >
                             {isSubmitting ? 'PROCESSING...' : (
