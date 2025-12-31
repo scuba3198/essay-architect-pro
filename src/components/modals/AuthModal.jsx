@@ -32,7 +32,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
                     }
                 });
                 if (signUpError) throw signUpError;
-                alert("Sign up successful! Please check your email for verification.");
+                alert("Sign up successful! Please check your email (including spam folder) for verification.");
                 setMode('login');
             } else {
                 const { data, error: signInError } = await supabase.auth.signInWithPassword({
