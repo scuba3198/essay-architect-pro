@@ -6,6 +6,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
     const [mode, setMode] = useState('login'); // 'login' or 'signup'
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [fullName, setFullName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -21,6 +22,9 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
                     password,
                     options: {
                         emailRedirectTo: window.location.origin,
+                        data: {
+                            full_name: fullName,
+                        }
                     }
                 });
                 if (signUpError) throw signUpError;
@@ -68,6 +72,23 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {mode === 'signup' && (
+                        <div>
+                            <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Full Name</label>
+                            <div className="relative">
+                                <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+                                <input
+                                    type="text"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    placeholder="John Doe"
+                                    className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
+                                    required={mode === 'signup'}
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     <div>
                         <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Email Address</label>
                         <div className="relative">
