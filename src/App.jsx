@@ -578,7 +578,7 @@ const App = () => {
                 onUpgrade={handleUpgradeFromLimit}
             />
 
-            <FeedbackButton onClick={() => setShowFeedback(true)} />
+
 
             {showFeedback && (
                 <FeedbackModal
@@ -588,6 +588,7 @@ const App = () => {
             )}
 
             <main className="flex-1 overflow-hidden relative">
+                <FeedbackButton onClick={() => setShowFeedback(true)} />
                 {activeTab === 'learn' && (
                     <div className="h-full overflow-y-auto custom-scrollbar bg-[#f4f1ea]">
                         <div className="max-w-7xl mx-auto p-12">
