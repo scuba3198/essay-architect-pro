@@ -27,7 +27,8 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) 
             features: ["Everything in Day Pass", "30 Days Access", "Academic Structure Tools"],
             icon: <Zap className="text-yellow-500" />,
             color: "border-yellow-400",
-            popular: true
+            popular: true,
+            savings: "Save 67%"
         },
         {
             id: 'lifetime',
@@ -38,7 +39,8 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) 
             description: "One-time payment, forever yours.",
             features: ["Lifetime AI Grading", "Prioritized Suggestions", "All Future Updates"],
             icon: <Crown className="text-purple-500" />,
-            color: "border-purple-500"
+            color: "border-purple-500",
+            savings: "Save 90%+"
         }
     ];
 
@@ -95,6 +97,14 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) 
                                 {plan.popular && (
                                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-stone-900 text-[10px] font-black px-3 py-1 border-2 border-stone-900 uppercase">
                                         Best Value
+                                    </div>
+                                )}
+
+                                {plan.savings && !isActive && !isLower && (
+                                    <div className="absolute top-2 right-2 rotate-6">
+                                        <span className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 border border-green-700 rounded-sm uppercase tracking-wider shadow-[2px_2px_0px_0px_rgb(21,128,61)]">
+                                            {plan.savings}
+                                        </span>
                                     </div>
                                 )}
 
