@@ -43,6 +43,7 @@ import PrivacyModal from './components/modals/PrivacyModal';
 import AuthModal from './components/modals/AuthModal';
 import { Helmet } from 'react-helmet-async';
 import { LogOut, User } from 'lucide-react';
+import TestimonialSection from './components/TestimonialSection';
 
 const LearnCard = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -700,111 +701,117 @@ const App = () => {
                                 </div>
                             </div>
 
-                            <div className="bg-stone-900 text-white p-12 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-12 opacity-10">
-                                    <Award size={200} />
+                        </div>
+
+                        <TestimonialSection />
+
+                        <div className="bg-stone-900 text-white p-12 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-12 opacity-10">
+                                <Award size={200} />
+                            </div>
+                            <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                                <div>
+                                    <h3 className="font-serif font-black text-4xl mb-4">Ready to draft your first piece?</h3>
+                                    <p className="text-stone-400 mb-8 max-w-md">Put the theory into practice with our live wizard. Real-time preview, word counting, and structure enforcement included.</p>
+                                    <button
+                                        onClick={() => setActiveTab('practice')}
+                                        className="bg-yellow-400 text-stone-900 px-8 py-4 font-black uppercase tracking-widest hover:bg-white transition-colors"
+                                    >
+                                        Start Writing
+                                    </button>
                                 </div>
-                                <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
-                                    <div>
-                                        <h3 className="font-serif font-black text-4xl mb-4">Ready to draft your first piece?</h3>
-                                        <p className="text-stone-400 mb-8 max-w-md">Put the theory into practice with our live wizard. Real-time preview, word counting, and structure enforcement included.</p>
-                                        <button
-                                            onClick={() => setActiveTab('practice')}
-                                            className="bg-yellow-400 text-stone-900 px-8 py-4 font-black uppercase tracking-widest hover:bg-white transition-colors"
-                                        >
-                                            Start Writing
-                                        </button>
+                                <div className="space-y-4">
+                                    <div className="border border-stone-700 p-4">
+                                        <span className="text-yellow-400 font-bold uppercase text-xs tracking-wider mb-1 block">Opinion Essays</span>
+                                        <p className="font-serif text-xl">"To what extent do you agree?"</p>
                                     </div>
-                                    <div className="space-y-4">
-                                        <div className="border border-stone-700 p-4">
-                                            <span className="text-yellow-400 font-bold uppercase text-xs tracking-wider mb-1 block">Opinion Essays</span>
-                                            <p className="font-serif text-xl">"To what extent do you agree?"</p>
-                                        </div>
-                                        <div className="border border-stone-700 p-4">
-                                            <span className="text-yellow-400 font-bold uppercase text-xs tracking-wider mb-1 block">Discussion Essays</span>
-                                            <p className="font-serif text-xl">"Discuss both views and give your opinion."</p>
-                                        </div>
+                                    <div className="border border-stone-700 p-4">
+                                        <span className="text-yellow-400 font-bold uppercase text-xs tracking-wider mb-1 block">Discussion Essays</span>
+                                        <p className="font-serif text-xl">"Discuss both views and give your opinion."</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
+}
 
-                {activeTab === 'practice' && (
-                    <div className="flex flex-col md:flex-row h-full">
-                        <div className="w-full md:w-3/5 p-0 overflow-y-auto custom-scrollbar bg-[#f4f1ea] border-r-2 border-stone-900">
-                            <div className="p-8 pb-4">
-                                <div className="border-2 border-stone-900 bg-white p-6 relative shadow-[8px_8px_0px_0px_rgba(28,25,23,0.1)] hover:shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] transition-shadow duration-300">
-                                    <div className="flex justify-between items-start mb-4 border-b border-stone-200 pb-4">
-                                        <span className="text-[10px] font-black text-stone-900 uppercase tracking-widest flex items-center gap-2">
-                                            <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
-                                            Topic: {topic?.type}
-                                        </span>
-                                        <div className="relative z-20">
-                                            <button
-                                                onClick={getNewRandomTopic}
-                                                className="text-stone-400 hover:text-stone-900 transition-colors flex items-center gap-1 text-xs font-bold uppercase tracking-wider"
-                                                title="Get new random topic"
-                                            >
-                                                <RefreshCw size={12} /> New Prompt
-                                            </button>
-                                            <TourTooltip
-                                                stepIndex={1}
-                                                text="This is your prompt. Auto-resizes as you type. Click 'New Prompt' to shuffle."
-                                                position="bottomLeft"
-                                                {...tourProps}
-                                            />
+                {
+                    activeTab === 'practice' && (
+                        <div className="flex flex-col md:flex-row h-full">
+                            <div className="w-full md:w-3/5 p-0 overflow-y-auto custom-scrollbar bg-[#f4f1ea] border-r-2 border-stone-900">
+                                <div className="p-8 pb-4">
+                                    <div className="border-2 border-stone-900 bg-white p-6 relative shadow-[8px_8px_0px_0px_rgba(28,25,23,0.1)] hover:shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] transition-shadow duration-300">
+                                        <div className="flex justify-between items-start mb-4 border-b border-stone-200 pb-4">
+                                            <span className="text-[10px] font-black text-stone-900 uppercase tracking-widest flex items-center gap-2">
+                                                <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                                                Topic: {topic?.type}
+                                            </span>
+                                            <div className="relative z-20">
+                                                <button
+                                                    onClick={getNewRandomTopic}
+                                                    className="text-stone-400 hover:text-stone-900 transition-colors flex items-center gap-1 text-xs font-bold uppercase tracking-wider"
+                                                    title="Get new random topic"
+                                                >
+                                                    <RefreshCw size={12} /> New Prompt
+                                                </button>
+                                                <TourTooltip
+                                                    stepIndex={1}
+                                                    text="This is your prompt. Auto-resizes as you type. Click 'New Prompt' to shuffle."
+                                                    position="bottomLeft"
+                                                    {...tourProps}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="relative group">
-                                        <textarea
-                                            ref={promptRef}
-                                            className={`w-full text-stone-900 font-serif font-bold leading-tight bg-transparent border-0 p-0 resize-none outline-none placeholder:text-stone-300 overflow-hidden ${(topic?.question?.length || 0) > 150 ? 'text-xs' : (topic?.question?.length || 0) > 80 ? 'text-sm' : 'text-lg'
-                                                }`}
-                                            value={topic?.question || ''}
-                                            onChange={handleTopicChange}
-                                            rows={1}
-                                            placeholder="Type your essay question here..."
-                                        />
-                                        <div className="absolute right-0 bottom-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <PenTool size={14} className="text-stone-300" />
+                                        <div className="relative group">
+                                            <textarea
+                                                ref={promptRef}
+                                                className={`w-full text-stone-900 font-serif font-bold leading-tight bg-transparent border-0 p-0 resize-none outline-none placeholder:text-stone-300 overflow-hidden ${(topic?.question?.length || 0) > 150 ? 'text-xs' : (topic?.question?.length || 0) > 80 ? 'text-sm' : 'text-lg'
+                                                    }`}
+                                                value={topic?.question || ''}
+                                                onChange={handleTopicChange}
+                                                rows={1}
+                                                placeholder="Type your essay question here..."
+                                            />
+                                            <div className="absolute right-0 bottom-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <PenTool size={14} className="text-stone-300" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div className="pb-20 md:pb-0 min-h-[500px] p-8 pt-0">
+                                    <StepWizard
+                                        currentStep={currentStep}
+                                        setCurrentStep={setCurrentStep}
+                                        essay={essay}
+                                        handleInputChange={handleInputChange}
+                                        tourProps={tourProps}
+                                        topic={topic}
+                                        isPaid={isPaid}
+                                        onOpenPricing={() => setShowPricing(true)}
+                                        freeUsageCount={aiUsageCount}
+                                        onIncrementUsage={incrementFreeUsage}
+                                        onLimitReached={() => setShowLimitModal(true)}
+                                    />
+                                </div>
                             </div>
 
-                            <div className="pb-20 md:pb-0 min-h-[500px] p-8 pt-0">
-                                <StepWizard
-                                    currentStep={currentStep}
-                                    setCurrentStep={setCurrentStep}
+                            <div className="w-full md:w-2/5 h-80 md:h-auto border-t-2 md:border-t-0 border-stone-900 relative z-10 bg-white">
+                                <PreviewSection
                                     essay={essay}
-                                    handleInputChange={handleInputChange}
+                                    totalWordCount={totalWordCount}
+                                    setShowExaminer={handleExaminerOpen}
+                                    copyToClipboard={copyToClipboard}
                                     tourProps={tourProps}
-                                    topic={topic}
                                     isPaid={isPaid}
-                                    onOpenPricing={() => setShowPricing(true)}
-                                    freeUsageCount={aiUsageCount}
-                                    onIncrementUsage={incrementFreeUsage}
-                                    onLimitReached={() => setShowLimitModal(true)}
+                                    examinerUsageCount={examinerUsageCount}
                                 />
                             </div>
                         </div>
-
-                        <div className="w-full md:w-2/5 h-80 md:h-auto border-t-2 md:border-t-0 border-stone-900 relative z-10 bg-white">
-                            <PreviewSection
-                                essay={essay}
-                                totalWordCount={totalWordCount}
-                                setShowExaminer={handleExaminerOpen}
-                                copyToClipboard={copyToClipboard}
-                                tourProps={tourProps}
-                                isPaid={isPaid}
-                                examinerUsageCount={examinerUsageCount}
-                            />
-                        </div>
-                    </div>
-                )}
-            </main>
+                    )
+                }
+            </main >
 
             <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2">
                 <div className="flex items-center gap-4">
@@ -832,7 +839,7 @@ const App = () => {
                     </button>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 };
 
