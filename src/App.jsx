@@ -515,7 +515,17 @@ const App = () => {
                                 </div>
                                 <button
                                     onClick={async () => {
-                                        await supabase.auth.signOut();
+                                        try {
+                                            await supabase.auth.signOut();
+                                        } catch (err) {
+                                            console.error("Logout error:", err);
+                                        } finally {
+                                            // Manual state reset to ensure UI updates immediately
+                                            setUser(null);
+                                            setIsPaid(false);
+                                            setUserEmail('');
+                                            setActivePlan(null);
+                                        }
                                     }}
                                     className="p-2 border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-all text-stone-900"
                                     title="Logout"
