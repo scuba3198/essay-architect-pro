@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Zap, Crown, Flame, Check } from 'lucide-react';
 
-const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) => {
-    const [inputEmail, setInputEmail] = useState(initialEmail);
+const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth }) => {
     const retrieveAccessRef = useRef(null);
 
     const plans = [
@@ -44,14 +43,6 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) 
         }
     ];
 
-    // Auto-scroll to "Retrieve Access" if initialEmail is provided (redirect after payment)
-    useEffect(() => {
-        if (initialEmail && retrieveAccessRef.current) {
-            setTimeout(() => {
-                retrieveAccessRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 500);
-        }
-    }, [initialEmail]);
 
     const getPlanTier = (name) => {
         const p = plans.find(pl => pl.name === name);
@@ -148,27 +139,14 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) 
                     className="mt-12 pt-8 border-t-2 border-dashed border-stone-200 text-center"
                 >
                     <p className="text-sm font-bold text-stone-900 mb-2 uppercase tracking-tighter italic">Already Paid?</p>
-                    <p className="text-[10px] text-stone-500 mb-4 font-medium uppercase tracking-widest">Login to your account to restore access, or verify your email below.</p>
+                    <p className="text-[10px] text-stone-500 mb-6 font-medium uppercase tracking-widest px-4">Your access is now tied to your account. Please log in to restore your premium features.</p>
 
-                    <div className="max-w-xs mx-auto flex gap-2">
-                        <input
-                            type="email"
-                            placeholder="Enter your email"
-                            value={inputEmail}
-                            onChange={(e) => setInputEmail(e.target.value)}
-                            className="flex-1 bg-white border-2 border-stone-900 p-3 text-xs outline-none focus:bg-yellow-50"
-                        />
-                        <button
-                            onClick={() => {
-                                if (!inputEmail) return alert("Enter email");
-                                onClose();
-                                window.dispatchEvent(new CustomEvent('check-access', { detail: { email: inputEmail } }));
-                            }}
-                            className="bg-stone-900 text-white px-4 py-2 text-xs font-black uppercase hover:bg-yellow-400 hover:text-stone-900 transition-colors border-2 border-stone-900"
-                        >
-                            Verify
-                        </button>
-                    </div>
+                    <button
+                        onClick={onShowAuth}
+                        className="bg-stone-900 text-white px-8 py-4 text-xs font-black uppercase hover:bg-yellow-400 hover:text-stone-900 transition-colors border-2 border-stone-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
+                    >
+                        Sign In to My Account
+                    </button>
                 </div>
 
                 <p className="text-center mt-10 text-[10px] text-stone-400 font-mono">

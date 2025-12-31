@@ -75,7 +75,6 @@ const App = () => {
     const [userEmail, setUserEmail] = useState('');
     const [activePlan, setActivePlan] = useState(null);
     const [showPayment, setShowPayment] = useState(false);
-    const [pendingEmail, setPendingEmail] = useState("");
     const [showPricing, setShowPricing] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [visitorID, setVisitorID] = useState(null);
@@ -208,14 +207,8 @@ const App = () => {
             }
         });
 
-        const handleAccessCheck = (e) => {
-            verifyAccess(e.detail.email, false);
-        };
-
-        window.addEventListener('check-access', handleAccessCheck);
         return () => {
             subscription.unsubscribe();
-            window.removeEventListener('check-access', handleAccessCheck);
         };
     }, []);
 
@@ -585,11 +578,19 @@ const App = () => {
                 <PricingModal
                     onClose={() => setShowPricing(false)}
                     activePlan={activePlan}
-                    initialEmail={pendingEmail}
                     onSelectPlan={(plan) => {
-                        setSelectedPlan(plan);
+                        if (!user) {
+                            setShowPricing(false);
+                            setShowAuth(true);
+                        } else {
+                            setSelectedPlan(plan);
+                            setShowPricing(false);
+                            setShowPayment(true);
+                        }
+                    }}
+                    onShowAuth={() => {
                         setShowPricing(false);
-                        setShowPayment(true);
+                        setShowAuth(true);
                     }}
                 />
             )}

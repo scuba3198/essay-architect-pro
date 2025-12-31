@@ -146,15 +146,15 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
                             </p>
 
                             <div className="border-t border-stone-100 pt-4 mt-4">
-                                <p className="text-xs font-mono mb-2 text-stone-500 uppercase tracking-widest">Your Email (To unlock access)</p>
+                                <p className="text-xs font-mono mb-2 text-stone-500 uppercase tracking-widest px-1">Tied to Account</p>
                                 <input
                                     type="email"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="student@example.com"
-                                    className="w-full bg-stone-50 border-2 border-stone-900 p-3 text-sm mb-4 outline-none focus:bg-yellow-50 transition-colors"
+                                    readOnly
+                                    className="w-full bg-stone-100 border-2 border-stone-900 p-3 text-sm mb-4 outline-none font-bold text-stone-500 cursor-not-allowed"
                                     required
                                 />
+                                <p className="text-[10px] text-stone-400 mb-4 px-1 italic">Note: This payment will automatically unlock access for this account.</p>
 
                                 <div className="flex justify-between items-end">
                                     <div>
@@ -189,10 +189,6 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
 
                         <button
                             onClick={() => {
-                                if (!email || !email.includes('@')) {
-                                    alert("Please enter a valid email to receive your access!");
-                                    return;
-                                }
                                 setStep(2);
                             }}
                             className="w-full mt-8 bg-stone-900 text-white py-4 font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-stone-900 transition-all flex items-center justify-center gap-2"
