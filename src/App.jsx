@@ -504,7 +504,7 @@ const App = () => {
                             <div className="flex items-center gap-2">
                                 <div className="hidden lg:flex flex-col items-end mr-2">
                                     <span className="text-[10px] font-black uppercase text-stone-900 tracking-widest truncate max-w-[120px]">
-                                        {user.email}
+                                        {user.user_metadata?.full_name || user.email}
                                     </span>
                                     {isPaid && <span className="text-[8px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1">
                                         <Zap size={8} fill="currentColor" /> {activePlan}
