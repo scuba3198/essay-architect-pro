@@ -534,7 +534,7 @@ const App = () => {
                                 onClick={() => setShowAuth(true)}
                                 className="flex items-center gap-2 px-4 py-2 border-2 border-stone-900 font-black uppercase text-[10px] tracking-widest bg-white text-stone-900 hover:bg-stone-900 hover:text-white transition-all"
                             >
-                                <User size={14} /> Login
+                                <User size={14} /> Login / Sign Up
                             </button>
                         )}
                         <button
