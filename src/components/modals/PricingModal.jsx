@@ -147,7 +147,9 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) 
                     ref={retrieveAccessRef}
                     className="mt-12 pt-8 border-t-2 border-dashed border-stone-200 text-center"
                 >
-                    <p className="text-sm font-bold text-stone-900 mb-4 uppercase tracking-tighter italic">Already Paid? Retrieve Your Access</p>
+                    <p className="text-sm font-bold text-stone-900 mb-2 uppercase tracking-tighter italic">Already Paid?</p>
+                    <p className="text-[10px] text-stone-500 mb-4 font-medium uppercase tracking-widest">Login to your account to restore access, or verify your email below.</p>
+
                     <div className="max-w-xs mx-auto flex gap-2">
                         <input
                             type="email"
@@ -164,7 +166,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, initialEmail = "" }) 
                             }}
                             className="bg-stone-900 text-white px-4 py-2 text-xs font-black uppercase hover:bg-yellow-400 hover:text-stone-900 transition-colors border-2 border-stone-900"
                         >
-                            Check
+                            Verify
                         </button>
                     </div>
                 </div>

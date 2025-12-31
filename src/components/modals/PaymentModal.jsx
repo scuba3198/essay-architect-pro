@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { X, Upload, CheckCircle2, QrCode, Phone, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-const PaymentModal = ({ onClose, plan, onSuccess }) => {
+const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
     const [step, setStep] = useState(1); // 1: Info, 2: Upload, 3: Success
     const [fileName, setFileName] = useState("");
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(userEmail || "");
     const [isUploading, setIsUploading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('gbime'); // 'gbime' or 'esewa'
 
@@ -181,9 +181,9 @@ const PaymentModal = ({ onClose, plan, onSuccess }) => {
                         </div>
 
                         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-6 mb-2">
-                            <p className="text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-1">⚠️ Important Device Policy</p>
+                            <p className="text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-1">⚠️ Account Policy</p>
                             <p className="text-xs text-stone-700 leading-relaxed">
-                                Please complete this process on your <strong>Personal Device (Laptop/PC)</strong>. Your account will be <strong>permanently locked</strong> to the device on which you enter your email.
+                                Please ensure you use the <strong>same email</strong> associated with your account. Your access will be unlocked across all your devices.
                             </p>
                         </div>
 

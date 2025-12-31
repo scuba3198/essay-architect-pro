@@ -40,7 +40,9 @@ import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/fingerprint';
 import MobileWarning from './components/MobileWarning';
 import PrivacyModal from './components/modals/PrivacyModal';
+import AuthModal from './components/modals/AuthModal';
 import { Helmet } from 'react-helmet-async';
+import { LogOut, User } from 'lucide-react';
 
 const LearnCard = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -64,12 +66,14 @@ const App = () => {
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
     const [showPrivacy, setShowPrivacy] = useState(false);
+    const [showAuth, setShowAuth] = useState(false);
     const [showExaminer, setShowExaminer] = useState(false);
 
-    // Monetization State
-    const [isPaid, setIsPaid] = useState(() => localStorage.getItem('ea_pro_paid') === 'true');
-    const [userEmail, setUserEmail] = useState(() => localStorage.getItem('ea_pro_email') || '');
-    const [activePlan, setActivePlan] = useState(() => localStorage.getItem('ea_pro_plan') || null);
+    // Auth & Monetization State
+    const [user, setUser] = useState(null);
+    const [isPaid, setIsPaid] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
+    const [activePlan, setActivePlan] = useState(null);
     const [showPayment, setShowPayment] = useState(false);
     const [pendingEmail, setPendingEmail] = useState("");
     const [showPricing, setShowPricing] = useState(false);
@@ -106,7 +110,11 @@ const App = () => {
     ];
 
     const verifyAccess = async (email, isSilent = false) => {
-        if (!email) return;
+        if (!email) {
+            setIsPaid(false);
+            setActivePlan(null);
+            return;
+        }
 
         try {
             const { data, error } = await supabase
@@ -126,19 +134,6 @@ const App = () => {
 
                 let isValid = false;
                 let expiryMessage = "";
-
-                // 1. Calculate Device Fingerprint
-                const currentDeviceID = await getVisitorID();
-
-                // 2. Check Device Lock
-                if (latest.device_id && latest.device_id !== currentDeviceID) {
-                    if (!isSilent) {
-                        alert("Security Alert: This account is locked to another device. Access denied.");
-                    }
-                    // Force logout / deny
-                    setIsPaid(false);
-                    return;
-                }
 
                 if (latest.plan_name === "Consultancy Killer") {
                     isValid = true;
@@ -162,41 +157,20 @@ const App = () => {
                 }
 
                 if (isValid) {
-                    // 3. Bind Device if not set
-                    if (!latest.device_id) {
-                        const { error: updateError } = await supabase
-                            .from('payments')
-                            .update({ device_id: currentDeviceID })
-                            .eq('id', latest.id);
-
-                        if (updateError) {
-                            console.error("Failed to bind device:", updateError);
-                            // Proceed anyway for now, but log it. 
-                            // Or potentially block? standard policy is to be lenient if system fails.
-                        }
-                    }
-
                     setIsPaid(true);
                     setUserEmail(email);
                     setActivePlan(latest.plan_name);
-                    localStorage.setItem('ea_pro_paid', 'true');
-                    localStorage.setItem('ea_pro_email', email);
-                    localStorage.setItem('ea_pro_plan', latest.plan_name);
                     if (!isSilent) alert(expiryMessage);
                 } else {
                     // Plan expired
                     setIsPaid(false);
                     setActivePlan(null);
-                    localStorage.setItem('ea_pro_paid', 'false');
-                    localStorage.removeItem('ea_pro_plan');
-                    alert(expiryMessage || "No active plan found. Your previous plan may have expired.");
+                    if (!isSilent) alert(expiryMessage || "No active plan found. Your previous plan may have expired.");
                 }
             } else {
                 // No approved record found - Revoke access
                 setIsPaid(false);
                 setActivePlan(null);
-                localStorage.setItem('ea_pro_paid', 'false');
-                localStorage.removeItem('ea_pro_plan');
 
                 if (!isSilent) {
                     alert("No approved payment found for this email. If you just paid, please wait for manual verification (1-2 hours).");
@@ -211,17 +185,35 @@ const App = () => {
     useEffect(() => {
         setTopic(topics[0]);
 
-        // Auto-verify on mount if we have an email
-        if (userEmail) {
-            verifyAccess(userEmail, true);
-        }
+        // Auth Listener
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                setUser(session.user);
+                verifyAccess(session.user.email, true);
+            }
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session) {
+                setUser(session.user);
+                verifyAccess(session.user.email, true);
+            } else {
+                setUser(null);
+                setIsPaid(false);
+                setUserEmail('');
+                setActivePlan(null);
+            }
+        });
 
         const handleAccessCheck = (e) => {
             verifyAccess(e.detail.email, false);
         };
 
         window.addEventListener('check-access', handleAccessCheck);
-        return () => window.removeEventListener('check-access', handleAccessCheck);
+        return () => {
+            subscription.unsubscribe();
+            window.removeEventListener('check-access', handleAccessCheck);
+        };
     }, []);
 
     useEffect(() => {
@@ -510,7 +502,35 @@ const App = () => {
                         />
                     </div>
 
-                    <div className="relative">
+                    <div className="relative flex items-center gap-3">
+                        {user ? (
+                            <div className="flex items-center gap-2">
+                                <div className="hidden lg:flex flex-col items-end mr-2">
+                                    <span className="text-[10px] font-black uppercase text-stone-900 tracking-widest truncate max-w-[120px]">
+                                        {user.email}
+                                    </span>
+                                    {isPaid && <span className="text-[8px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1">
+                                        <Zap size={8} fill="currentColor" /> {activePlan}
+                                    </span>}
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        await supabase.auth.signOut();
+                                    }}
+                                    className="p-2 border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-all text-stone-900"
+                                    title="Logout"
+                                >
+                                    <LogOut size={16} />
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setShowAuth(true)}
+                                className="flex items-center gap-2 px-4 py-2 border-2 border-stone-900 font-black uppercase text-[10px] tracking-widest bg-white text-stone-900 hover:bg-stone-900 hover:text-white transition-all"
+                            >
+                                <User size={14} /> Login
+                            </button>
+                        )}
                         <button
                             onClick={() => setShowPricing(true)}
                             className={`flex items-center gap-2 px-4 py-2 border-2 border-stone-900 font-black uppercase text-[10px] tracking-widest transition-all ${isPaid ? 'bg-green-500 text-white border-green-600' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
@@ -532,6 +552,7 @@ const App = () => {
 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
             {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
+            {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuthSuccess={(user) => verifyAccess(user.email, true)} />}
             {showExaminer && (
                 <ExaminerModal
                     isOpen={showExaminer}
@@ -563,6 +584,7 @@ const App = () => {
             {showPayment && (
                 <PaymentModal
                     plan={selectedPlan}
+                    userEmail={userEmail}
                     onClose={() => setShowPayment(false)}
                     onSuccess={(email) => {
                         setPendingEmail(email);

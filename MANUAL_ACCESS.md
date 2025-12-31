@@ -28,8 +28,8 @@ Click **Save**.
 ## 4. Notify User
 Tell the user to:
 1.  Go to the website.
-2.  Click **"Upgrade"**.
-3.  Scroll down to **"Already Paid? Retrieve Your Access"**.
-4.  Enter their email and click **Check**.
+2.  Click **Login** in the header to create an account or sign in.
+3.  Once logged in, their access should be automatically recognized. 
+4.  Alternatively, they can click **"Upgrade"**, scroll to the bottom, and enter their email to **Verify**.
 
-They will instantly get access!
+They will instantly get access across all their devices!
