@@ -135,7 +135,7 @@ const FeedbackModal = ({ onClose, initialEmail = "" }) => {
                                     <button
                                         key={star}
                                         type="button"
-                                        onClick={() => setRating(star)}
+                                        onClick={() => setRating(rating === star ? 0 : star)}
                                         className={`w-12 h-12 flex items-center justify-center border-2 border-stone-900 transition-all ${rating >= star ? 'bg-yellow-400 text-stone-900' : 'bg-white text-stone-300 hover:border-yellow-400'
                                             }`}
                                     >
