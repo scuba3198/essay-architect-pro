@@ -762,7 +762,7 @@ const App = () => {
                         Architected by <a href="https://scuba3198.github.io/mumukshu-portfolio/" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
                     </p>
                     <div className="flex items-center gap-3">
-                        <a href="https://wa.me/979862329617" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-green-500 transition-colors" aria-label="WhatsApp">
+                        <a href="https://wa.me/9779862329617" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-green-500 transition-colors" aria-label="WhatsApp">
                             <WhatsAppIcon size={16} />
                         </a>
                         <a href="https://github.com/scuba3198" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-stone-900 transition-colors" aria-label="GitHub">
