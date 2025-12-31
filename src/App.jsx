@@ -338,6 +338,12 @@ const App = () => {
     };
 
     const handleUpgradeFromLimit = (planName) => {
+        if (!user) {
+            setShowLimitModal(false);
+            setShowAuth(true);
+            return;
+        }
+
         setShowLimitModal(false);
         if (planName) {
             const plan = {
