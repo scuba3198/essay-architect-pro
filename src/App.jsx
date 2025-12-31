@@ -68,6 +68,7 @@ const App = () => {
     const [showAbout, setShowAbout] = useState(false);
     const [showPrivacy, setShowPrivacy] = useState(false);
     const [showAuth, setShowAuth] = useState(false);
+    const [authMode, setAuthMode] = useState('login');
     const [showExaminer, setShowExaminer] = useState(false);
 
     // Auth & Monetization State
@@ -198,7 +199,7 @@ const App = () => {
             }
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (session) {
                 setUser(session.user);
                 verifyAccess(session.user.email, true);
@@ -207,6 +208,11 @@ const App = () => {
                 setIsPaid(false);
                 setUserEmail('');
                 setActivePlan(null);
+            }
+
+            if (event === 'PASSWORD_RECOVERY') {
+                setAuthMode('update_password');
+                setShowAuth(true);
             }
         });
 
@@ -568,7 +574,7 @@ const App = () => {
 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
             {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
-            {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuthSuccess={(user) => verifyAccess(user.email, true)} />}
+            {showAuth && <AuthModal onClose={() => { setShowAuth(false); setAuthMode('login'); }} onAuthSuccess={(user) => verifyAccess(user.email, true)} initialMode={authMode} />}
             {showExaminer && (
                 <ExaminerModal
                     isOpen={showExaminer}
