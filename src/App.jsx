@@ -338,14 +338,14 @@ const App = () => {
     };
 
     const handleUpgradeFromLimit = (planName) => {
-        if (!user) {
-            setShowLimitModal(false);
-            setShowAuth(true);
-            return;
-        }
-
         setShowLimitModal(false);
+
         if (planName) {
+            // "Get 24h Access Now" - requires login immediately to proceed to payment
+            if (!user) {
+                setShowAuth(true);
+                return;
+            }
             const plan = {
                 name: "Crammer's Pass",
                 price: "Rs. 50",
@@ -354,6 +354,7 @@ const App = () => {
             setSelectedPlan(plan);
             setShowPayment(true);
         } else {
+            // "View All Plans" - show pricing modal, login not required yet
             setShowPricing(true);
         }
     };
