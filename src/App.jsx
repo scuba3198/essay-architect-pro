@@ -34,6 +34,8 @@ import LimitExhaustedModal from './components/modals/LimitExhaustedModal';
 import StepWizard from './components/StepWizard';
 import PreviewSection from './components/PreviewSection';
 import TourTooltip from './components/TourTooltip';
+import FeedbackButton from './components/FeedbackButton';
+import FeedbackModal from './components/modals/FeedbackModal';
 import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/fingerprint';
 import MobileWarning from './components/MobileWarning';
@@ -76,6 +78,7 @@ const App = () => {
     const [aiUsageCount, setAiUsageCount] = useState(0);
     const [examinerUsageCount, setExaminerUsageCount] = useState(0);
     const [showLimitModal, setShowLimitModal] = useState(false);
+    const [showFeedback, setShowFeedback] = useState(false);
 
     const [tourStep, setTourStep] = useState(-1);
     const [hasSeenTour, setHasSeenTour] = useState(false);
@@ -574,6 +577,15 @@ const App = () => {
                 onClose={() => setShowLimitModal(false)}
                 onUpgrade={handleUpgradeFromLimit}
             />
+
+            <FeedbackButton onClick={() => setShowFeedback(true)} />
+
+            {showFeedback && (
+                <FeedbackModal
+                    onClose={() => setShowFeedback(false)}
+                    initialEmail={userEmail}
+                />
+            )}
 
             <main className="flex-1 overflow-hidden relative">
                 {activeTab === 'learn' && (

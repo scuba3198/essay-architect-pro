@@ -1,0 +1,165 @@
+import React, { useState } from 'react';
+import { X, Send, Heart, Star } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { getVisitorID } from '../../lib/fingerprint';
+
+const FeedbackModal = ({ onClose, initialEmail = "" }) => {
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState("");
+    const [email, setEmail] = useState(initialEmail);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (rating === 0 && !comment.trim()) {
+            setError("Please provide a rating or a comment.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            const visitorID = await getVisitorID();
+            const { error: supabaseError } = await supabase
+                .from('feedback')
+                .insert([
+                    {
+                        visitor_id: visitorID,
+                        rating: rating > 0 ? rating : null,
+                        comment: comment.trim() || null,
+                        email: email.trim() || null
+                    }
+                ]);
+
+            if (supabaseError) throw supabaseError;
+
+            setSubmitted(true);
+            setTimeout(() => {
+                onClose();
+            }, 3000);
+        } catch (err) {
+            console.error("Feedback submission error:", err);
+            setError("Failed to send feedback. Please try again later.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (submitted) {
+        return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+                <div className="bg-white border-4 border-stone-900 shadow-[12px_12px_0px_0px_rgba(28,25,23,1)] w-full max-w-md p-8 text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-green-500"></div>
+                    <div className="mb-6 flex justify-center">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 animate-bounce">
+                            <Heart size={32} fill="currentColor" />
+                        </div>
+                    </div>
+                    <h2 className="text-3xl font-serif font-black text-stone-900 mb-2 uppercase tracking-tighter">THANK YOU!</h2>
+                    <p className="text-stone-600 font-medium mb-6">Your feedback helps us architect a better experience for everyone.</p>
+                    <button
+                        onClick={onClose}
+                        className="w-full py-4 bg-stone-900 text-white font-black uppercase tracking-widest hover:bg-stone-800 transition-colors"
+                    >
+                        Close Wizard
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-[#fcfaf7] border-4 border-stone-900 shadow-[12px_12px_0px_0px_rgba(28,25,23,1)] w-full max-w-lg relative overflow-hidden flex flex-col max-h-[90vh]">
+                {/* Header */}
+                <div className="bg-stone-900 text-white p-6 flex justify-between items-center shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-yellow-400 flex items-center justify-center font-serif font-black text-stone-900">F</div>
+                        <h2 className="text-xl font-serif font-black uppercase tracking-widest">Feedback Architect</h2>
+                    </div>
+                    <button onClick={onClose} className="hover:rotate-90 transition-transform duration-300 p-1">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div className="p-8 overflow-y-auto custom-scrollbar">
+                    <p className="text-stone-500 font-bold text-xs uppercase tracking-[0.2em] mb-8 border-l-4 border-yellow-400 pl-4">
+                        What do you think of Essay Architect Pro? Be brutal, we can take it.
+                    </p>
+
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                        {/* Rating */}
+                        <div>
+                            <label className="block text-stone-900 font-black uppercase text-xs tracking-widest mb-3">Overall Rating</label>
+                            <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        onClick={() => setRating(star)}
+                                        className={`w-12 h-12 flex items-center justify-center border-2 border-stone-900 transition-all ${rating >= star ? 'bg-yellow-400 text-stone-900' : 'bg-white text-stone-300 hover:border-yellow-400'
+                                            }`}
+                                    >
+                                        <Star size={24} fill={rating >= star ? "currentColor" : "none"} strokeWidth={3} />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Comment */}
+                        <div>
+                            <label className="block text-stone-900 font-black uppercase text-xs tracking-widest mb-3">Your Suggestions / Thoughts</label>
+                            <textarea
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                className="w-full h-32 p-4 bg-white border-2 border-stone-900 font-medium focus:ring-4 focus:ring-yellow-400/20 focus:outline-none resize-none placeholder:text-stone-300"
+                                placeholder="Feature ideas, bugs, or just generic appreciation..."
+                            ></textarea>
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                            <label className="block text-stone-900 font-black uppercase text-xs tracking-widest mb-3">Email (Optional)</label>
+                            <div className="relative">
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full p-4 bg-white border-2 border-stone-900 font-medium focus:ring-4 focus:ring-yellow-400/20 focus:outline-none placeholder:text-stone-300"
+                                    placeholder="your@email.com"
+                                />
+                                <p className="mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-wider">Only if you want a response back.</p>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="bg-red-50 border-2 border-red-500 p-4 text-red-600 text-xs font-bold uppercase tracking-wider animate-pulse">
+                                {error}
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className={`w-full py-5 flex items-center justify-center gap-3 font-black uppercase tracking-[0.2em] transition-all border-2 border-stone-900 ${isSubmitting
+                                    ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                                    : 'bg-stone-900 text-white hover:bg-yellow-400 hover:text-stone-900 shadow-[6px_6px_0px_0px_rgba(28,25,23,1)] hover:shadow-none'
+                                }`}
+                        >
+                            {isSubmitting ? 'PROCESSING...' : (
+                                <>
+                                    SUBMIT FEEDBACK <Send size={18} />
+                                </>
+                            )}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default FeedbackModal;
