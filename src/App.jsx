@@ -121,13 +121,15 @@ const App = () => {
                 .from('payments')
                 .select('*')
                 .eq('user_email', email)
-                .eq('status', 'approved')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
 
-            if (data && data.length > 0) {
-                const latest = data[0];
+            // Filter for 'approved' status case-insensitively
+            const approvedPayments = data?.filter(p => p.status?.toLowerCase() === 'approved') || [];
+
+            if (approvedPayments.length > 0) {
+                const latest = approvedPayments[0];
                 const createdAt = new Date(latest.created_at).getTime();
                 const now = new Date().getTime();
                 const hoursPassed = (now - createdAt) / (1000 * 60 * 60);
