@@ -140,6 +140,8 @@ const App = () => {
                 if (latest.plan_name === "Consultancy Killer" || latest.plan_name === "Lifetime Pack") {
                     isValid = true;
                     expiryMessage = "Welcome back! Your Lifetime access is active.";
+                    // Normalize legacy plan name for UI display
+                    if (latest.plan_name === "Consultancy Killer") latest.plan_name = "Lifetime Pack";
                 } else if (latest.plan_name === "Preparation Pack") {
                     const daysLeft = Math.floor(30 - (hoursPassed / 24));
                     if (daysLeft >= 0) {
