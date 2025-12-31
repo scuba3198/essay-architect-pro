@@ -43,16 +43,16 @@ const PrivacyModal = ({ onClose }) => (
                     </div>
                     <div className="space-y-3 text-sm text-stone-600 leading-relaxed">
                         <p>
-                            <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">A. Usage Data & Device Signature</strong>
-                            To maintain the integrity of our free tier and prevent abuse, we generate a unique, non-personal device signature based on your browser's hardware and software configuration. This does not identify you personally.
+                            <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">A. Device Signature & Usage Limits</strong>
+                            To ensure fair access for all students, we utilize non-intrusive device fingerprinting technologies. This allows us to offer free tiers while preventing abuse of our AI resources.
                         </p>
                         <p>
-                            <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">B. Account Information</strong>
-                            For Pro Edition users, we collect and store your email address solely for payment verification and to grant access to premium features.
+                            <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">B. Essay Content & AI Processing</strong>
+                            The essays and prompts you submit are transiently processed by our Enterprise AI providers (e.g., Google Gemini) solely to generate feedback. We do not use your academic work to train public AI models.
                         </p>
                         <p>
-                            <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">C. Content Data</strong>
-                            The essays and prompts you input are processed to provide AI-driven feedback and structure enforcement.
+                            <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">C. Payment Verification Data</strong>
+                            For premium access, we collect payment proof (screenshots) and your email address. These are stored securely for manual verification. We do not process credit card numbers or banking credentials directly on our servers.
                         </p>
                     </div>
                 </section>
@@ -60,20 +60,20 @@ const PrivacyModal = ({ onClose }) => (
                 <section className="space-y-4">
                     <div className="flex items-center gap-3">
                         <Lock size={20} className="text-stone-900" />
-                        <h3 className="font-serif font-black text-xl uppercase tracking-tight">02. How We Use Data</h3>
+                        <h3 className="font-serif font-black text-xl uppercase tracking-tight">02. Data Usage & Analytics</h3>
                     </div>
                     <ul className="space-y-3 text-sm text-stone-600 list-none">
                         <li className="flex gap-3">
                             <span className="text-yellow-500 font-bold">•</span>
-                            <span>To provide the core functionalities of the Essay Architect Pro wizard and AI services.</span>
+                            <span>To provide real-time grading and structure analysis via our API partners.</span>
                         </li>
                         <li className="flex gap-3">
                             <span className="text-yellow-500 font-bold">•</span>
-                            <span>To verify subscription status and provide technical support.</span>
+                            <span>To verify subscription status and provide access recovery.</span>
                         </li>
                         <li className="flex gap-3">
                             <span className="text-yellow-500 font-bold">•</span>
-                            <span>To enforce usage limits and ensure fair access for all students.</span>
+                            <span>We use standard analytics tools (e.g., Facebook Pixel) to understand aggregate user behavior and improve our services.</span>
                         </li>
                     </ul>
                 </section>
@@ -81,19 +81,19 @@ const PrivacyModal = ({ onClose }) => (
                 <section className="space-y-4 text-sm text-stone-600">
                     <div className="flex items-center gap-3">
                         <Server size={20} className="text-stone-900" />
-                        <h3 className="font-serif font-black text-xl uppercase tracking-tight">03. Third-Party Services</h3>
+                        <h3 className="font-serif font-black text-xl uppercase tracking-tight">03. Trusted Infrastructure</h3>
                     </div>
                     <p>
-                        We utilize industry-leading infrastructure to power our platform. Your data may be processed by:
+                        We rely on industry-standard providers to keep your data safe:
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                         <div className="p-4 border border-stone-200 bg-white">
-                            <p className="font-bold text-stone-900 uppercase text-[10px] tracking-wider mb-1">Secure Data Storage</p>
-                            <p className="text-[10px] font-serif">Encrypted cloud databases for payment records and usage counts.</p>
+                            <p className="font-bold text-stone-900 uppercase text-[10px] tracking-wider mb-1">Cloud Storage</p>
+                            <p className="text-[10px] font-serif">Encrypted databases (Supabase) for account status and payment proofs.</p>
                         </div>
                         <div className="p-4 border border-stone-200 bg-white">
-                            <p className="font-bold text-stone-900 uppercase text-[10px] tracking-wider mb-1">AI Processing</p>
-                            <p className="text-[10px] font-serif">Content analysis via advanced generative language models.</p>
+                            <p className="font-bold text-stone-900 uppercase text-[10px] tracking-wider mb-1">AI Engine</p>
+                            <p className="text-[10px] font-serif">Enterprise-grade Large Language Models for content analysis.</p>
                         </div>
                     </div>
                 </section>
@@ -104,7 +104,7 @@ const PrivacyModal = ({ onClose }) => (
                         <h3 className="font-serif font-black text-xl uppercase tracking-tight">04. Data Sharing</h3>
                     </div>
                     <p className="text-sm text-stone-600 leading-relaxed">
-                        We do not sell, trade, or otherwise transfer your personal information to outside parties. This does not include trusted third parties who assist us in operating our website and conducting our business, so long as those parties agree to keep this information confidential.
+                        We are committed to your privacy. We do not sell your personal data. Data is only shared with trusted technical service providers (as listed above) strictly for the purpose of operating the application. Internal notifications regarding payments may be processed via secure messaging platforms.
                     </p>
                 </section>
 
