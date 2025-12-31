@@ -20,7 +20,7 @@ Click **"Insert details"** (or "Add row") and fill in the following fields:
 ### Valid Plan Names (Copy Exact Text)
 - `Crammer's Pass` (24 Hours access)
 - `Preparation Pack` (30 Days access)
-- `Consultancy Killer` (Lifetime access)
+- `Lifetime Pack` (Lifetime access)
 
 ## 3. Save
 Click **Save**.

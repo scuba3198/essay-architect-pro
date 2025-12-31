@@ -31,7 +31,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
         },
         {
             id: 'lifetime',
-            name: "Consultancy Killer",
+            name: "Lifetime Pack",
             tier: 3,
             price: "Rs 1,500",
             duration: "Lifetime",
@@ -78,7 +78,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
                         let buttonText = "Select Plan";
                         if (isActive) buttonText = "Currently Active";
                         if (isLower) buttonText = "Plan Owned";
-                        if (isHigher && currentTier > 0) buttonText = `Upgrade to ${plan.id === 'lifetime' ? 'Killer' : 'Pack'}`;
+                        if (isHigher && currentTier > 0) buttonText = `Upgrade to ${plan.id === 'lifetime' ? 'Lifetime' : 'Pack'}`;
 
                         return (
                             <div

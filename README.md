@@ -24,7 +24,7 @@ The Pro version features a tiered access system managed via a manual-verificatio
 
 -   **🔥 Crammer's Pass (24h)**: For the last-minute revision hero. Full access for 24 hours.
 -   **⚡ Preparation Pack (30 Days)**: The sweet spot for serious candidates. 30 days of unlimited AI grading.
--   **👑 Consultancy Killer (Lifetime)**: Pay once, own the architect forever. Includes all future feature updates.
+-   **👑 Lifetime Pack (Lifetime)**: Pay once, own the architect forever. Includes all future feature updates.
 
 ## 🛠️ Performance Tech Stack
 

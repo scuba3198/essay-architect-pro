@@ -137,7 +137,7 @@ const App = () => {
                 let isValid = false;
                 let expiryMessage = "";
 
-                if (latest.plan_name === "Consultancy Killer") {
+                if (latest.plan_name === "Consultancy Killer" || latest.plan_name === "Lifetime Pack") {
                     isValid = true;
                     expiryMessage = "Welcome back! Your Lifetime access is active.";
                 } else if (latest.plan_name === "Preparation Pack") {
