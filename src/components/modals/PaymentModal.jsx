@@ -154,7 +154,7 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
                                     className="w-full bg-stone-100 border-2 border-stone-900 p-3 text-sm mb-4 outline-none font-bold text-stone-500 cursor-not-allowed"
                                     required
                                 />
-                                <p className="text-[10px] text-stone-400 mb-4 px-1 italic">Note: This payment will automatically unlock access for this account.</p>
+                                <p className="text-[10px] text-stone-400 mb-4 px-1 italic">Note: Access will be unlocked for this account after verification.</p>
 
                                 <div className="flex justify-between items-end">
                                     <div>
