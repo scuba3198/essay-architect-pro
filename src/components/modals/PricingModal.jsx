@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Zap, Crown, Flame, Check } from 'lucide-react';
 
-const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth }) => {
+const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedIn }) => {
     const retrieveAccessRef = useRef(null);
 
     const plans = [
@@ -134,20 +134,22 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth }) => {
                     })}
                 </div>
 
-                <div
-                    ref={retrieveAccessRef}
-                    className="mt-12 pt-8 border-t-2 border-dashed border-stone-200 text-center"
-                >
-                    <p className="text-sm font-bold text-stone-900 mb-2 uppercase tracking-tighter italic">Already Paid?</p>
-                    <p className="text-[10px] text-stone-500 mb-6 font-medium uppercase tracking-widest px-4">Your access is now tied to your account. Please log in to restore your premium features.</p>
-
-                    <button
-                        onClick={onShowAuth}
-                        className="bg-stone-900 text-white px-8 py-4 text-xs font-black uppercase hover:bg-yellow-400 hover:text-stone-900 transition-colors border-2 border-stone-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
+                {!activePlan && !isLoggedIn && (
+                    <div
+                        ref={retrieveAccessRef}
+                        className="mt-12 pt-8 border-t-2 border-dashed border-stone-200 text-center"
                     >
-                        Sign In to My Account
-                    </button>
-                </div>
+                        <p className="text-sm font-bold text-stone-900 mb-2 uppercase tracking-tighter italic">Already Paid?</p>
+                        <p className="text-[10px] text-stone-500 mb-6 font-medium uppercase tracking-widest px-4">Your access is now tied to your account. Please log in to restore your premium features.</p>
+
+                        <button
+                            onClick={onShowAuth}
+                            className="bg-stone-900 text-white px-8 py-4 text-xs font-black uppercase hover:bg-yellow-400 hover:text-stone-900 transition-colors border-2 border-stone-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
+                        >
+                            Sign In to My Account
+                        </button>
+                    </div>
+                )}
 
                 <p className="text-center mt-10 text-[10px] text-stone-400 font-mono">
                     Join a growing number of Nepali students using the Architect.

@@ -578,6 +578,7 @@ const App = () => {
                 <PricingModal
                     onClose={() => setShowPricing(false)}
                     activePlan={activePlan}
+                    isLoggedIn={!!user}
                     onSelectPlan={(plan) => {
                         if (!user) {
                             setShowPricing(false);
