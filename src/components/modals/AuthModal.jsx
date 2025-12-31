@@ -6,6 +6,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
     const [mode, setMode] = useState('login'); // 'login' or 'signup'
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [fullName, setFullName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -17,6 +18,9 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
 
         try {
             if (mode === 'signup') {
+                if (password !== confirmPassword) {
+                    throw new Error("Passwords do not match");
+                }
                 const { data, error: signUpError } = await supabase.auth.signUp({
                     email,
                     password,
@@ -118,6 +122,23 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
                             />
                         </div>
                     </div>
+
+                    {mode === 'signup' && (
+                        <div>
+                            <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Confirm Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
+                                    required={mode === 'signup'}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="bg-red-50 border-l-4 border-red-500 p-3">
