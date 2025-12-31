@@ -179,8 +179,9 @@ const App = () => {
                 }
             }
         } catch (err) {
-            console.error("Access check failed:", err);
-            if (!isSilent) alert("Failed to verify access. Please try again.");
+            console.error("Access check failed details:", err);
+            const errorMsg = err.message || "Unknown error";
+            if (!isSilent) alert(`Failed to verify access: ${errorMsg}. Please check console for details.`);
         }
     };
 
