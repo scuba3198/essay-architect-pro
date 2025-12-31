@@ -48,7 +48,7 @@ const PrivacyModal = ({ onClose }) => (
                         </p>
                         <p>
                             <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">B. Essay Content & AI Processing</strong>
-                            The essays and prompts you submit are transiently processed by our Enterprise AI providers (e.g., Google Gemini) solely to generate feedback. We do not use your academic work to train public AI models.
+                            The essays and prompts you submit are transiently processed by our Enterprise AI providers solely to generate feedback. We do not use your academic work to train public AI models.
                         </p>
                         <p>
                             <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">C. Payment Verification Data</strong>
