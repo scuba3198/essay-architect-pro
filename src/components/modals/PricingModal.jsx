@@ -92,7 +92,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
                                 )}
 
                                 {plan.savings && !isActive && !isLower && (
-                                    <div className="absolute top-2 right-2 rotate-6">
+                                    <div className="absolute -top-3 right-2 rotate-6">
                                         <span className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 border border-green-700 rounded-sm uppercase tracking-wider shadow-[2px_2px_0px_0px_rgb(21,128,61)]">
                                             {plan.savings}
                                         </span>
