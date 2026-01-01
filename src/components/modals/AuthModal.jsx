@@ -11,7 +11,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
     const [fullName, setFullName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [messsage, setMessage] = useState(null);
+    const [message, setMessage] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -35,7 +35,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                     }
                 });
                 if (signUpError) throw signUpError;
-                alert("Sign up successful! Please check your email (including spam folder) for verification.");
+                setMessage("Sign up successful! Please check your email (including spam folder) for a verification link.");
                 setMode('login');
             } else if (mode === 'login') {
                 const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -55,7 +55,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                     redirectTo: window.location.origin,
                 });
                 if (resetError) throw resetError;
-                setMessage("Password reset link sent! Please check your email and click the link to reset your password.");
+                setMessage("Password reset link sent! Please check your email (including spam folder) and click the link to reset your password.");
             } else if (mode === 'update_password') {
                 if (password !== confirmPassword) {
                     throw new Error("Passwords do not match");
@@ -218,9 +218,9 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                             </div>
                         )}
 
-                        {messsage && (
+                        {message && (
                             <div className="bg-green-50 border-l-4 border-green-500 p-3">
-                                <p className="text-[10px] text-green-600 font-bold leading-tight uppercase tracking-wider">{messsage}</p>
+                                <p className="text-[10px] text-green-600 font-bold leading-tight uppercase tracking-wider">{message}</p>
                             </div>
                         )}
 
