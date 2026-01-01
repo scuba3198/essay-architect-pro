@@ -54,7 +54,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
     return (
         <div className="fixed inset-0 bg-stone-900/95 z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
             <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-4xl w-full relative max-h-[95vh] flex flex-col">
-                <div className="flex justify-end p-2 border-b-2 border-stone-100 bg-[#f4f1ea] z-20 shrink-0">
+                <div className="flex justify-end p-4 border-b-2 border-stone-100 bg-[#f4f1ea] z-20 shrink-0">
                     <button
                         onClick={onClose}
                         className="p-1.5 bg-white text-stone-900 rounded-full border-2 border-stone-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all active:scale-95"
