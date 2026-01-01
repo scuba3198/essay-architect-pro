@@ -478,6 +478,27 @@ const App = () => {
         document.body.removeChild(textArea);
     };
 
+    const handleLogout = async () => {
+        try {
+            // Deactivate session in database before signing out
+            if (user) {
+                await deactivateCurrentSession(user.id);
+            }
+            await supabase.auth.signOut();
+        } catch (err) {
+            console.error("Logout error:", err);
+        } finally {
+            // Manual state reset to ensure UI updates immediately
+            setUser(null);
+            setIsPaid(false);
+            setUserEmail('');
+            setActivePlan(null);
+
+            // Force a complete page reload to clear all library and browser states
+            window.location.href = window.location.origin;
+        }
+    };
+
     return (
         <div className="h-[100dvh] bg-[#f4f1ea] text-stone-900 font-sans flex flex-col overflow-hidden selection:bg-yellow-300 selection:text-stone-900">
             <Helmet>
@@ -594,23 +615,7 @@ const App = () => {
                                     </span>}
                                 </div>
                                 <button
-                                    onClick={async () => {
-                                        try {
-                                            // Deactivate session in database before signing out
-                                            if (user) {
-                                                await deactivateCurrentSession(user.id);
-                                            }
-                                            await supabase.auth.signOut();
-                                        } catch (err) {
-                                            console.error("Logout error:", err);
-                                        } finally {
-                                            // Manual state reset to ensure UI updates immediately
-                                            setUser(null);
-                                            setIsPaid(false);
-                                            setUserEmail('');
-                                            setActivePlan(null);
-                                        }
-                                    }}
+                                    onClick={handleLogout}
                                     className="p-2 border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-all text-stone-900"
                                     title="Logout"
                                 >
@@ -717,22 +722,9 @@ const App = () => {
                                         </div>
                                     </div>
                                     <button
-                                        onClick={async () => {
+                                        onClick={() => {
                                             setIsMenuOpen(false);
-                                            try {
-                                                // Deactivate session in database before signing out
-                                                if (user) {
-                                                    await deactivateCurrentSession(user.id);
-                                                }
-                                                await supabase.auth.signOut();
-                                            } catch (err) {
-                                                console.error("Logout error:", err);
-                                            } finally {
-                                                setUser(null);
-                                                setIsPaid(false);
-                                                setUserEmail('');
-                                                setActivePlan(null);
-                                            }
+                                            handleLogout();
                                         }}
                                         className="flex items-center justify-center gap-2 p-3 border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-all text-stone-900 font-bold uppercase tracking-widest text-xs"
                                     >
