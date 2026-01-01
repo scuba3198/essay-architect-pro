@@ -20,6 +20,7 @@ export const registerSession = async (userId, sessionToken) => {
         const deviceFingerprint = await getVisitorID();
 
         // Upsert session - if device already has a session, update it
+        // Include created_at so re-logging makes this the "newest" session for FIFO ordering
         const { error } = await supabase
             .from('user_sessions')
             .upsert({
@@ -27,6 +28,7 @@ export const registerSession = async (userId, sessionToken) => {
                 device_fingerprint: deviceFingerprint,
                 session_token: sessionToken,
                 is_active: true,
+                created_at: new Date().toISOString(),
                 last_active_at: new Date().toISOString()
             }, {
                 onConflict: 'user_id,device_fingerprint'
