@@ -2,9 +2,22 @@
  * Fingerprint Utility for Essay Architect
  * Strictly for tracking free usage limits without user accounts.
  * Generates a stable ID based on the browser's hardware and software signature.
+ * 
+ * IMPORTANT: The device ID is cached in localStorage to ensure consistency
+ * across all tabs and page reloads. This prevents the two-device login policy
+ * from incorrectly counting multiple tabs as separate devices.
  */
 
+const DEVICE_ID_KEY = 'essay_architect_device_id';
+
 export const getVisitorID = async () => {
+    // Check localStorage first for cached device ID
+    const cachedId = localStorage.getItem(DEVICE_ID_KEY);
+    if (cachedId) {
+        return cachedId;
+    }
+
+    // Generate new fingerprint if not cached
     const components = [
         navigator.userAgent,
         navigator.language,
@@ -24,6 +37,9 @@ export const getVisitorID = async () => {
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    // Cache in localStorage for consistency across tabs
+    localStorage.setItem(DEVICE_ID_KEY, hashHex);
 
     return hashHex;
 };
