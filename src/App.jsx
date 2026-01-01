@@ -418,7 +418,7 @@ const App = () => {
     };
 
     return (
-        <div className="h-screen bg-[#f4f1ea] text-stone-900 font-sans flex flex-col overflow-hidden selection:bg-yellow-300 selection:text-stone-900">
+        <div className="h-[100dvh] bg-[#f4f1ea] text-stone-900 font-sans flex flex-col overflow-hidden selection:bg-yellow-300 selection:text-stone-900">
             <Helmet>
                 <title>{activeTab === 'learn' ? 'Essay Architect PRO • Master Academic Writing' : 'Essay Architect PRO • AI Writing Wizard'}</title>
                 <meta name="description" content="The ultimate AI-powered essay writing and grading tool for IELTS and PTE. Practice with instant feedback, strict scoring, and structural guidance." />
