@@ -83,7 +83,7 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
             const { error: dbError } = await supabase
                 .from('payments')
                 .insert([{
-                    user_email: email,
+                    user_email: user.email,
                     plan_name: plan.name,
                     amount: plan.price,
                     screenshot_url: publicUrl,
