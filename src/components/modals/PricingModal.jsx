@@ -89,7 +89,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {plans.map((plan) => {
                             const isActive = activePlan === plan.name || (plan.id === 'free' && !activePlan);
-                            const isLower = plan.tier < currentTier;
+                            let isLower = plan.tier < currentTier;
                             const isHigher = plan.tier > currentTier;
 
                             // Specific logic for Free Tier
