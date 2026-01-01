@@ -68,15 +68,9 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
             const fileName = `${Math.random()}.${fileExt}`;
             const filePath = `screenshots/${user.id}/${fileName}`;
 
-            const uploadPromise = supabase.storage
+            const { error: uploadError, data } = await supabase.storage
                 .from('payments')
                 .upload(filePath, file);
-
-            const uploadTimeout = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Upload timed out - please try again")), 60000)
-            );
-
-            const { error: uploadError, data } = await Promise.race([uploadPromise, uploadTimeout]);
 
             if (uploadError) throw uploadError;
 
