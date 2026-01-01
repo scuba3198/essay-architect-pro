@@ -194,6 +194,7 @@ const App = () => {
 
     useEffect(() => {
         setTopic(topics[0]);
+        let isLoggingOut = false; // Flag to prevent race condition
 
         // Auth Listener with two-device session validation
         supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -203,7 +204,17 @@ const App = () => {
 
                 if (wasLoggedOut) {
                     // Session was invalidated by login from another device
-                    await supabase.auth.signOut();
+                    isLoggingOut = true;
+                    try {
+                        await supabase.auth.signOut();
+                    } catch (err) {
+                        console.error("SignOut error:", err);
+                    }
+                    // Directly clear state - don't rely only on onAuthStateChange
+                    setUser(null);
+                    setIsPaid(false);
+                    setUserEmail('');
+                    setActivePlan(null);
                     alert("You've been logged out because you logged in on another device. (Max 2 devices allowed)");
                     return;
                 }
@@ -220,13 +231,25 @@ const App = () => {
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            // Skip if we're in the middle of a forced logout
+            if (isLoggingOut) return;
+
             if (session) {
                 // For SIGNED_IN event, session is already registered by AuthModal
                 // For TOKEN_REFRESHED, validate the session
                 if (event === 'TOKEN_REFRESHED') {
                     const { isValid, wasLoggedOut } = await validateSession(session.user.id);
                     if (wasLoggedOut) {
-                        await supabase.auth.signOut();
+                        isLoggingOut = true;
+                        try {
+                            await supabase.auth.signOut();
+                        } catch (err) {
+                            console.error("SignOut error:", err);
+                        }
+                        setUser(null);
+                        setIsPaid(false);
+                        setUserEmail('');
+                        setActivePlan(null);
                         alert("You've been logged out because you logged in on another device. (Max 2 devices allowed)");
                         return;
                     }
