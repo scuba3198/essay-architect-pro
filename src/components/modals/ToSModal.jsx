@@ -91,7 +91,7 @@ const ToSModal = ({ onClose }) => (
 
                 <div className="bg-stone-900 p-8 text-white text-center">
                     <p className="text-xs uppercase tracking-[0.2em] font-bold mb-4">Questions regarding these terms?</p>
-                    <p className="font-serif text-sm text-stone-400">Contact us at support@essay-architect.uk</p>
+                    <p className="font-serif text-sm text-stone-400">Reach out via the official channels or GitHub repository.</p>
                     <button
                         onClick={onClose}
                         className="mt-6 px-12 py-3 bg-yellow-400 text-stone-900 font-black uppercase tracking-widest hover:bg-white transition-colors text-xs"
