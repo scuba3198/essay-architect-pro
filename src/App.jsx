@@ -44,6 +44,7 @@ import AuthModal from './components/modals/AuthModal';
 import { Helmet } from 'react-helmet-async';
 import { LogOut, User } from 'lucide-react';
 import TestimonialSection from './components/TestimonialSection';
+import ToSModal from './components/modals/ToSModal';
 
 const LearnCard = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -71,6 +72,7 @@ const App = () => {
     const [showAuth, setShowAuth] = useState(false);
     const [authMode, setAuthMode] = useState('login');
     const [showExaminer, setShowExaminer] = useState(false);
+    const [showToS, setShowToS] = useState(false);
 
     // Auth & Monetization State
     const [user, setUser] = useState(null);
@@ -755,6 +757,8 @@ const App = () => {
                 />
             )}
 
+            {showToS && <ToSModal onClose={() => setShowToS(false)} />}
+
             <main className="flex-1 overflow-hidden relative">
                 <FeedbackButton onClick={() => setShowFeedback(true)} />
                 {activeTab === 'learn' && (
@@ -864,8 +868,6 @@ const App = () => {
                         </div>
                     </div>
                 )}
-}
-
                 {
                     activeTab === 'practice' && (
                         <div className="flex flex-col md:flex-row h-full">
@@ -966,6 +968,12 @@ const App = () => {
                         className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors"
                     >
                         Privacy Policy
+                    </button>
+                    <button
+                        onClick={() => setShowToS(true)}
+                        className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors"
+                    >
+                        Terms of Service
                     </button>
                 </div>
             </footer>
