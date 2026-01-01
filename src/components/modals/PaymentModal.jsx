@@ -59,10 +59,14 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
         setFileName(file.name);
 
         try {
-            // 1. Upload to Supabase Storage
+            // 1. Get User ID for RLS policies
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) throw new Error("User authentication failed");
+
+            // 2. Upload to Supabase Storage
             const fileExt = file.name.split('.').pop();
             const fileName = `${Math.random()}.${fileExt}`;
-            const filePath = `screenshots/${fileName}`;
+            const filePath = `screenshots/${user.id}/${fileName}`;
 
             const { error: uploadError, data } = await supabase.storage
                 .from('payments')
@@ -70,12 +74,12 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
 
             if (uploadError) throw uploadError;
 
-            // 2. Get Public URL
+            // 3. Get Public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('payments')
                 .getPublicUrl(filePath);
 
-            // 3. Save to Database
+            // 4. Save to Database
             const { error: dbError } = await supabase
                 .from('payments')
                 .insert([{
