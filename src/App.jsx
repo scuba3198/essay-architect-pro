@@ -646,7 +646,7 @@ const App = () => {
                     <div className="h-full overflow-y-auto custom-scrollbar bg-[#f4f1ea] pb-28 md:pb-0">
                         <div className="max-w-7xl mx-auto p-12">
                             <div className="mb-16 border-b-4 border-stone-900 pb-12">
-                                <h2 className="text-7xl md:text-8xl font-black font-serif text-stone-900 mb-6 tracking-tighter leading-[0.8]">
+                                <h2 className="text-5xl sm:text-7xl md:text-8xl font-black font-serif text-stone-900 mb-6 tracking-tighter leading-[0.8]">
                                     MASTER <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-stone-600" style={{ WebkitTextStroke: '2px #1c1917' }}>THE</span> <br />
                                     ARCHITECT PRO
