@@ -37,7 +37,7 @@ import TourTooltip from './components/TourTooltip';
 import FeedbackButton from './components/FeedbackButton';
 import FeedbackModal from './components/modals/FeedbackModal';
 import { supabase } from './lib/supabase';
-import { getVisitorID } from './lib/fingerprint';
+import { getVisitorID } from './lib/device-id';
 import { validateSession, deactivateCurrentSession, registerSession } from './lib/sessionManager';
 
 import PrivacyModal from './components/modals/PrivacyModal';

@@ -5,7 +5,7 @@
  */
 
 import { supabase } from './supabase';
-import { getVisitorID } from './fingerprint';
+import { getVisitorID } from './device-id';
 
 const MAX_DEVICES = 2;
 

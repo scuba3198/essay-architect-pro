@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Send, Heart, Star } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { getVisitorID } from '../../lib/fingerprint';
+import { getVisitorID } from '../../lib/device-id';
 
 const FeedbackModal = ({ onClose, initialEmail = "" }) => {
     const [rating, setRating] = useState(0);
