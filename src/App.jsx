@@ -118,8 +118,12 @@ const App = () => {
         if (!email) {
             setIsPaid(false);
             setActivePlan(null);
+            setUserEmail('');
             return;
         }
+
+        // Always set the user's email when they're logged in
+        setUserEmail(email);
 
         try {
             const { data, error } = await supabase
@@ -167,7 +171,6 @@ const App = () => {
 
                 if (isValid) {
                     setIsPaid(true);
-                    setUserEmail(email);
                     setActivePlan(latest.plan_name);
                     if (!isSilent) alert(expiryMessage);
                 } else {
