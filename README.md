@@ -4,7 +4,7 @@
 
 Essay Architect Pro is a professional-grade AI writing suite designed specifically for students aiming for the highest bands (IELTS 8.5+ / PTE 85+). It transforms the chaotic process of essay writing into a precise, architectural discipline.
 
-![Version](https://img.shields.io/badge/version-0.2--pro-gold.svg) ![License](https://img.shields.io/badge/license-Proprietary-red.svg) ![Stack](https://img.shields.io/badge/stack-React%20%7C%20Supabase%20%7C%20Gemini-blue.svg)
+![Version](https://img.shields.io/badge/version-0.3.0--pro-gold.svg) ![License](https://img.shields.io/badge/license-Proprietary-red.svg) ![Stack](https://img.shields.io/badge/stack-React%20%7C%20Supabase%20%7C%20Gemini-blue.svg)
 
 ## 🚀 Live Production Site
 **[https://pro.essay-architect.uk/](https://pro.essay-architect.uk/)**

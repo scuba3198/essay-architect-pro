@@ -502,7 +502,7 @@ const App = () => {
                                 <HelpCircle size={18} />
                             </button>
                         </h1>
-                        <p className="hidden md:block text-[10px] font-bold text-stone-500 tracking-widest uppercase mt-1">v0.2 • IELTS & PTE Edition</p>
+                        <p className="hidden md:block text-[10px] font-bold text-stone-500 tracking-widest uppercase mt-1">v0.3.0 • IELTS & PTE Edition</p>
                     </div>
                 </div>
 
