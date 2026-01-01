@@ -1,10 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Zap, Crown, Flame, Check } from 'lucide-react';
+import { X, Zap, Crown, Flame, Check, BookOpen } from 'lucide-react';
 
 const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedIn }) => {
     const retrieveAccessRef = useRef(null);
 
     const plans = [
+        {
+            id: 'free',
+            name: "Free Tier",
+            tier: 0,
+            price: "Rs 0",
+            duration: "Forever",
+            description: "Basic access to get you started.",
+            features: ["Limited AI Feedback", "Basic Structure Tools", "Community Support"],
+            icon: <BookOpen className="text-stone-500" />,
+            color: "border-stone-200"
+        },
         {
             id: 'day',
             name: "Crammer's Pass",
@@ -53,7 +64,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
 
     return (
         <div className="fixed inset-0 bg-stone-900/95 z-[110] flex items-center justify-center p-4 pt-20 md:p-4 animate-in fade-in duration-300">
-            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-4xl w-full relative max-h-[95vh] flex flex-col">
+            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-6xl w-full relative max-h-[95vh] flex flex-col">
                 <div className="flex justify-end p-4 border-b-2 border-stone-100 bg-[#f4f1ea] z-20 shrink-0">
                     <button
                         onClick={onClose}
@@ -75,21 +86,27 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
                         )}
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {plans.map((plan) => {
-                            const isActive = activePlan === plan.name;
+                            const isActive = activePlan === plan.name || (plan.id === 'free' && !activePlan);
                             const isLower = plan.tier < currentTier;
                             const isHigher = plan.tier > currentTier;
 
+                            // Specific logic for Free Tier
+                            if (plan.id === 'free') {
+                                isLower = false; // Never treat free as "lower" in a way that disables it if we want to show it as active base
+                            }
+
                             let buttonText = "Select Plan";
                             if (isActive) buttonText = "Currently Active";
-                            if (isLower) buttonText = "Plan Owned";
-                            if (isHigher && currentTier > 0) buttonText = `Upgrade to ${plan.id === 'lifetime' ? 'Lifetime' : 'Pack'}`;
+                            if (isLower && plan.id !== 'free') buttonText = "Plan Owned";
+                            if (isHigher && currentTier >= 0) buttonText = `Upgrade to ${plan.id === 'lifetime' ? 'Lifetime' : 'Pack'}`;
+                            if (plan.id === 'free' && activePlan) buttonText = "Included";
 
                             return (
                                 <div
                                     key={plan.id}
-                                    className={`p-6 bg-white border-2 border-stone-900 relative flex flex-col h-full transform transition-transform hover:-translate-y-2 ${plan.popular ? 'shadow-[8px_8px_0px_0px_rgba(250,204,21,1)]' : 'shadow-[8px_8px_0px_0px_rgba(28,25,23,1)]'} ${(isActive || isLower) ? 'opacity-75' : ''}`}
+                                    className={`p-6 bg-white border-2 border-stone-900 relative flex flex-col h-full transform transition-transform hover:-translate-y-2 ${plan.popular ? 'shadow-[8px_8px_0px_0px_rgba(250,204,21,1)]' : 'shadow-[8px_8px_0px_0px_rgba(28,25,23,1)]'} ${(isActive && plan.id !== 'free') ? 'opacity-75' : ''}`}
                                 >
                                     {plan.popular && (
                                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-stone-900 text-[10px] font-black px-3 py-1 border-2 border-stone-900 uppercase">
