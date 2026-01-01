@@ -34,8 +34,8 @@ export const registerSession = async (userId, sessionToken) => {
 
         if (error) throw error;
 
-        // Enforce device limit after registering - DISABLED: Limit removed by owner request
-        // await enforceDeviceLimit(userId);
+        // Register session in the database
+        // No device limit enforced for registered users
 
         return { success: true };
     } catch (err) {

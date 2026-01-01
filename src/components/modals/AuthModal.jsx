@@ -44,7 +44,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                 });
                 if (signInError) throw signInError;
 
-                // Register session for two-device limit enforcement
+                // Register session for session management
                 const sessionToken = data.session?.access_token?.substring(0, 32) || Date.now().toString();
                 await registerSession(data.user.id, sessionToken);
 

@@ -4,8 +4,8 @@
  * Generates a stable ID based on the browser's hardware and software signature.
  * 
  * IMPORTANT: The device ID is cached in localStorage to ensure consistency
- * across all tabs and page reloads. This prevents the two-device login policy
- * from incorrectly counting multiple tabs as separate devices.
+ * across all tabs and page reloads. This ensures that session management
+ * correctly identifies the current device.
  */
 
 const DEVICE_ID_KEY = 'essay_architect_device_id';

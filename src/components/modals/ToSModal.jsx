@@ -57,7 +57,7 @@ const ToSModal = ({ onClose }) => (
                         </p>
                         <p>
                             <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">B. Account Security</strong>
-                            You are responsible for safeguarding the password that you use to access the Service. We enforce a two-device login policy to prevent account sharing. If you log in on a third device, your oldest session will be automatically logged out.
+                            You are responsible for safeguarding the password that you use to access the Service. You agree not to share your account credentials with others.
                         </p>
                     </div>
                 </section>
