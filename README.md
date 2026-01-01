@@ -40,6 +40,24 @@ The Pro version features a tiered access system managed via a manual-verificatio
 -   **🔄 Smart Redirection**: After payment proof is uploaded, users are automatically directed to a pre-filled "Retrieve Access" screen.
 -   **📜 Auto-Scroll UI**: Modals intelligently scroll to relevant sections (like payment retrieval) to minimize friction.
 
+## 🔐 Security & Authentication
+
+-   **📱 Two-Device Login Policy**: Users can be logged in on a maximum of two devices simultaneously. Logging in on a third device will automatically log out the oldest session (FIFO).
+-   **🔑 Password Reset**: Secure email-based password recovery flow.
+-   **✅ Confirm Password**: Added password confirmation field during signup to prevent typos.
+-   **📧 Device-Specific Verification**: Payment verification options are tailored based on whether the user is on mobile or desktop.
+
+## 📱 Mobile-First Design
+
+-   **☰ Hamburger Menu**: Collapsible navigation for mobile devices with smooth scrolling support.
+-   **🖼️ Responsive Modals**: All modals (Auth, Pricing, About) are optimized for mobile viewports with proper close button visibility.
+-   **📐 Dynamic Viewport Handling**: Uses dynamic viewport units to account for mobile browser URL bars.
+
+## 📜 Legal Compliance
+
+-   **Terms of Service**: Comprehensive ToS accessible via footer link.
+-   **Privacy Policy**: Detailed privacy policy outlining data handling practices.
+
 ## 🏃‍♂️ Manual Installation
 
 1.  **Clone the Architecture**
