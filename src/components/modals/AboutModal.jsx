@@ -9,18 +9,18 @@ const AboutModal = ({ onClose }) => (
     >
         <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] max-w-lg w-full overflow-hidden relative transform transition-all scale-100 cursor-default"
+            className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden relative transform transition-all scale-100 cursor-default"
         >
 
             {/* Wizard Header */}
-            <div className="bg-stone-900 p-8 text-white relative overflow-hidden">
+            <div className="bg-stone-900 p-8 text-white relative overflow-hidden shrink-0">
                 <div className="absolute top-0 right-0 p-8 opacity-10">
                     <Type size={120} />
                 </div>
 
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-white hover:text-yellow-400 transition-colors"
+                    className="absolute top-4 right-4 text-white hover:text-yellow-400 transition-colors z-20"
                 >
                     <X size={24} strokeWidth={3} />
                 </button>
@@ -32,7 +32,7 @@ const AboutModal = ({ onClose }) => (
                 </div>
             </div>
 
-            <div className="p-8 space-y-6">
+            <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
                 <div className="font-serif text-xl leading-relaxed text-stone-800 border-l-4 border-yellow-400 pl-4 italic">
                     "Structure is not just a framework; it is the skeleton upon which your ideas must hang."
                 </div>
