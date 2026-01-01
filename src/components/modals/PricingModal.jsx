@@ -144,8 +144,8 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
 
                                     <button
                                         onClick={() => onSelectPlan(plan)}
-                                        disabled={isActive || isLower}
-                                        className={`w-full py-4 font-black uppercase tracking-widest transition-all border-2 border-stone-900 ${(isActive || isLower) ? 'bg-stone-200 text-stone-500 cursor-not-allowed border-stone-300' :
+                                        disabled={isActive || isLower || (plan.id === 'free' && !!activePlan)}
+                                        className={`w-full py-4 font-black uppercase tracking-widest transition-all border-2 border-stone-900 ${(isActive || isLower || (plan.id === 'free' && !!activePlan)) ? 'bg-stone-200 text-stone-500 cursor-not-allowed border-stone-300' :
                                             plan.popular ? 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white' :
                                                 'bg-stone-50 text-stone-900 hover:bg-stone-900 hover:text-white'
                                             }`}
