@@ -510,7 +510,10 @@ const App = () => {
                 <meta name="keywords" content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder" />
             </Helmet>
             <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-4 md:px-6 py-4 md:py-5 flex justify-between items-center z-50 sticky top-0">
-                <div className="flex items-center gap-3 md:gap-6 shrink-1 md:shrink-0 min-w-0">
+                <div
+                    className="flex items-center gap-3 md:gap-6 shrink-1 md:shrink-0 min-w-0 cursor-pointer"
+                    onClick={() => window.location.reload()}
+                >
                     <div className="bg-stone-900 text-white w-8 h-8 md:w-10 md:h-10 flex items-center justify-center font-serif font-black text-lg md:text-xl shrink-0">
                         E
                     </div>
@@ -518,7 +521,10 @@ const App = () => {
                         <h1 className="text-lg md:text-2xl font-serif font-black tracking-tighter text-stone-900 flex items-center gap-2 md:gap-3 leading-none truncate">
                             ESSAY ARCHITECT PRO
                             <button
-                                onClick={() => setShowAbout(true)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowAbout(true);
+                                }}
                                 className="text-stone-400 hover:text-stone-900 transition-colors"
                             >
                                 <HelpCircle size={18} />
