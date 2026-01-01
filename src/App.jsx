@@ -431,13 +431,13 @@ const App = () => {
                 <meta name="twitter:image" content="https://pro.essay-architect.uk/og-image.svg" />
                 <meta name="keywords" content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder" />
             </Helmet>
-            <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-6 py-5 flex justify-between items-center z-50 sticky top-0">
-                <div className="flex items-center gap-6 shrink-0">
-                    <div className="bg-stone-900 text-white w-10 h-10 flex items-center justify-center font-serif font-black text-xl">
+            <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-4 md:px-6 py-4 md:py-5 flex justify-between items-center z-50 sticky top-0">
+                <div className="flex items-center gap-3 md:gap-6 shrink-1 md:shrink-0 min-w-0">
+                    <div className="bg-stone-900 text-white w-8 h-8 md:w-10 md:h-10 flex items-center justify-center font-serif font-black text-lg md:text-xl shrink-0">
                         E
                     </div>
-                    <div>
-                        <h1 className="text-2xl font-serif font-black tracking-tighter text-stone-900 flex items-center gap-3 leading-none">
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-lg md:text-2xl font-serif font-black tracking-tighter text-stone-900 flex items-center gap-2 md:gap-3 leading-none truncate">
                             ESSAY ARCHITECT PRO
                             <button
                                 onClick={() => setShowAbout(true)}
@@ -573,7 +573,7 @@ const App = () => {
 
                 {/* Mobile Menu Toggle */}
                 <button
-                    className="md:hidden text-stone-900 p-2"
+                    className="md:hidden text-stone-900 p-2 shrink-0"
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
                     {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
