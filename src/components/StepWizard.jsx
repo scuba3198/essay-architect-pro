@@ -20,7 +20,7 @@ const VocabularyPill = ({ words, onSelect }) => {
                         e.preventDefault();
                         if (onSelect) onSelect(word);
                     }}
-                    className="group relative inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide bg-white border border-stone-900 text-stone-900 px-4 py-2 hover:bg-stone-900 hover:text-white transition-all duration-200 shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                    className="group relative inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide bg-white border border-stone-900 text-stone-900 px-4 py-2.5 md:py-2 hover:bg-stone-900 hover:text-white transition-all duration-200 shadow-[2px_2px_0px_0px_rgba(28,25,23,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
                     title="Click to insert into text box"
                 >
                     <Sparkles size={10} className="opacity-0 group-hover:opacity-100 transition-opacity absolute left-1" />
@@ -279,7 +279,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current['intro-paraphrase'] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[80px] md:min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="Start writing here..."
                                 value={essay.intro.paraphrase}
                                 onChange={(e) => handleInputChange('intro', 'paraphrase', e.target.value)}
@@ -300,7 +300,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current['intro-thesis'] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[80px] md:min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="I completely agree with this view because..."
                                 value={essay.intro.thesis}
                                 onChange={(e) => handleInputChange('intro', 'thesis', e.target.value)}
@@ -334,7 +334,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-topicSentence`] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[60px] md:min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="Firstly, the main reason for this is..."
                                 value={essay[`body${currentStep}`].topicSentence}
                                 onChange={(e) => handleInputChange(`body${currentStep}`, 'topicSentence', e.target.value)}
@@ -355,7 +355,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-explanation`] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[100px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[70px] md:min-h-[100px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="This is because..."
                                 value={essay[`body${currentStep}`].explanation}
                                 onChange={(e) => handleInputChange(`body${currentStep}`, 'explanation', e.target.value)}
@@ -376,7 +376,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-example`] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[60px] md:min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="For instance..."
                                 value={essay[`body${currentStep}`].example}
                                 onChange={(e) => handleInputChange(`body${currentStep}`, 'example', e.target.value)}
@@ -397,7 +397,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-concluding`] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[60px] md:min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="Therefore..."
                                 value={essay[`body${currentStep}`].concluding}
                                 onChange={(e) => handleInputChange(`body${currentStep}`, 'concluding', e.target.value)}
@@ -431,7 +431,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current['conclusion-summary'] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[80px] md:min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="In conclusion..."
                                 value={essay.conclusion.summary}
                                 onChange={(e) => handleInputChange('conclusion', 'summary', e.target.value)}
@@ -452,7 +452,7 @@ const StepWizard = ({ currentStep, setCurrentStep, essay, handleInputChange, tou
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current['conclusion-finalThought'] = el)}
-                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
+                                className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[80px] md:min-h-[120px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="It is predicted that..."
                                 value={essay.conclusion.finalThought}
                                 onChange={(e) => handleInputChange('conclusion', 'finalThought', e.target.value)}

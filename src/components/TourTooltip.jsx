@@ -99,6 +99,11 @@ const TourTooltip = ({ stepIndex, currentStep, onNext, onSkip, text, position = 
         return <div ref={anchorRef} className="hidden" />;
     }
 
+    // Disable tooltips on mobile (screen width < 768px)
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        return null;
+    }
+
     // Portal content
     const tooltipContent = (
         <div

@@ -66,6 +66,7 @@ const App = () => {
     const [activeTab, setActiveTab] = useState('learn');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
+    const [mobilePracticeTab, setMobilePracticeTab] = useState('wizard'); // 'wizard' or 'preview'
     const [topic, setTopic] = useState(null);
     const [timer, setTimer] = useState(0);
     const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -966,7 +967,30 @@ const App = () => {
                 {
                     activeTab === 'practice' && (
                         <div className="flex flex-col md:flex-row h-full">
-                            <div className="w-full md:w-3/5 p-0 overflow-y-auto custom-scrollbar bg-[#f4f1ea] border-r-2 border-stone-900">
+                            {/* Mobile Tab Switcher - only visible on mobile */}
+                            <div className="md:hidden flex border-b-2 border-stone-900 bg-white sticky top-0 z-30">
+                                <button
+                                    onClick={() => setMobilePracticeTab('wizard')}
+                                    className={`flex-1 py-3 text-xs font-black uppercase tracking-widest transition-all ${mobilePracticeTab === 'wizard'
+                                        ? 'bg-stone-900 text-white'
+                                        : 'bg-white text-stone-400 hover:text-stone-900'
+                                        }`}
+                                >
+                                    ✏️ Write
+                                </button>
+                                <button
+                                    onClick={() => setMobilePracticeTab('preview')}
+                                    className={`flex-1 py-3 text-xs font-black uppercase tracking-widest transition-all border-l-2 border-stone-900 ${mobilePracticeTab === 'preview'
+                                        ? 'bg-stone-900 text-white'
+                                        : 'bg-white text-stone-400 hover:text-stone-900'
+                                        }`}
+                                >
+                                    👁️ Preview ({totalWordCount}w)
+                                </button>
+                            </div>
+
+                            {/* Wizard Section - hidden on mobile if preview tab is active */}
+                            <div className={`w-full md:w-3/5 p-0 overflow-y-auto custom-scrollbar bg-[#f4f1ea] md:border-r-2 border-stone-900 ${mobilePracticeTab !== 'wizard' ? 'hidden md:block' : ''}`}>
                                 <div className="p-8 pb-4">
                                     <div className="border-2 border-stone-900 bg-white p-6 relative shadow-[8px_8px_0px_0px_rgba(28,25,23,0.1)] hover:shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] transition-shadow duration-300">
                                         <div className="flex justify-between items-start mb-4 border-b border-stone-200 pb-4">
@@ -1024,7 +1048,8 @@ const App = () => {
                                 </div>
                             </div>
 
-                            <div className="w-full md:w-2/5 h-80 md:h-auto border-t-2 md:border-t-0 border-stone-900 relative z-10 bg-white">
+                            {/* Preview Section - hidden on mobile if wizard tab is active, full height on mobile when visible */}
+                            <div className={`w-full md:w-2/5 md:h-auto border-t-2 md:border-t-0 border-stone-900 relative z-10 bg-white ${mobilePracticeTab !== 'preview' ? 'hidden md:block' : 'flex-1'}`}>
                                 <PreviewSection
                                     essay={essay}
                                     totalWordCount={totalWordCount}
@@ -1040,7 +1065,7 @@ const App = () => {
                 }
             </main >
 
-            <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2 fixed bottom-0 w-full md:static">
+            <footer className={`bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2 fixed bottom-0 w-full md:static ${activeTab === 'practice' ? 'hidden md:flex' : ''}`}>
                 <div className="flex items-center gap-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
                         Architected by <a href="https://scuba3198.github.io/mumukshu-portfolio/" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
