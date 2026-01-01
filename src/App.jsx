@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 // Essay Architect Pro Version Branch
-import { BookOpen, PenTool, RefreshCw, Clock, RotateCcw, HelpCircle, Award, Zap, Github, Facebook } from 'lucide-react';
+import { BookOpen, PenTool, RefreshCw, Clock, RotateCcw, HelpCircle, Award, Zap, Github, Facebook, Menu, X } from 'lucide-react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }) => (
     <svg
@@ -61,6 +61,7 @@ const LearnCard = ({ title, desc, number }) => (
 
 const App = () => {
     const [activeTab, setActiveTab] = useState('learn');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [topic, setTopic] = useState(null);
     const [timer, setTimer] = useState(0);
@@ -430,7 +431,7 @@ const App = () => {
                 <meta name="twitter:image" content="https://pro.essay-architect.uk/og-image.svg" />
                 <meta name="keywords" content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder" />
             </Helmet>
-            <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-6 py-5 flex justify-between items-center z-50 sticky top-0 overflow-x-auto">
+            <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-6 py-5 flex justify-between items-center z-50 sticky top-0">
                 <div className="flex items-center gap-6 shrink-0">
                     <div className="bg-stone-900 text-white w-10 h-10 flex items-center justify-center font-serif font-black text-xl">
                         E
@@ -449,7 +450,8 @@ const App = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-8 shrink-0">
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex items-center gap-8 shrink-0">
                     <div className="flex items-center">
                         <button
                             onClick={() => setActiveTab('learn')}
@@ -568,6 +570,119 @@ const App = () => {
                         />
                     </div>
                 </div>
+
+                {/* Mobile Menu Toggle */}
+                <button
+                    className="md:hidden text-stone-900 p-2"
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                    {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+
+                {/* Mobile Menu Overlay */}
+                {isMenuOpen && (
+                    <div className="md:hidden absolute top-full left-0 w-full bg-[#f4f1ea] border-b-2 border-stone-900 z-40 flex flex-col p-6 gap-6 shadow-xl animate-in slide-in-from-top-5">
+                        <div className="flex flex-col gap-4 border-b border-stone-300 pb-6">
+                            <div className="flex items-center justify-between">
+                                <span className="font-serif font-bold text-lg">Navigation</span>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    onClick={() => { setActiveTab('learn'); setIsMenuOpen(false); }}
+                                    className={`text-left p-3 border-2 ${activeTab === 'learn' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 text-stone-500'} font-bold uppercase tracking-wider transition-all`}
+                                >
+                                    The Guide (Theory)
+                                </button>
+                                <button
+                                    onClick={() => { setActiveTab('practice'); setIsMenuOpen(false); }}
+                                    className={`text-left p-3 border-2 ${activeTab === 'practice' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 text-stone-500'} font-bold uppercase tracking-wider transition-all`}
+                                >
+                                    The Wizard (Practice)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-4 border-b border-stone-300 pb-6">
+                            <span className="font-serif font-bold text-lg">Timer</span>
+                            <div className="flex items-center justify-between bg-white p-4 border border-stone-200">
+                                <div className="flex items-center gap-2 text-stone-900">
+                                    <Clock size={20} strokeWidth={3} className={isTimerRunning ? 'text-red-500 animate-pulse' : 'text-stone-400'} />
+                                    <span className="font-mono font-bold text-xl">{formatTime(timer)}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setIsTimerRunning(!isTimerRunning)}
+                                        className={`w-10 h-10 flex items-center justify-center border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-colors`}
+                                    >
+                                        {isTimerRunning ? (
+                                            <div className="flex gap-[3px]">
+                                                <div className="w-1 h-3 bg-current" />
+                                                <div className="w-1 h-3 bg-current" />
+                                            </div>
+                                        ) : (
+                                            <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-current border-b-[6px] border-b-transparent ml-1" />
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => { setIsTimerRunning(false); setTimer(0); }}
+                                        className="w-10 h-10 flex items-center justify-center border-2 border-stone-900 text-stone-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors"
+                                    >
+                                        <RotateCcw size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-4">
+                            {user ? (
+                                <>
+                                    <div className="flex items-center justify-between p-4 bg-stone-100 border border-stone-200">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-black uppercase text-stone-900 tracking-widest">
+                                                {user.user_metadata?.full_name || user.email}
+                                            </span>
+                                            {isPaid && <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1 mt-1">
+                                                <Zap size={10} fill="currentColor" /> {activePlan}
+                                            </span>}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            setIsMenuOpen(false);
+                                            try {
+                                                await supabase.auth.signOut();
+                                            } catch (err) {
+                                                console.error("Logout error:", err);
+                                            } finally {
+                                                setUser(null);
+                                                setIsPaid(false);
+                                                setUserEmail('');
+                                                setActivePlan(null);
+                                            }
+                                        }}
+                                        className="flex items-center justify-center gap-2 p-3 border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-all text-stone-900 font-bold uppercase tracking-widest text-xs"
+                                    >
+                                        <LogOut size={16} /> Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => { setShowAuth(true); setIsMenuOpen(false); }}
+                                    className="flex items-center justify-center gap-2 p-3 border-2 border-stone-900 font-black uppercase text-xs tracking-widest bg-white text-stone-900 hover:bg-stone-900 hover:text-white transition-all"
+                                >
+                                    <User size={16} /> Login / Sign Up
+                                </button>
+                            )}
+                            <button
+                                onClick={() => { setShowPricing(true); setIsMenuOpen(false); }}
+                                className={`flex items-center justify-center gap-2 p-3 border-2 border-stone-900 font-black uppercase text-xs tracking-widest transition-all ${isPaid ? 'bg-green-500 text-white border-green-600' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
+                            >
+                                {isPaid ? <Award size={16} /> : <Zap size={16} />}
+                                {isPaid ? 'Pro Access Active' : 'Upgrade to Pro'}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </header>
 
             <MobileWarning />
