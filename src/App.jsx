@@ -38,7 +38,7 @@ import FeedbackButton from './components/FeedbackButton';
 import FeedbackModal from './components/modals/FeedbackModal';
 import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/fingerprint';
-import MobileWarning from './components/MobileWarning';
+
 import PrivacyModal from './components/modals/PrivacyModal';
 import AuthModal from './components/modals/AuthModal';
 import { Helmet } from 'react-helmet-async';
@@ -687,7 +687,7 @@ const App = () => {
                 )}
             </header>
 
-            <MobileWarning />
+
 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
             {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
