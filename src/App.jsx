@@ -211,19 +211,18 @@ const App = () => {
                 const { isValid, wasLoggedOut } = await validateSession(session.user.id);
 
                 if (wasLoggedOut) {
-                    // Session was invalidated by login from another device
+                    // Session was invalidated manually or by a rare database event
                     isLoggingOut = true;
                     try {
                         await supabase.auth.signOut();
                     } catch (err) {
                         console.error("SignOut error:", err);
                     }
-                    // Directly clear state - don't rely only on onAuthStateChange
                     setUser(null);
                     setIsPaid(false);
                     setUserEmail('');
                     setActivePlan(null);
-                    alert("You've been logged out because you logged in on another device. (Max 2 devices allowed)");
+                    alert("Your session has expired. Please log in again.");
                     return;
                 }
 
@@ -258,7 +257,7 @@ const App = () => {
                         setIsPaid(false);
                         setUserEmail('');
                         setActivePlan(null);
-                        alert("You've been logged out because you logged in on another device. (Max 2 devices allowed)");
+                        alert("Your session has expired. Please log in again.");
                         return;
                     }
                 }

@@ -1,13 +1,11 @@
 /**
- * Session Manager for Two-Device Login Policy
- * Handles session tracking with FIFO logout mechanism.
- * Users can be logged into a maximum of 2 devices simultaneously.
+ * Session Manager for User Sessions
+ * Handles session tracking and validation.
+ * Users can be logged into multiple devices simultaneously.
  */
 
 import { supabase } from './supabase';
 import { getVisitorID } from './device-id';
-
-const MAX_DEVICES = 2;
 
 /**
  * Registers a new session for the current device.
@@ -36,8 +34,8 @@ export const registerSession = async (userId, sessionToken) => {
 
         if (error) throw error;
 
-        // Enforce device limit after registering
-        await enforceDeviceLimit(userId);
+        // Enforce device limit after registering - DISABLED: Limit removed by owner request
+        // await enforceDeviceLimit(userId);
 
         return { success: true };
     } catch (err) {
@@ -71,7 +69,7 @@ export const validateSession = async (userId) => {
             throw error;
         }
 
-        // Session exists but was deactivated by another device
+        // Session exists but was deactivated (e.g. manual logout from another device if implemented later)
         if (!data.is_active) {
             return { isValid: false, wasLoggedOut: true };
         }
@@ -93,47 +91,13 @@ export const validateSession = async (userId) => {
 
 /**
  * Enforces the device limit by deactivating the oldest sessions.
- * Implements FIFO (First-In-First-Out) logout behavior.
+ * DISABLED: Users can have unlimited devices.
  * @param {string} userId - The user's UUID
  * @returns {Promise<{success: boolean, deactivatedCount: number}>}
  */
 export const enforceDeviceLimit = async (userId) => {
-    try {
-        // Get all active sessions for this user, ordered by creation time
-        const { data: sessions, error } = await supabase
-            .from('user_sessions')
-            .select('id, device_fingerprint, created_at')
-            .eq('user_id', userId)
-            .eq('is_active', true)
-            .order('created_at', { ascending: true });
-
-        if (error) throw error;
-
-        // If within limit, nothing to do
-        if (!sessions || sessions.length <= MAX_DEVICES) {
-            return { success: true, deactivatedCount: 0 };
-        }
-
-        // Calculate how many sessions to deactivate (oldest first)
-        const excessCount = sessions.length - MAX_DEVICES;
-        const sessionsToDeactivate = sessions.slice(0, excessCount);
-
-        // Deactivate oldest sessions
-        const idsToDeactivate = sessionsToDeactivate.map(s => s.id);
-
-        const { error: updateError } = await supabase
-            .from('user_sessions')
-            .update({ is_active: false })
-            .in('id', idsToDeactivate);
-
-        if (updateError) throw updateError;
-
-        console.log(`Deactivated ${excessCount} session(s) due to device limit`);
-        return { success: true, deactivatedCount: excessCount };
-    } catch (err) {
-        console.error('Failed to enforce device limit:', err);
-        return { success: false, deactivatedCount: 0 };
-    }
+    // Logic disabled by owner request - return success without deactivating anything
+    return { success: true, deactivatedCount: 0 };
 };
 
 /**
