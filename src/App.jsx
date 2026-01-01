@@ -38,6 +38,7 @@ import FeedbackButton from './components/FeedbackButton';
 import FeedbackModal from './components/modals/FeedbackModal';
 import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/fingerprint';
+import { validateSession, deactivateCurrentSession, registerSession } from './lib/sessionManager';
 
 import PrivacyModal from './components/modals/PrivacyModal';
 import AuthModal from './components/modals/AuthModal';
@@ -194,16 +195,43 @@ const App = () => {
     useEffect(() => {
         setTopic(topics[0]);
 
-        // Auth Listener
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        // Auth Listener with two-device session validation
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (session) {
+                // Validate session against two-device limit
+                const { isValid, wasLoggedOut } = await validateSession(session.user.id);
+
+                if (wasLoggedOut) {
+                    // Session was invalidated by login from another device
+                    await supabase.auth.signOut();
+                    alert("You've been logged out because you logged in on another device. (Max 2 devices allowed)");
+                    return;
+                }
+
+                // If no session record exists, register this session
+                if (!isValid && !wasLoggedOut) {
+                    const sessionToken = session.access_token?.substring(0, 32) || Date.now().toString();
+                    await registerSession(session.user.id, sessionToken);
+                }
+
                 setUser(session.user);
                 verifyAccess(session.user.email, true);
             }
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (session) {
+                // For SIGNED_IN event, session is already registered by AuthModal
+                // For TOKEN_REFRESHED, validate the session
+                if (event === 'TOKEN_REFRESHED') {
+                    const { isValid, wasLoggedOut } = await validateSession(session.user.id);
+                    if (wasLoggedOut) {
+                        await supabase.auth.signOut();
+                        alert("You've been logged out because you logged in on another device. (Max 2 devices allowed)");
+                        return;
+                    }
+                }
+
                 setUser(session.user);
                 verifyAccess(session.user.email, true);
             } else {
@@ -532,6 +560,10 @@ const App = () => {
                                 <button
                                     onClick={async () => {
                                         try {
+                                            // Deactivate session in database before signing out
+                                            if (user) {
+                                                await deactivateCurrentSession(user.id);
+                                            }
                                             await supabase.auth.signOut();
                                         } catch (err) {
                                             console.error("Logout error:", err);
@@ -652,6 +684,10 @@ const App = () => {
                                         onClick={async () => {
                                             setIsMenuOpen(false);
                                             try {
+                                                // Deactivate session in database before signing out
+                                                if (user) {
+                                                    await deactivateCurrentSession(user.id);
+                                                }
                                                 await supabase.auth.signOut();
                                             } catch (err) {
                                                 console.error("Logout error:", err);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, Loader2, ArrowRight, UserPlus, LogIn } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { registerSession } from '../../lib/sessionManager';
 
 const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
     const [mode, setMode] = useState(initialMode); // 'login', 'signup', 'forgot_password', 'update_password'
@@ -42,6 +43,11 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                     password,
                 });
                 if (signInError) throw signInError;
+
+                // Register session for two-device limit enforcement
+                const sessionToken = data.session?.access_token?.substring(0, 32) || Date.now().toString();
+                await registerSession(data.user.id, sessionToken);
+
                 if (onAuthSuccess) onAuthSuccess(data.user);
                 onClose();
             } else if (mode === 'forgot_password') {
