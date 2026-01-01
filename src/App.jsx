@@ -797,9 +797,10 @@ const App = () => {
                     userEmail={userEmail}
                     onClose={() => setShowPayment(false)}
                     onSuccess={(email) => {
-                        setPendingEmail(email);
                         setShowPayment(false);
-                        setShowPricing(true);
+                        // Removed setPendingEmail (undefined) and setShowPricing (redundant)
+                        // User stays on current page after submission
+                        alert("Screenshot received! We will verify it within 1-2 hours.");
                     }}
                 />
             )}
