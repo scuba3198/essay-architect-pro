@@ -583,7 +583,7 @@ const App = () => {
 
                 {/* Mobile Menu Overlay */}
                 {isMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-[#f4f1ea] border-b-2 border-stone-900 z-40 flex flex-col p-6 gap-6 shadow-xl animate-in slide-in-from-top-5">
+                    <div className="md:hidden absolute top-full left-0 w-full bg-[#f4f1ea] border-b-2 border-stone-900 z-40 flex flex-col p-6 gap-6 shadow-xl animate-in slide-in-from-top-5 max-h-[calc(100dvh-5rem)] overflow-y-auto pb-10">
                         <div className="flex flex-col gap-4 border-b border-stone-300 pb-6">
                             <div className="flex items-center justify-between">
                                 <span className="font-serif font-bold text-lg">Navigation</span>
