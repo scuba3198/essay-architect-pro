@@ -643,7 +643,7 @@ const App = () => {
             <main className="flex-1 overflow-hidden relative">
                 <FeedbackButton onClick={() => setShowFeedback(true)} />
                 {activeTab === 'learn' && (
-                    <div className="h-full overflow-y-auto custom-scrollbar bg-[#f4f1ea]">
+                    <div className="h-full overflow-y-auto custom-scrollbar bg-[#f4f1ea] pb-28 md:pb-0">
                         <div className="max-w-7xl mx-auto p-12">
                             <div className="mb-16 border-b-4 border-stone-900 pb-12">
                                 <h2 className="text-7xl md:text-8xl font-black font-serif text-stone-900 mb-6 tracking-tighter leading-[0.8]">
@@ -795,7 +795,7 @@ const App = () => {
                                     </div>
                                 </div>
 
-                                <div className="pb-20 md:pb-0 min-h-[500px] p-8 pt-0">
+                                <div className="pb-28 md:pb-0 min-h-[500px] p-8 pt-0">
                                     <StepWizard
                                         currentStep={currentStep}
                                         setCurrentStep={setCurrentStep}
@@ -828,7 +828,7 @@ const App = () => {
                 }
             </main >
 
-            <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2">
+            <footer className="bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2 fixed bottom-0 w-full md:static">
                 <div className="flex items-center gap-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
                         Architected by <a href="https://scuba3198.github.io/mumukshu-portfolio/" target="_blank" rel="noopener noreferrer" className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer">Mumukshu D.C.</a>
