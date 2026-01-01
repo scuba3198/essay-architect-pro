@@ -17,31 +17,33 @@ export const getVisitorID = async () => {
         return cachedId;
     }
 
-    // Generate new fingerprint if not cached
-    const components = [
-        navigator.userAgent,
-        navigator.language,
-        new Date().getTimezoneOffset(),
-        window.screen.width + 'x' + window.screen.height,
-        window.screen.colorDepth,
-        navigator.hardwareConcurrency,
-        navigator.deviceMemory,
-        // Canvas Fingerprinting
-        getCanvasFingerprint()
-    ];
+    // Generate fingerprint with 1-second timeout (mobile browsers may block these APIs)
+    const fingerprintPromise = (async () => {
+        const components = [
+            navigator.userAgent,
+            navigator.language,
+            new Date().getTimezoneOffset(),
+            window.screen.width + 'x' + window.screen.height,
+            window.screen.colorDepth,
+            navigator.hardwareConcurrency,
+            navigator.deviceMemory,
+            getCanvasFingerprint()
+        ];
 
-    const fingerprintString = components.join('###');
+        const fingerprintString = components.join('###');
+        const msgUint8 = new TextEncoder().encode(fingerprintString);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    })();
 
-    // Hash the result for a clean ID
-    const msgUint8 = new TextEncoder().encode(fingerprintString);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const timeoutPromise = new Promise((resolve) => {
+        setTimeout(() => resolve('fallback_' + Math.random().toString(36).substring(2, 15)), 1000);
+    });
 
-    // Cache in localStorage for consistency across tabs
-    localStorage.setItem(DEVICE_ID_KEY, hashHex);
-
-    return hashHex;
+    const deviceId = await Promise.race([fingerprintPromise, timeoutPromise]);
+    localStorage.setItem(DEVICE_ID_KEY, deviceId);
+    return deviceId;
 };
 
 const getCanvasFingerprint = () => {
