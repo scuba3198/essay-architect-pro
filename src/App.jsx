@@ -46,7 +46,7 @@ import { Helmet } from 'react-helmet-async';
 import { LogOut, User } from 'lucide-react';
 import TestimonialSection from './components/TestimonialSection';
 import ToSModal from './components/modals/ToSModal';
-import MobileExperienceModal from './components/modals/MobileExperienceModal';
+
 
 const LearnCard = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -76,27 +76,9 @@ const App = () => {
     const [authMode, setAuthMode] = useState('login');
     const [showExaminer, setShowExaminer] = useState(false);
     const [showToS, setShowToS] = useState(false);
-    const [showMobileWarning, setShowMobileWarning] = useState(false);
 
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth < 768) {
-                // Check if user has already dismissed it in this session (optional, but good UX)
-                // For now, simple implementation as requested:
-                const hasSeenWarning = sessionStorage.getItem('hasSeenMobileWarning');
-                if (!hasSeenWarning) {
-                    setShowMobileWarning(true);
-                }
-            }
-        };
 
-        // Check on mount
-        handleResize();
 
-        // Optional: Listen for resize if testing responsiveness dynamically
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     // Auth & Monetization State
     const [user, setUser] = useState(null);
@@ -782,10 +764,7 @@ const App = () => {
 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
             {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
-            {showMobileWarning && <MobileExperienceModal isOpen={showMobileWarning} onClose={() => {
-                setShowMobileWarning(false);
-                sessionStorage.setItem('hasSeenMobileWarning', 'true');
-            }} />}
+
             {showAuth && <AuthModal onClose={() => { setShowAuth(false); setAuthMode('login'); }} onAuthSuccess={(user) => verifyAccess(user.email, true)} initialMode={authMode} />}
             {showExaminer && (
                 <ExaminerModal
