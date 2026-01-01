@@ -52,7 +52,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
     const currentTier = getPlanTier(activePlan);
 
     return (
-        <div className="fixed inset-0 bg-stone-900/95 z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-stone-900/95 z-[110] flex items-center justify-center p-4 pt-20 md:p-4 animate-in fade-in duration-300">
             <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-4xl w-full relative max-h-[95vh] flex flex-col">
                 <div className="flex justify-end p-4 border-b-2 border-stone-100 bg-[#f4f1ea] z-20 shrink-0">
                     <button
