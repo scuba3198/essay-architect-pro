@@ -101,164 +101,168 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
 
     return (
         <div
-            className="fixed inset-0 bg-stone-900/95 z-[130] flex items-center justify-center p-4 animate-in fade-in duration-300"
-            onClick={(e) => {
-                if (e.target === e.currentTarget) onClose();
-            }}
+            className="fixed inset-0 z-[130] bg-stone-900/95 overflow-y-auto animate-in fade-in duration-300"
         >
-            <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-sm w-full p-8 relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-900 transition-colors">
-                    <X size={24} strokeWidth={3} />
-                </button>
+            <div
+                className="flex min-h-full items-center justify-center p-4"
+                onClick={(e) => {
+                    if (e.target === e.currentTarget) onClose();
+                }}
+            >
+                <div className="bg-[#f4f1ea] border-2 border-stone-900 shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] max-w-sm w-full p-8 relative my-8">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-900 transition-colors z-10">
+                        <X size={24} strokeWidth={3} />
+                    </button>
 
-                <div className="text-center mb-8">
-                    <div className="bg-stone-900 text-white w-12 h-12 flex items-center justify-center font-serif font-black text-2xl mx-auto mb-4">
-                        E
+                    <div className="text-center mb-8">
+                        <div className="bg-stone-900 text-white w-12 h-12 flex items-center justify-center font-serif font-black text-2xl mx-auto mb-4">
+                            E
+                        </div>
+                        <h2 className="text-2xl font-serif font-black text-stone-900 uppercase tracking-tight italic">
+                            {getTitle()}
+                        </h2>
+                        <p className="text-xs text-stone-500 mt-2 font-medium">
+                            {getDescription()}
+                        </p>
                     </div>
-                    <h2 className="text-2xl font-serif font-black text-stone-900 uppercase tracking-tight italic">
-                        {getTitle()}
-                    </h2>
-                    <p className="text-xs text-stone-500 mt-2 font-medium">
-                        {getDescription()}
-                    </p>
-                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {mode === 'signup' && (
-                        <div>
-                            <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Full Name</label>
-                            <div className="relative">
-                                <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
-                                <input
-                                    type="text"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    placeholder="John Doe"
-                                    className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
-                                    required={mode === 'signup'}
-                                />
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {mode === 'signup' && (
+                            <div>
+                                <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Full Name</label>
+                                <div className="relative">
+                                    <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+                                    <input
+                                        type="text"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        placeholder="John Doe"
+                                        className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
+                                        required={mode === 'signup'}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {(mode === 'login' || mode === 'signup' || mode === 'forgot_password') && (
-                        <div>
-                            <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Email Address</label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="name@example.com"
-                                    className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
-                                    required
-                                />
+                        {(mode === 'login' || mode === 'signup' || mode === 'forgot_password') && (
+                            <div>
+                                <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Email Address</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="name@example.com"
+                                        className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {(mode === 'login' || mode === 'signup' || mode === 'update_password') && (
-                        <div>
-                            <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest flex justify-between items-center">
-                                <span>Password</span>
-                                {mode === 'login' && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setMode('forgot_password')}
-                                        className="text-[9px] text-stone-500 hover:text-stone-900 hover:underline"
-                                    >
-                                        Forgot?
-                                    </button>
-                                )}
-                            </label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
-                                    required
-                                />
+                        {(mode === 'login' || mode === 'signup' || mode === 'update_password') && (
+                            <div>
+                                <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest flex justify-between items-center">
+                                    <span>Password</span>
+                                    {mode === 'login' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setMode('forgot_password')}
+                                            className="text-[9px] text-stone-500 hover:text-stone-900 hover:underline"
+                                        >
+                                            Forgot?
+                                        </button>
+                                    )}
+                                </label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {(mode === 'signup' || mode === 'update_password') && (
-                        <div>
-                            <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Confirm Password</label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
-                                <input
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
-                                    required
-                                />
+                        {(mode === 'signup' || mode === 'update_password') && (
+                            <div>
+                                <label className="text-[10px] font-black uppercase text-stone-400 mb-1 block tracking-widest">Confirm Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+                                    <input
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        className="w-full bg-white border-2 border-stone-900 p-3 pl-10 text-sm outline-none focus:bg-yellow-50 transition-colors"
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {error && (
-                        <div className="bg-red-50 border-l-4 border-red-500 p-3">
-                            <p className="text-[10px] text-red-600 font-bold leading-tight uppercase tracking-wider">{error}</p>
-                        </div>
-                    )}
+                        {error && (
+                            <div className="bg-red-50 border-l-4 border-red-500 p-3">
+                                <p className="text-[10px] text-red-600 font-bold leading-tight uppercase tracking-wider">{error}</p>
+                            </div>
+                        )}
 
-                    {messsage && (
-                        <div className="bg-green-50 border-l-4 border-green-500 p-3">
-                            <p className="text-[10px] text-green-600 font-bold leading-tight uppercase tracking-wider">{messsage}</p>
-                        </div>
-                    )}
+                        {messsage && (
+                            <div className="bg-green-50 border-l-4 border-green-500 p-3">
+                                <p className="text-[10px] text-green-600 font-bold leading-tight uppercase tracking-wider">{messsage}</p>
+                            </div>
+                        )}
 
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-stone-900 text-white py-4 font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-stone-900 transition-all flex items-center justify-center gap-2 group"
-                    >
-                        {isLoading ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-stone-900 text-white py-4 font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-stone-900 transition-all flex items-center justify-center gap-2 group"
+                        >
+                            {isLoading ? (
+                                <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                                <>
+                                    {mode === 'login' && 'Login'}
+                                    {mode === 'signup' && 'Sign Up'}
+                                    {mode === 'forgot_password' && 'Send Reset Link'}
+                                    {mode === 'update_password' && 'Update Password'}
+                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="mt-8 pt-6 border-t border-stone-200 text-center">
+                        {mode !== 'update_password' && (
                             <>
-                                {mode === 'login' && 'Login'}
-                                {mode === 'signup' && 'Sign Up'}
-                                {mode === 'forgot_password' && 'Send Reset Link'}
-                                {mode === 'update_password' && 'Update Password'}
-                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                <p className="text-xs text-stone-500 font-medium mb-4">
+                                    {mode === 'login' ? "Don't have an account?" : (mode === 'signup' ? "Already have an account?" : "Remembered your password?")}
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        if (mode === 'login') setMode('signup');
+                                        else setMode('login');
+                                    }}
+                                    className="flex items-center gap-2 mx-auto text-[10px] font-black uppercase tracking-widest text-stone-900 hover:text-stone-600 transition-colors"
+                                >
+                                    {mode === 'login' ? (
+                                        <>
+                                            <UserPlus size={14} /> Create Account
+                                        </>
+                                    ) : (
+                                        <>
+                                            <LogIn size={14} /> Log In Instead
+                                        </>
+                                    )}
+                                </button>
                             </>
                         )}
-                    </button>
-                </form>
-
-                <div className="mt-8 pt-6 border-t border-stone-200 text-center">
-                    {mode !== 'update_password' && (
-                        <>
-                            <p className="text-xs text-stone-500 font-medium mb-4">
-                                {mode === 'login' ? "Don't have an account?" : (mode === 'signup' ? "Already have an account?" : "Remembered your password?")}
-                            </p>
-                            <button
-                                onClick={() => {
-                                    if (mode === 'login') setMode('signup');
-                                    else setMode('login');
-                                }}
-                                className="flex items-center gap-2 mx-auto text-[10px] font-black uppercase tracking-widest text-stone-900 hover:text-stone-600 transition-colors"
-                            >
-                                {mode === 'login' ? (
-                                    <>
-                                        <UserPlus size={14} /> Create Account
-                                    </>
-                                ) : (
-                                    <>
-                                        <LogIn size={14} /> Log In Instead
-                                    </>
-                                )}
-                            </button>
-                        </>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>
