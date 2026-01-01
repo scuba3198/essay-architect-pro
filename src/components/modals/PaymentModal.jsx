@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Upload, CheckCircle2, QrCode, Phone, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -8,6 +8,17 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
     const [email, setEmail] = useState(userEmail || "");
     const [isUploading, setIsUploading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('gbime'); // 'gbime' or 'esewa'
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Detect if user is on mobile device
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const sendDiscordNotification = async (imageUrl, planName, price) => {
         // ... rest of the function (no changes until step 3 button)
@@ -213,59 +224,63 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
                         </h2>
 
                         <div className="space-y-6">
-                            {/* Desktop Upload Option */}
-                            <div className="bg-white border-2 border-stone-900 p-4">
-                                <p className="text-[10px] font-black uppercase text-stone-400 mb-4 tracking-widest">Option A: Upload from this Device</p>
-                                <div className={`aspect-video border-4 border-dashed border-stone-100 bg-stone-50 flex flex-col items-center justify-center p-8 text-center transition-colors relative ${isUploading ? 'opacity-50 pointer-events-none' : 'hover:border-stone-900 cursor-pointer group'}`}>
-                                    {!isUploading && (
-                                        <input
-                                            type="file"
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={handleUpload}
-                                            accept="image/*"
-                                        />
-                                    )}
-                                    {isUploading ? (
-                                        <>
-                                            <Loader2 size={32} className="text-stone-900 animate-spin mb-4" />
-                                            <p className="text-xs font-bold text-stone-900 mb-1">Uploading...</p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Upload size={32} className="text-stone-200 group-hover:text-stone-900 transition-colors mb-4" />
-                                            <p className="text-xs font-bold text-stone-900 mb-1">Select Screenshot</p>
-                                            <p className="text-[10px] text-stone-400">JPG, PNG, WEBP</p>
-                                        </>
-                                    )}
+                            {/* Option A: Upload from this Device - MOBILE ONLY */}
+                            {isMobile && (
+                                <div className="bg-white border-2 border-stone-900 p-4">
+                                    <p className="text-[10px] font-black uppercase text-stone-400 mb-4 tracking-widest">Upload from this Device</p>
+                                    <div className={`aspect-video border-4 border-dashed border-stone-100 bg-stone-50 flex flex-col items-center justify-center p-8 text-center transition-colors relative ${isUploading ? 'opacity-50 pointer-events-none' : 'hover:border-stone-900 cursor-pointer group'}`}>
+                                        {!isUploading && (
+                                            <input
+                                                type="file"
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                onChange={handleUpload}
+                                                accept="image/*"
+                                            />
+                                        )}
+                                        {isUploading ? (
+                                            <>
+                                                <Loader2 size={32} className="text-stone-900 animate-spin mb-4" />
+                                                <p className="text-xs font-bold text-stone-900 mb-1">Uploading...</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Upload size={32} className="text-stone-200 group-hover:text-stone-900 transition-colors mb-4" />
+                                                <p className="text-xs font-bold text-stone-900 mb-1">Select Screenshot</p>
+                                                <p className="text-[10px] text-stone-400">JPG, PNG, WEBP</p>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            {/* Mobile/WhatsApp Option */}
-                            <div className="bg-yellow-400 border-2 border-stone-900 p-6 relative overflow-hidden group">
-                                <div className="absolute -right-4 -top-4 text-stone-900 opacity-5 group-hover:rotate-12 transition-transform">
-                                    <QrCode size={100} />
+                            {/* Option B: WhatsApp - DESKTOP ONLY */}
+                            {!isMobile && (
+                                <div className="bg-yellow-400 border-2 border-stone-900 p-6 relative overflow-hidden group">
+                                    <div className="absolute -right-4 -top-4 text-stone-900 opacity-5 group-hover:rotate-12 transition-transform">
+                                        <QrCode size={100} />
+                                    </div>
+                                    <p className="text-[10px] font-black uppercase text-stone-900 mb-2 tracking-widest">Send Proof via WhatsApp</p>
+                                    <h3 className="font-serif font-black text-xl text-stone-900 mb-4 tracking-tight leading-none">Verify Your Payment</h3>
+
+                                    <p className="text-xs text-stone-800 font-medium mb-6 leading-relaxed">
+                                        Send the payment screenshot to <strong>+977 986-2329617</strong> on WhatsApp and we'll unlock your access!
+                                    </p>
+
+                                    <a
+                                        href={`https://wa.me/9779862329617?text=${encodeURIComponent(`Hi, I just paid for Essay Architect Pro (Email: ${email}). Here is my screenshot proof!`)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full bg-stone-900 text-white py-3 px-6 font-black uppercase tracking-widest hover:bg-white hover:text-stone-900 transition-all flex items-center justify-center gap-2 text-sm shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-none"
+                                    >
+                                        Open WhatsApp
+                                    </a>
+
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-stone-900 rounded-full animate-pulse"></div>
+                                        <p className="text-[9px] font-bold text-stone-800 uppercase tracking-widest">Instant Verification (10 AM - 10 PM)</p>
+                                    </div>
                                 </div>
-                                <p className="text-[10px] font-black uppercase text-stone-900 mb-2 tracking-widest">Option B: Paying from Mobile?</p>
-                                <h3 className="font-serif font-black text-xl text-stone-900 mb-4 tracking-tight leading-none">Send Proof via WhatsApp</h3>
-
-                                <p className="text-xs text-stone-800 font-medium mb-6 leading-relaxed">
-                                    Paid using eSewa/Khalti on your phone? Send the screenshot to <strong>+977 986-2329617</strong> on WhatsApp and we'll unlock your access!
-                                </p>
-
-                                <a
-                                    href={`https://wa.me/9779862329617?text=${encodeURIComponent(`Hi, I just paid for Essay Architect Pro (Email: ${email}). Here is my screenshot proof!`)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full bg-stone-900 text-white py-3 px-6 font-black uppercase tracking-widest hover:bg-white hover:text-stone-900 transition-all flex items-center justify-center gap-2 text-sm shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-none"
-                                >
-                                    Open WhatsApp
-                                </a>
-
-                                <div className="mt-4 flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 bg-stone-900 rounded-full animate-pulse"></div>
-                                    <p className="text-[9px] font-bold text-stone-800 uppercase tracking-widest">Instant Verification (10 AM - 10 PM)</p>
-                                </div>
-                            </div>
+                            )}
                         </div>
 
                         <p className="mt-6 text-[10px] leading-relaxed text-stone-500 italic text-center">
