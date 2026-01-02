@@ -5,6 +5,10 @@
  * server-side only. The key is stored as GEMINI_API_KEY (without VITE_ prefix)
  * in Vercel's environment variables, ensuring it never reaches the browser.
  * 
+ * SECURITY:
+ * - Logged-in users: Validated via Supabase JWT in Authorization header
+ * - Anonymous users: Validated via Cloudflare Turnstile token
+ * 
  * @route POST /api/ai
  */
 
@@ -14,6 +18,68 @@ export const config = {
 
 // Simple in-memory rate limiting (resets on cold start, but good enough for basic protection)
 const rateLimitMap = new Map();
+
+/**
+ * Verify Supabase JWT token
+ * Returns user object if valid, null otherwise
+ */
+async function verifySupabaseToken(token) {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.error('Supabase environment variables not configured');
+        return null;
+    }
+
+    try {
+        const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'apikey': supabaseAnonKey,
+            },
+        });
+
+        if (response.ok) {
+            return await response.json();
+        }
+        return null;
+    } catch (error) {
+        console.error('Supabase token verification failed:', error);
+        return null;
+    }
+}
+
+/**
+ * Verify Cloudflare Turnstile token
+ * Returns true if valid, false otherwise
+ */
+async function verifyTurnstileToken(token, clientIP) {
+    const secretKey = process.env.TURNSTILE_SECRET_KEY;
+
+    if (!secretKey) {
+        console.error('TURNSTILE_SECRET_KEY not configured');
+        return false;
+    }
+
+    try {
+        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                secret: secretKey,
+                response: token,
+                remoteip: clientIP,
+            }),
+        });
+
+        const result = await response.json();
+        return result.success === true;
+    } catch (error) {
+        console.error('Turnstile verification failed:', error);
+        return false;
+    }
+}
 
 export default async function handler(request) {
     // Only allow POST requests
@@ -35,6 +101,42 @@ export default async function handler(request) {
         );
     }
 
+    // Get client IP for rate limiting and Turnstile verification
+    const clientIP = request.headers.get('x-forwarded-for') ||
+        request.headers.get('x-real-ip') ||
+        'unknown';
+
+    // --- AUTHENTICATION CHECK ---
+    const authHeader = request.headers.get('Authorization');
+    const turnstileToken = request.headers.get('X-Turnstile-Token');
+
+    let isAuthenticated = false;
+
+    // Option 1: Check Supabase JWT (for logged-in users)
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const jwtToken = authHeader.substring(7);
+        const user = await verifySupabaseToken(jwtToken);
+        if (user) {
+            isAuthenticated = true;
+        }
+    }
+
+    // Option 2: Check Turnstile token (for anonymous users)
+    if (!isAuthenticated && turnstileToken) {
+        const isTurnstileValid = await verifyTurnstileToken(turnstileToken, clientIP);
+        if (isTurnstileValid) {
+            isAuthenticated = true;
+        }
+    }
+
+    // Reject if neither authentication method passed
+    if (!isAuthenticated) {
+        return new Response(
+            JSON.stringify({ error: 'Unauthorized. Please complete verification or log in.' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+    }
+
     try {
         // Parse the incoming request
         const { prompt, systemInstruction } = await request.json();
@@ -47,10 +149,6 @@ export default async function handler(request) {
         }
 
         // Basic rate limiting by IP (best effort)
-        const clientIP = request.headers.get('x-forwarded-for') ||
-            request.headers.get('x-real-ip') ||
-            'unknown';
-
         const now = Date.now();
         const windowMs = 60000; // 1 minute window
         const maxRequests = 30; // 30 requests per minute per IP

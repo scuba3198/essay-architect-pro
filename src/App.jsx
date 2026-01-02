@@ -483,10 +483,16 @@ const App = () => {
         const newCount = aiUsageCount + 1;
         setAiUsageCount(newCount);
 
-        // Sync to Supabase
-        await supabase
-            .from('usage_tracking')
-            .upsert({ visitor_id: visitorID, usage_count: newCount }, { onConflict: 'visitor_id' });
+        // Sync to Supabase using secure RPC
+        try {
+            const { error } = await supabase.rpc('increment_usage_count', {
+                target_visitor_id: visitorID,
+                counter_type: 'ai'
+            });
+            if (error) throw error;
+        } catch (err) {
+            console.error("Failed to sync AI usage:", err);
+        }
     };
 
     const incrementExaminerUsage = async () => {
@@ -495,10 +501,16 @@ const App = () => {
         const newCount = examinerUsageCount + 1;
         setExaminerUsageCount(newCount);
 
-        // Sync to Supabase
-        await supabase
-            .from('usage_tracking')
-            .upsert({ visitor_id: visitorID, examiner_count: newCount }, { onConflict: 'visitor_id' });
+        // Sync to Supabase using secure RPC
+        try {
+            const { error } = await supabase.rpc('increment_usage_count', {
+                target_visitor_id: visitorID,
+                counter_type: 'examiner'
+            });
+            if (error) throw error;
+        } catch (err) {
+            console.error("Failed to sync examiner usage:", err);
+        }
     };
 
     const calculateWordCount = (text) => {
