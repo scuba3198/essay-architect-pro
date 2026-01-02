@@ -79,11 +79,12 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
                 .from('payments')
                 .getPublicUrl(filePath);
 
-            // 4. Save to Database
+            // 4. Save to Database (include user_id for RLS policy)
             const { error: dbError } = await supabase
                 .from('payments')
                 .insert([{
-                    user_email: user.email,
+                    user_id: user.id,  // Required for RLS policy
+                    user_email: user.email,  // Keep for display/notification purposes
                     plan_name: plan.name,
                     amount: plan.price,
                     screenshot_url: publicUrl,

@@ -9,6 +9,20 @@ import { supabase } from './supabase';
 import { getVisitorID } from './device-id';
 
 /**
+ * Hashes a token using SHA-256 for secure storage.
+ * Session tokens should never be stored in plaintext.
+ * @param {string} token - The token to hash
+ * @returns {Promise<string>} - Hex-encoded hash
+ */
+const hashToken = async (token) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(token);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+/**
  * Registers a new session for the current device.
  * @param {string} userId - The user's UUID from Supabase auth
  * @param {string} sessionToken - A unique identifier for this session (access_token hash)
@@ -18,6 +32,9 @@ export const registerSession = async (userId, sessionToken) => {
     try {
         const deviceFingerprint = await getVisitorID();
 
+        // Hash the token before storing for security
+        const tokenHash = await hashToken(sessionToken);
+
         // Upsert session - if device already has a session, update it
         // Include created_at so re-logging makes this the "newest" session for FIFO ordering
         const { error } = await supabase
@@ -25,7 +42,8 @@ export const registerSession = async (userId, sessionToken) => {
             .upsert({
                 user_id: userId,
                 device_fingerprint: deviceFingerprint,
-                session_token: sessionToken,
+                session_token: sessionToken.substring(0, 32), // Keep truncated version for debugging
+                session_token_hash: tokenHash,  // Store full hash for validation
                 is_active: true,
                 created_at: new Date().toISOString(),
                 last_active_at: new Date().toISOString()
