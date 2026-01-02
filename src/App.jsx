@@ -204,6 +204,30 @@ const App = () => {
         setTopic(topics[0]);
         let isLoggingOut = false; // Flag to prevent race condition
 
+        // Handle PKCE recovery token from URL query params
+        const urlParams = new URLSearchParams(window.location.search);
+        const verificationType = urlParams.get('verification_type');
+        const tokenHash = urlParams.get('token_hash');
+
+        if (verificationType === 'recovery' && tokenHash) {
+            // Exchange the token and open the update password modal
+            supabase.auth.verifyOtp({
+                type: 'recovery',
+                token_hash: tokenHash,
+            }).then(({ data, error }) => {
+                if (error) {
+                    console.error("Recovery token verification failed:", error);
+                    alert("Failed to verify recovery link. It may have expired. Please request a new one.");
+                } else {
+                    // Token verified, open the update password modal
+                    setAuthMode('update_password');
+                    setShowAuth(true);
+                    // Clean up URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            });
+        }
+
         // Auth Listener with two-device session validation
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (session) {
