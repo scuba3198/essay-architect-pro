@@ -1,7 +1,8 @@
 /**
  * Session Manager for User Sessions
- * Handles session tracking and validation.
- * Users can be logged into multiple devices simultaneously.
+ * Handles session tracking, validation, and two-device limit enforcement.
+ * Users can be logged into a maximum of 2 devices simultaneously.
+ * Uses LRU (Least Recently Used) eviction when limit is exceeded.
  */
 
 import { supabase } from './supabase';
@@ -34,8 +35,8 @@ export const registerSession = async (userId, sessionToken) => {
 
         if (error) throw error;
 
-        // Register session in the database
-        // No device limit enforced for registered users
+        // Enforce two-device limit after registering this session
+        await enforceDeviceLimit(userId);
 
         return { success: true };
     } catch (err) {
@@ -90,14 +91,51 @@ export const validateSession = async (userId) => {
 };
 
 /**
- * Enforces the device limit by deactivating the oldest sessions.
- * DISABLED: Users can have unlimited devices.
+ * Enforces the two-device limit by deactivating the least recently used sessions.
+ * Uses LRU (Least Recently Used) eviction strategy - industry standard.
  * @param {string} userId - The user's UUID
  * @returns {Promise<{success: boolean, deactivatedCount: number}>}
  */
 export const enforceDeviceLimit = async (userId) => {
-    // Logic disabled by owner request - return success without deactivating anything
-    return { success: true, deactivatedCount: 0 };
+    const MAX_DEVICES = 2;
+
+    try {
+        // Get all active sessions, ordered by most recently active first
+        const { data: sessions, error } = await supabase
+            .from('user_sessions')
+            .select('id, device_fingerprint, last_active_at')
+            .eq('user_id', userId)
+            .eq('is_active', true)
+            .order('last_active_at', { ascending: false });
+
+        if (error) throw error;
+
+        // If within limit, nothing to do
+        if (!sessions || sessions.length <= MAX_DEVICES) {
+            return { success: true, deactivatedCount: 0 };
+        }
+
+        // Deactivate oldest sessions beyond the limit (LRU eviction)
+        const sessionsToDeactivate = sessions.slice(MAX_DEVICES);
+        const idsToDeactivate = sessionsToDeactivate.map(s => s.id);
+
+        const { error: updateError } = await supabase
+            .from('user_sessions')
+            .update({ is_active: false })
+            .in('id', idsToDeactivate);
+
+        if (updateError) throw updateError;
+
+        console.log(`Enforced device limit: deactivated ${idsToDeactivate.length} session(s)`);
+
+        return {
+            success: true,
+            deactivatedCount: idsToDeactivate.length
+        };
+    } catch (err) {
+        console.error('Failed to enforce device limit:', err);
+        return { success: false, deactivatedCount: 0 };
+    }
 };
 
 /**

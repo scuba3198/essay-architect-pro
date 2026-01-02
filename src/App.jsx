@@ -306,6 +306,31 @@ const App = () => {
         };
     }, []);
 
+    // Periodic session validation - detect when this device was logged out by another device
+    useEffect(() => {
+        if (!user) return;
+
+        const checkSession = async () => {
+            const { wasLoggedOut } = await validateSession(user.id);
+            if (wasLoggedOut) {
+                try {
+                    await supabase.auth.signOut();
+                } catch (err) {
+                    console.error("SignOut error:", err);
+                }
+                setUser(null);
+                setIsPaid(false);
+                setUserEmail('');
+                setActivePlan(null);
+                alert('You have been logged out because you signed in on another device. (Two-device limit)');
+            }
+        };
+
+        // Check every 30 seconds
+        const interval = setInterval(checkSession, 30000);
+        return () => clearInterval(interval);
+    }, [user]);
+
     useEffect(() => {
         if (activeTab === 'practice' && !hasSeenTour) {
             setTourStep(0);
