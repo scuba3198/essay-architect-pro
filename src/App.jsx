@@ -357,24 +357,41 @@ const App = () => {
     // Initialize Fingerprint and Sync Usage
     useEffect(() => {
         const initTracking = async () => {
-            const vid = await getVisitorID();
-            setVisitorID(vid);
+            try {
+                const vid = await getVisitorID();
+                setVisitorID(vid);
 
-            // Fetch current usage from Supabase
-            const { data, error } = await supabase
-                .from('usage_tracking')
-                .select('usage_count, examiner_count')
-                .eq('visitor_id', vid)
-                .single();
-
-            if (data) {
-                setAiUsageCount(data.usage_count || 0);
-                setExaminerUsageCount(data.examiner_count || 0);
-            } else if (!error) {
-                // Create record if not exists
-                await supabase
+                // Fetch current usage from Supabase
+                const { data, error } = await supabase
                     .from('usage_tracking')
-                    .insert([{ visitor_id: vid, usage_count: 0, examiner_count: 0 }]);
+                    .select('usage_count, examiner_count')
+                    .eq('visitor_id', vid)
+                    .maybeSingle();
+
+                if (error && error.code !== 'PGRST116') {
+                    console.error("Error fetching usage data:", error);
+                }
+
+                if (data) {
+                    setAiUsageCount(data.usage_count || 0);
+                    setExaminerUsageCount(data.examiner_count || 0);
+                } else {
+                    setAiUsageCount(0);
+                    setExaminerUsageCount(0);
+                    // Create record if not exists (requires the new INSERT policy)
+                    try {
+                        const { error: insertError } = await supabase
+                            .from('usage_tracking')
+                            .insert([{ visitor_id: vid, usage_count: 0, examiner_count: 0, alias: 'My Device' }]);
+                        if (insertError) {
+                            console.error("Auto-creation of usage record failed:", insertError.message);
+                        }
+                    } catch (e) {
+                        console.error("Critical error during usage record creation:", e);
+                    }
+                }
+            } catch (err) {
+                console.error("initTracking failed:", err);
             }
         };
         initTracking();
@@ -489,7 +506,9 @@ const App = () => {
                 target_visitor_id: visitorID,
                 counter_type: 'ai'
             });
-            if (error) throw error;
+            if (error) {
+                console.error("RPC Error (AI Usage):", error.message, error.details);
+            }
         } catch (err) {
             console.error("Failed to sync AI usage:", err);
         }
@@ -507,7 +526,9 @@ const App = () => {
                 target_visitor_id: visitorID,
                 counter_type: 'examiner'
             });
-            if (error) throw error;
+            if (error) {
+                console.error("RPC Error (Examiner Usage):", error.message, error.details);
+            }
         } catch (err) {
             console.error("Failed to sync examiner usage:", err);
         }
