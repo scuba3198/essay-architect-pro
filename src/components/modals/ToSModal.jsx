@@ -59,10 +59,6 @@ const ToSModal = ({ onClose }) => (
                             <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">B. Account Security</strong>
                             You are responsible for safeguarding the password that you use to access the Service. You agree not to share your account credentials with others.
                         </p>
-                        <p>
-                            <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">C. Device Limit</strong>
-                            Each account is limited to a maximum of two (2) concurrent active sessions. Logging in on a third device will automatically terminate the least recently used session. This measure prevents account sharing and ensures fair access for all users.
-                        </p>
                     </div>
                 </section>
 

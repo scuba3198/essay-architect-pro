@@ -51,7 +51,7 @@ const PrivacyModal = ({ onClose }) => (
                         </p>
                         <p>
                             <strong className="text-stone-900 uppercase text-[10px] tracking-wider block mb-1">C. Device & Session Data</strong>
-                            We use lightweight device fingerprinting to enforce fair usage limits on free tiers and maintain secure session management for your account.
+                            We use lightweight device fingerprinting to enforce fair usage limits on free tiers and maintain secure session management. To prevent account sharing, each account is limited to two (2) concurrent active sessions—logging in on a third device will automatically terminate the least recently used session.
                         </p>
                     </div>
                 </section>
