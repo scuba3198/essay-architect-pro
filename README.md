@@ -42,6 +42,8 @@ The Pro version features a tiered access system managed via a manual-verificatio
 
 ## 🔐 Security & Authentication
 
+-   **🛡️ Two-Device Session Limit**: Industry-standard session management that limits users to a maximum of 2 concurrent devices. Uses LRU (Least Recently Used) eviction to automatically deactivate the oldest session when a new device logs in.
+-   **🔄 Periodic Session Validation**: Real-time polling detects remote logouts and informs users instantly if their session has been invalidated by another login.
 -   **🔑 Password Reset**: Secure email-based password recovery flow.
 -   **✅ Confirm Password**: Added password confirmation field during signup to prevent typos.
 -   **📧 Device-Specific Verification**: Payment verification options are tailored based on whether the user is on mobile or desktop.
