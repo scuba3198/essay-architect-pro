@@ -382,7 +382,7 @@ const App = () => {
                     try {
                         const { error: insertError } = await supabase
                             .from('usage_tracking')
-                            .insert([{ visitor_id: vid, usage_count: 0, examiner_count: 0, alias: 'My Device' }]);
+                            .insert([{ visitor_id: vid, usage_count: 0, examiner_count: 0, alias: null }]);
                         if (insertError) {
                             console.error("Auto-creation of usage record failed:", insertError.message);
                         }
