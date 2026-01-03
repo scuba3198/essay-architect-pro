@@ -131,11 +131,15 @@ const App = () => {
         setUserEmail(user.email);
 
         try {
+            // Optimized: Filter by status at DB level and limit to latest approved payment
+            // Uses composite index: idx_payments_user_status_created
             const { data, error } = await supabase
                 .from('payments')
                 .select('*')
                 .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
+                .eq('status', 'approved')
+                .order('created_at', { ascending: false })
+                .limit(1);
 
             if (error) {
                 console.error("Payment check fetch error:", error);
@@ -143,11 +147,10 @@ const App = () => {
                 return;
             }
 
-            // Filter for 'approved' status case-insensitively
-            const approvedPayments = data?.filter(p => p.status?.toLowerCase() === 'approved') || [];
+            // Since we filtered at DB level, data contains only approved payments
+            if (data && data.length > 0) {
+                const latest = data[0];
 
-            if (approvedPayments.length > 0) {
-                const latest = approvedPayments[0];
                 const createdAt = new Date(latest.created_at).getTime();
                 const now = new Date().getTime();
                 const hoursPassed = (now - createdAt) / (1000 * 60 * 60);
