@@ -42,6 +42,7 @@ export const registerSession = async (userId, sessionToken) => {
             .upsert({
                 user_id: userId,
                 device_fingerprint: deviceFingerprint,
+                session_token: tokenHash,       // Satisfy NOT NULL constraint (stored hashed)
                 session_token_hash: tokenHash,  // Store full hash for validation
                 is_active: true,
                 created_at: new Date().toISOString(),
@@ -74,7 +75,7 @@ export const validateSession = async (userId) => {
 
         const { data, error } = await supabase
             .from('user_sessions')
-            .select('is_active, session_token')
+            .select('is_active, session_token_hash')
             .eq('user_id', userId)
             .eq('device_fingerprint', deviceFingerprint)
             .single();

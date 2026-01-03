@@ -582,7 +582,10 @@ const App = () => {
         try {
             // Deactivate session in database before signing out
             if (user) {
-                await deactivateCurrentSession(user.id);
+                console.log('Deactivating session for user:', user.id);
+                const { success } = await deactivateCurrentSession(user.id);
+                if (success) console.log('Session deactivated successfully');
+                else console.warn('Session deactivation returned false');
             }
             await supabase.auth.signOut();
         } catch (err) {
