@@ -80,29 +80,38 @@ export const validateSession = async (userId) => {
             .single();
 
         if (error) {
-            // No session found - could be first time or was deleted
+            // PGRST116: JSON object requested, but no rows were returned.
+            // This is expected if the session record was deleted or never existed.
             if (error.code === 'PGRST116') {
                 return { isValid: false, wasLoggedOut: false };
             }
+            console.error(`Session fetch error [${error.code}]:`, error.message);
             throw error;
         }
 
-        // Session exists but was deactivated (e.g. manual logout from another device if implemented later)
+        // Session exists but was deactivated
         if (!data.is_active) {
+            console.warn('Session deactivated for user:', userId);
             return { isValid: false, wasLoggedOut: true };
         }
 
         // Update last active timestamp
-        await supabase
+        const { error: updateError } = await supabase
             .from('user_sessions')
             .update({ last_active_at: new Date().toISOString() })
             .eq('user_id', userId)
             .eq('device_fingerprint', deviceFingerprint);
 
+        if (updateError) {
+            console.error('Failed to update session activity:', updateError);
+            // Don't logout on update failure (might be network blip)
+        }
+
         return { isValid: true, wasLoggedOut: false };
     } catch (err) {
-        console.error('Failed to validate session:', err);
-        // On error, assume valid to avoid false logouts
+        console.error('Critical session validation error:', err);
+        // Fallback: Assume valid on network errors to prevent aggressive kickouts,
+        // but log it clearly for debugging.
         return { isValid: true, wasLoggedOut: false };
     }
 };

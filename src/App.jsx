@@ -137,7 +137,11 @@ const App = () => {
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                console.error("Payment check fetch error:", error);
+                // On network error, keep current state to avoid UI flicker
+                return;
+            }
 
             // Filter for 'approved' status case-insensitively
             const approvedPayments = data?.filter(p => p.status?.toLowerCase() === 'approved') || [];
@@ -194,9 +198,9 @@ const App = () => {
                 }
             }
         } catch (err) {
-            console.error("Access check failed details:", err);
-            const errorMsg = err.message || "Unknown error";
-            if (!isSilent) alert(`Failed to verify access: ${errorMsg}. Please check console for details.`);
+            console.error("Critical verifyAccess error:", err);
+            // Fail silent in silent mode, alert user otherwise
+            if (!isSilent) alert(`Failed to verify access: ${err.message || 'Unknown error'}. Please refresh the page.`);
         }
     };
 
@@ -368,26 +372,32 @@ const App = () => {
                     .eq('visitor_id', vid)
                     .maybeSingle();
 
-                if (error && error.code !== 'PGRST116') {
-                    console.error("Error fetching usage data:", error);
+                if (error) {
+                    // PGRST116 means no row found, which is handled in the 'else' block
+                    if (error.code !== 'PGRST116') {
+                        console.error(`Usage fetch failed [${error.code}]:`, error.message);
+                        // Fallback to 0 if record missing or inaccessible
+                        setAiUsageCount(0);
+                        setExaminerUsageCount(0);
+                    }
                 }
 
                 if (data) {
                     setAiUsageCount(data.usage_count || 0);
                     setExaminerUsageCount(data.examiner_count || 0);
-                } else {
+                } else if (!error || error.code === 'PGRST116') {
+                    // Record truly doesn't exist, create it
                     setAiUsageCount(0);
                     setExaminerUsageCount(0);
-                    // Create record if not exists (requires the new INSERT policy)
                     try {
                         const { error: insertError } = await supabase
                             .from('usage_tracking')
                             .insert([{ visitor_id: vid, usage_count: 0, examiner_count: 0, alias: null }]);
                         if (insertError) {
-                            console.error("Auto-creation of usage record failed:", insertError.message);
+                            console.error("Failed to create initial usage record:", insertError.message);
                         }
                     } catch (e) {
-                        console.error("Critical error during usage record creation:", e);
+                        console.error("Critical error during usage sync:", e);
                     }
                 }
             } catch (err) {
