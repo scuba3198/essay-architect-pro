@@ -42,7 +42,6 @@ export const registerSession = async (userId, sessionToken) => {
             .upsert({
                 user_id: userId,
                 device_fingerprint: deviceFingerprint,
-                session_token: sessionToken.substring(0, 32), // Keep truncated version for debugging
                 session_token_hash: tokenHash,  // Store full hash for validation
                 is_active: true,
                 created_at: new Date().toISOString(),

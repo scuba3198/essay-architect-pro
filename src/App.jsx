@@ -119,8 +119,8 @@ const App = () => {
         { id: 10, type: "Causes / Effects", question: "Nowadays many people choose to be self-employed, rather than to work for a company or organisation. Why is this the case? What could be the disadvantages of being self-employed?" }
     ];
 
-    const verifyAccess = async (email, isSilent = false) => {
-        if (!email) {
+    const verifyAccess = async (user, isSilent = false) => {
+        if (!user) {
             setIsPaid(false);
             setActivePlan(null);
             setUserEmail('');
@@ -128,13 +128,13 @@ const App = () => {
         }
 
         // Always set the user's email when they're logged in
-        setUserEmail(email);
+        setUserEmail(user.email);
 
         try {
             const { data, error } = await supabase
                 .from('payments')
                 .select('*')
-                .eq('user_email', email)
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -257,7 +257,7 @@ const App = () => {
                 }
 
                 setUser(session.user);
-                verifyAccess(session.user.email, true);
+                verifyAccess(session.user, true);
             }
         });
 
@@ -287,7 +287,7 @@ const App = () => {
                 }
 
                 setUser(session.user);
-                verifyAccess(session.user.email, true);
+                verifyAccess(session.user, true);
             } else {
                 setUser(null);
                 setIsPaid(false);
@@ -508,9 +508,12 @@ const App = () => {
             });
             if (error) {
                 console.error("RPC Error (AI Usage):", error.message, error.details);
+                // Rollback local state if sync failed so user sees accurate persisted data
+                setAiUsageCount(prev => prev - 1);
             }
         } catch (err) {
             console.error("Failed to sync AI usage:", err);
+            setAiUsageCount(prev => prev - 1);
         }
     };
 
@@ -528,9 +531,11 @@ const App = () => {
             });
             if (error) {
                 console.error("RPC Error (Examiner Usage):", error.message, error.details);
+                setExaminerUsageCount(prev => prev - 1);
             }
         } catch (err) {
             console.error("Failed to sync examiner usage:", err);
+            setExaminerUsageCount(prev => prev - 1);
         }
     };
 
