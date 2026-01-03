@@ -139,11 +139,29 @@ export default async function handler(request) {
 
     try {
         // Parse the incoming request
-        const { prompt, systemInstruction } = await request.json();
-
+        // Basic input validation
         if (!prompt || typeof prompt !== 'string') {
             return new Response(
                 JSON.stringify({ error: 'Invalid request: prompt is required' }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
+        // --- SECURITY: INPUT LENGTH VALIDATION ---
+        // Prevent oversized payloads to conserve tokens and prevent DoS-style requests
+        const MAX_PROMPT_LENGTH = 8000;
+        const MAX_SYSTEM_LENGTH = 2000;
+
+        if (prompt.length > MAX_PROMPT_LENGTH) {
+            return new Response(
+                JSON.stringify({ error: `Prompt too long. Maximum length is ${MAX_PROMPT_LENGTH} characters.` }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
+        if (systemInstruction && systemInstruction.length > MAX_SYSTEM_LENGTH) {
+            return new Response(
+                JSON.stringify({ error: `System instruction too long. Maximum length is ${MAX_SYSTEM_LENGTH} characters.` }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
         }

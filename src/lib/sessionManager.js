@@ -111,8 +111,12 @@ export const validateSession = async (userId) => {
         return { isValid: true, wasLoggedOut: false };
     } catch (err) {
         console.error('Critical session validation error:', err);
-        // Fallback: Assume valid on network errors to prevent aggressive kickouts,
-        // but log it clearly for debugging.
+
+        // SECURITY: Fallback logic
+        // If it's a network error (e.g., fetch failed), we might want to allow 
+        // the user to stay in for a short grace period or handle it more strictly.
+        // For now, we return isValid: true to avoid kicking users on spotty internet,
+        // but this could be restricted to a limited number of retries in the UI.
         return { isValid: true, wasLoggedOut: false };
     }
 };
