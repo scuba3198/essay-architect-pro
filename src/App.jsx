@@ -733,19 +733,21 @@ const App = () => {
                                 <User size={14} /> Login / Sign Up
                             </button>
                         )}
-                        <button
-                            onClick={() => setShowPricing(true)}
-                            className={`flex items-center gap-2 px-4 py-2 border-2 border-stone-900 font-black uppercase text-[10px] tracking-widest transition-all ${isPaid ? 'bg-green-500 text-white border-green-600' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
-                        >
-                            {isPaid ? <Award size={14} /> : <Zap size={14} />}
-                            {isPaid ? 'Pro Access' : 'Upgrade'}
-                        </button>
-                        <TourTooltip
-                            stepIndex={5}
-                            text="Unlock unlimited AI grading and premium features here."
-                            position="bottomRight"
-                            {...tourProps}
-                        />
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowPricing(true)}
+                                className={`flex items-center gap-2 px-4 py-2 border-2 border-stone-900 font-black uppercase text-[10px] tracking-widest transition-all ${isPaid ? 'bg-green-500 text-white border-green-600' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
+                            >
+                                {isPaid ? <Award size={14} /> : <Zap size={14} />}
+                                {isPaid ? 'Pro Access' : 'Upgrade'}
+                            </button>
+                            <TourTooltip
+                                stepIndex={5}
+                                text="Unlock unlimited AI grading and premium features here."
+                                position="bottomRight"
+                                {...tourProps}
+                            />
+                        </div>
                     </div>
                 </div>
 
