@@ -93,6 +93,7 @@ const App = () => {
     const [examinerUsageCount, setExaminerUsageCount] = useState(0);
     const [showLimitModal, setShowLimitModal] = useState(false);
     const [showFeedback, setShowFeedback] = useState(false);
+    const [notification, setNotification] = useState(null); // { message: '', type: 'info' | 'error' | 'success' }
 
     const [tourStep, setTourStep] = useState(-1);
     const [hasSeenTour, setHasSeenTour] = useState(false);
@@ -184,12 +185,12 @@ const App = () => {
                 if (isValid) {
                     setIsPaid(true);
                     setActivePlan(latest.plan_name);
-                    if (!isSilent) alert(expiryMessage);
+                    if (!isSilent) setNotification({ message: expiryMessage, type: 'success' });
                 } else {
                     // Plan expired
                     setIsPaid(false);
                     setActivePlan(null);
-                    if (!isSilent) alert(expiryMessage || "No active plan found. Your previous plan may have expired.");
+                    if (!isSilent) setNotification({ message: expiryMessage || "No active plan found. Your previous plan may have expired.", type: 'info' });
                 }
             } else {
                 // No approved record found - Revoke access
@@ -197,13 +198,13 @@ const App = () => {
                 setActivePlan(null);
 
                 if (!isSilent) {
-                    alert("No approved payment found for this email. If you just paid, please wait for manual verification (1-2 hours).");
+                    setNotification({ message: "No approved payment found for this email. If you just paid, please wait for manual verification (1-2 hours).", type: 'info' });
                 }
             }
         } catch (err) {
             console.error("Critical verifyAccess error:", err);
             // Fail silent in silent mode, alert user otherwise
-            if (!isSilent) alert(`Failed to verify access: ${err.message || 'Unknown error'}. Please refresh the page.`);
+            if (!isSilent) setNotification({ message: `Failed to verify access: ${err.message || 'Unknown error'}. Please refresh the page.`, type: 'error' });
         }
     };
 
@@ -224,7 +225,7 @@ const App = () => {
             }).then(({ data, error }) => {
                 if (error) {
                     console.error("Recovery token verification failed:", error);
-                    alert("Failed to verify recovery link. It may have expired. Please request a new one.");
+                    setNotification({ message: "Failed to verify recovery link. It may have expired. Please request a new one.", type: 'error' });
                 } else {
                     // Token verified, open the update password modal
                     setAuthMode('update_password');
@@ -253,7 +254,7 @@ const App = () => {
                     setIsPaid(false);
                     setUserEmail('');
                     setActivePlan(null);
-                    alert("Your session has expired. Please log in again.");
+                    setNotification({ message: "Your session has expired. Please log in again.", type: 'info' });
                     return;
                 }
 
@@ -288,7 +289,7 @@ const App = () => {
                         setIsPaid(false);
                         setUserEmail('');
                         setActivePlan(null);
-                        alert("Your session has expired. Please log in again.");
+                        setNotification({ message: "Your session has expired. Please log in again.", type: 'info' });
                         return;
                     }
                 }
@@ -329,7 +330,7 @@ const App = () => {
                 setIsPaid(false);
                 setUserEmail('');
                 setActivePlan(null);
-                alert('You have been logged out because you signed in on another device. (Two-device limit)');
+                setNotification({ message: 'You have been logged out because you signed in on another device. (Two-device limit)', type: 'info' });
             }
         };
 
@@ -604,6 +605,21 @@ const App = () => {
 
     return (
         <div className="h-[100dvh] bg-[#f4f1ea] text-stone-900 font-sans flex flex-col overflow-hidden selection:bg-yellow-300 selection:text-stone-900">
+            {/* Notification Toast */}
+            {notification && (
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300">
+                    <div className={`px-6 py-3 border-2 border-stone-900 bg-white flex items-center gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
+                        <div className={`w-3 h-3 ${notification.type === 'error' ? 'bg-red-500' : notification.type === 'success' ? 'bg-green-500' : 'bg-yellow-400'}`}></div>
+                        <p className="text-sm font-bold uppercase tracking-tight">{notification.message}</p>
+                        <button
+                            onClick={() => setNotification(null)}
+                            className="ml-4 text-stone-400 hover:text-stone-900 transition-colors"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
             <Helmet>
                 <title>{activeTab === 'learn' ? 'Essay Architect PRO • Master Academic Writing' : 'Essay Architect PRO • AI Writing Wizard'}</title>
                 <meta name="description" content="The ultimate AI-powered essay writing and grading tool for IELTS and PTE. Practice with instant feedback, strict scoring, and structural guidance." />
