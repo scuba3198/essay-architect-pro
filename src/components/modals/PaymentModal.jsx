@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload, CheckCircle2, QrCode, Phone, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
+const PaymentModal = ({ onClose, plan, onSuccess, userEmail, user: passedUser }) => {
     const [step, setStep] = useState(1); // 1: Info, 2: Upload, 3: Success
     const [fileName, setFileName] = useState("");
     const [email, setEmail] = useState(userEmail || "");
@@ -53,33 +53,53 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
 
     const handleUpload = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file) {
+            console.log("No file selected");
+            return;
+        }
 
+        console.log("Starting upload process for:", file.name, "Size:", file.size);
         setIsUploading(true);
         setFileName(file.name);
 
         try {
-            // 1. Get User ID for RLS policies
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-            if (authError || !user) throw new Error("User authentication failed");
+            // 1. Get User ID for RLS policies (Use passedUser if available to avoid extra DB roundtrip)
+            let user = passedUser;
+            if (!user) {
+                console.log("No user prop, fetching user...");
+                const { data: { user: fetchedUser }, error: authError } = await supabase.auth.getUser();
+                if (authError || !fetchedUser) throw new Error("User authentication failed. Please try logging in again.");
+                user = fetchedUser;
+            }
+
+            console.log("Authenticated as:", user.email, "id:", user.id);
 
             // 2. Upload to Supabase Storage
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random()}.${fileExt}`;
-            const filePath = `screenshots/${user.id}/${fileName}`;
+            const fileExt = file.name.split('.').pop() || 'png';
+            const uniqueFileName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
+            const filePath = `screenshots/${user.id}/${uniqueFileName}`;
 
+            console.log("Uploading to storage path:", filePath);
             const { error: uploadError, data } = await supabase.storage
                 .from('payments')
                 .upload(filePath, file);
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                console.error("Storage upload error:", uploadError);
+                throw uploadError;
+            }
+
+            console.log("Upload successful, getting public URL...");
 
             // 3. Get Public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('payments')
                 .getPublicUrl(filePath);
 
+            console.log("Public URL generated:", publicUrl);
+
             // 4. Save to Database (include user_id for RLS policy)
+            console.log("Saving payment record to database...");
             const { error: dbError } = await supabase
                 .from('payments')
                 .insert([{
@@ -92,25 +112,38 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail }) => {
                     created_at: new Date().toISOString()
                 }]);
 
-            if (dbError) throw dbError;
-
-            // 4. Notify Discord
-            await sendDiscordNotification(publicUrl, plan.name, plan.price);
-
-            // 5. Track Facebook Pixel
-            if (window.fbq) {
-                window.fbq('track', 'Purchase', {
-                    value: plan.price,
-                    currency: 'NPR', // Assuming NPR as per the context of eSewa/Khalti, or use 'USD' if that's the base
-                    content_name: plan.name
-                });
+            if (dbError) {
+                console.error("Database insert error:", dbError);
+                throw dbError;
             }
 
+            console.log("Database record saved. Triggering notification and pixel...");
+
+            // 4. Notify Discord (Non-blocking to prevent UI hang)
+            sendDiscordNotification(publicUrl, plan.name, plan.price).catch(err =>
+                console.error("Background Discord notification failed:", err)
+            );
+
+            // 5. Track Facebook Pixel (Non-blocking)
+            if (window.fbq) {
+                try {
+                    window.fbq('track', 'Purchase', {
+                        value: plan.price,
+                        currency: 'NPR',
+                        content_name: plan.name
+                    });
+                } catch (fbError) {
+                    console.error("FB Pixel tracking failed:", fbError);
+                }
+            }
+
+            console.log("Process complete! Moving to success screen.");
             setStep(3);
         } catch (error) {
-            console.error("Upload failed:", error);
-            alert(`Upload failed: ${error.message || 'Unknown error'}. Please check your Supabase settings.`);
+            console.error("Critical upload flow failure:", error);
+            alert(`Upload failed: ${error.message || 'Unknown error'}. Please try again or contact support if the issue persists.`);
         } finally {
+            console.log("Setting isUploading to false");
             setIsUploading(false);
         }
     };

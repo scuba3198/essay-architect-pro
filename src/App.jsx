@@ -898,6 +898,7 @@ const App = () => {
                 <PaymentModal
                     plan={selectedPlan}
                     userEmail={userEmail}
+                    user={user}
                     onClose={() => setShowPayment(false)}
                     onSuccess={(email) => {
                         setShowPayment(false);
