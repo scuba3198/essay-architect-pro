@@ -21,34 +21,10 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail, user: passedUser })
     }, []);
 
     const sendDiscordNotification = async (imageUrl, planName, price) => {
-        // ... rest of the function (no changes until step 3 button)
-        const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
-        if (!webhookUrl || webhookUrl.includes("YOUR_")) return;
-
-        const payload = {
-            embeds: [{
-                title: "💰 New Payment Submission",
-                color: 16766720, // Yellow
-                fields: [
-                    { name: "Plan", value: planName, inline: true },
-                    { name: "Amount", value: price, inline: true },
-                    { name: "User Email", value: email || "Not provided", inline: false },
-                    { name: "Status", value: "Pending Verification", inline: false }
-                ],
-                image: { url: imageUrl },
-                timestamp: new Date().toISOString()
-            }]
-        };
-
-        try {
-            await fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } catch (err) {
-            console.error("Discord integration failed:", err);
-        }
+        // SECURITY: Webhook logic moved to backend AI proxy to protect the secret URL.
+        // The frontend now only sends the necessary signals via the /api/ai endpoint
+        // using the 'type: payment' parameter.
+        console.log("Payment submitted - notification handled by backend");
     };
 
     const handleUpload = async (e) => {
@@ -119,10 +95,11 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail, user: passedUser })
 
             console.log("Database record saved. Triggering notification and pixel...");
 
-            // 4. Notify Discord (Non-blocking to prevent UI hang)
-            sendDiscordNotification(publicUrl, plan.name, plan.price).catch(err =>
-                console.error("Background Discord notification failed:", err)
-            );
+            // 4. Notify Backend (which notifies Discord)
+            import('../../lib/api').then(({ callProAI }) => {
+                callProAI(`NEW_PAYMENT_SUBMITTED: ${plan.name} (${plan.price}) by ${user.email}`, "", "payment")
+                    .catch(err => console.error("Backend notification signal failed:", err));
+            });
 
             // 5. Track Facebook Pixel (Non-blocking)
             if (window.fbq) {

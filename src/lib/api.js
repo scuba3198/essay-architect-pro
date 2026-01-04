@@ -16,7 +16,7 @@ import { getTurnstileToken, loadTurnstileScript } from './turnstile';
  * - Logged-in users: Uses Supabase JWT
  * - Anonymous users: Uses Cloudflare Turnstile verification
  */
-export const callProAI = async (prompt, systemInstruction = "") => {
+export const callProAI = async (prompt, systemInstruction = "", type = "completion") => {
     try {
         const headers = { 'Content-Type': 'application/json' };
 
@@ -40,7 +40,7 @@ export const callProAI = async (prompt, systemInstruction = "") => {
         const response = await fetch('/api/ai', {
             method: 'POST',
             headers,
-            body: JSON.stringify({ prompt, systemInstruction })
+            body: JSON.stringify({ prompt, systemInstruction, type })
         });
 
         if (!response.ok) {

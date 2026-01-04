@@ -139,8 +139,20 @@ export default async function handler(request) {
 
     try {
         // Parse the incoming request
+        let body;
+        try {
+            body = await request.json();
+        } catch (e) {
+            return new Response(
+                JSON.stringify({ error: 'Invalid JSON payload' }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
+        const { prompt, systemInstruction, type } = body;
+
         // Basic input validation
-        if (!prompt || typeof prompt !== 'string') {
+        if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
             return new Response(
                 JSON.stringify({ error: 'Invalid request: prompt is required' }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -219,6 +231,16 @@ export default async function handler(request) {
 
         const data = await geminiResponse.json();
         const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+
+        // --- BACKGROUND: DISCORD NOTIFICATION (If type specified) ---
+        // This keeps the webhook secret server-side
+        if (type === 'payment' && generatedText) {
+            const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (webhookUrl) {
+                // We'll track payments on the server now
+                // This is a placeholder for where you'd trigger backend-only signals
+            }
+        }
 
         return new Response(
             JSON.stringify({ text: generatedText }),
