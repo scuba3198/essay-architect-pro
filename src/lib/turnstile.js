@@ -4,6 +4,7 @@
  */
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAACKMj0SomqwjwY9E';
+const TURNSTILE_SCRIPT_TIMEOUT_MS = 8000;
 let turnstileScriptLoaded = false;
 let turnstileScriptLoading = false;
 let loadPromise = null;
@@ -24,17 +25,37 @@ export function loadTurnstileScript() {
 
     loadPromise = new Promise((resolve, reject) => {
         const script = document.createElement('script');
+        let timeoutId = null;
         script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
         script.async = true;
         script.defer = true;
 
+        const cleanup = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            script.onload = null;
+            script.onerror = null;
+        };
+
+        timeoutId = setTimeout(() => {
+            cleanup();
+            turnstileScriptLoading = false;
+            reject(new Error('Turnstile script load timed out.'));
+        }, TURNSTILE_SCRIPT_TIMEOUT_MS);
+
         script.onload = () => {
+            cleanup();
+            if (!window.turnstile || typeof window.turnstile.render !== 'function') {
+                turnstileScriptLoading = false;
+                reject(new Error('Turnstile failed to initialize.'));
+                return;
+            }
             turnstileScriptLoaded = true;
             turnstileScriptLoading = false;
             resolve();
         };
 
         script.onerror = () => {
+            cleanup();
             turnstileScriptLoading = false;
             reject(new Error('Failed to load Turnstile script'));
         };
@@ -54,6 +75,11 @@ export async function getTurnstileToken() {
     await loadTurnstileScript();
 
     return new Promise((resolve, reject) => {
+        if (!window.turnstile || typeof window.turnstile.render !== 'function') {
+            reject(new Error('Turnstile is not available.'));
+            return;
+        }
+
         // Create a hidden container for the widget
         const container = document.createElement('div');
         container.style.position = 'fixed';
@@ -101,6 +127,21 @@ export async function getTurnstileToken() {
                 },
                 size: 'invisible',
             });
+
+            if (typeof window.turnstile.execute === 'function' && widgetId !== null) {
+                try {
+                    const execResult = window.turnstile.execute(widgetId);
+                    if (execResult && typeof execResult.catch === 'function') {
+                        execResult.catch(() => {
+                            cleanup();
+                            reject(new Error('Verification failed. Please try again.'));
+                        });
+                    }
+                } catch (error) {
+                    cleanup();
+                    reject(error);
+                }
+            }
         } catch (error) {
             cleanup();
             reject(error);
