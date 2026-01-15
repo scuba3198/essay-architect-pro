@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { X, Mail, Lock, Loader2, ArrowRight, UserPlus, LogIn } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Mail, Lock, Loader2, ArrowRight, UserPlus, LogIn, Shield } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { registerSession } from '../../lib/sessionManager';
+import { loadTurnstileScript, getTurnstileToken } from '../../lib/turnstile';
 
 const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
     const [mode, setMode] = useState(initialMode); // 'login', 'signup', 'forgot_password', 'update_password'
@@ -12,6 +13,18 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [message, setMessage] = useState(null);
+    const [turnstileLoaded, setTurnstileLoaded] = useState(false);
+    const turnstileContainerRef = useRef(null);
+
+    // Load Turnstile script when component mounts
+    useEffect(() => {
+        loadTurnstileScript()
+            .then(() => setTurnstileLoaded(true))
+            .catch((err) => {
+                console.error('Failed to load Turnstile:', err);
+                setError('Security verification failed to load. Please refresh the page.');
+            });
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,6 +33,27 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
         setMessage(null);
 
         try {
+            // Require Turnstile verification for signup and login
+            if (mode === 'signup' || mode === 'login') {
+                if (!turnstileLoaded) {
+                    throw new Error('Security verification not ready. Please wait a moment and try again.');
+                }
+
+                // Get Turnstile token
+                let turnstileToken;
+                try {
+                    turnstileToken = await getTurnstileToken();
+                } catch (turnstileError) {
+                    console.error('Turnstile verification failed:', turnstileError);
+                    throw new Error('Security verification failed. Please try again or refresh the page.');
+                }
+
+                // Verify the token is valid
+                if (!turnstileToken) {
+                    throw new Error('Security verification incomplete. Please try again.');
+                }
+            }
+
             if (mode === 'signup') {
                 if (password !== confirmPassword) {
                     throw new Error("Passwords do not match");
@@ -224,10 +258,30 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                             </div>
                         )}
 
+                        {/* Turnstile Security Badge for Signup/Login */}
+                        {(mode === 'signup' || mode === 'login') && (
+                            <div className="flex items-center gap-2 text-xs text-stone-500 bg-stone-50 border border-stone-200 p-2 rounded">
+                                <Shield size={14} className="text-stone-400" />
+                                <span className="font-medium">
+                                    {turnstileLoaded ? (
+                                        'Protected by Cloudflare security'
+                                    ) : (
+                                        <span className="flex items-center gap-1">
+                                            <Loader2 size={12} className="animate-spin" />
+                                            Loading security verification...
+                                        </span>
+                                    )}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Hidden Turnstile container */}
+                        <div ref={turnstileContainerRef} style={{ display: 'none' }} />
+
                         <button
                             type="submit"
-                            disabled={isLoading}
-                            className="w-full bg-stone-900 text-white py-4 font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-stone-900 transition-all flex items-center justify-center gap-2 group"
+                            disabled={isLoading || ((mode === 'signup' || mode === 'login') && !turnstileLoaded)}
+                            className="w-full bg-stone-900 text-white py-4 font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-stone-900 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <Loader2 size={18} className="animate-spin" />
