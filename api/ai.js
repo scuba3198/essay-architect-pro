@@ -234,11 +234,36 @@ export default async function handler(request) {
 
         // --- BACKGROUND: DISCORD NOTIFICATION (If type specified) ---
         // This keeps the webhook secret server-side
-        if (type === 'payment' && generatedText) {
+        if (type === 'payment' && prompt) {
             const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
             if (webhookUrl) {
-                // We'll track payments on the server now
-                // This is a placeholder for where you'd trigger backend-only signals
+                // Parse payment details from prompt: "NEW_PAYMENT_SUBMITTED: plan_name (price) by email"
+                const match = prompt.match(/NEW_PAYMENT_SUBMITTED:\s*(.+?)\s*\((.+?)\)\s*by\s*(.+)/);
+                if (match) {
+                    const [, planName, price, userEmail] = match;
+
+                    const embed = {
+                        title: "💳 New Payment Submitted!",
+                        color: 0x10B981, // Green
+                        fields: [
+                            { name: "Plan", value: planName, inline: true },
+                            { name: "Amount", value: price, inline: true },
+                            { name: "Email", value: userEmail, inline: false },
+                        ],
+                        footer: { text: "Essay Architect Pro - Payment Verification" },
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Fire and forget - don't block the response
+                    fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            content: "🔔 **New payment screenshot uploaded!** Please verify in Supabase.",
+                            embeds: [embed]
+                        })
+                    }).catch(err => console.error("Discord webhook failed:", err));
+                }
             }
         }
 

@@ -33,7 +33,7 @@ export const callProAI = async (prompt, systemInstruction = "", type = "completi
                 headers['X-Turnstile-Token'] = turnstileToken;
             } catch (turnstileError) {
                 console.error('Turnstile verification failed:', turnstileError);
-                throw new Error('Human verification failed. Please refresh the page and try again.');
+                throw new Error('Bot verification unavailable (network restriction). Please log in to continue.');
             }
         }
 
@@ -47,7 +47,7 @@ export const callProAI = async (prompt, systemInstruction = "", type = "completi
             const errorData = await response.json().catch(() => ({}));
 
             if (response.status === 401) {
-                throw new Error("Verification required. Please refresh the page or log in.");
+                throw new Error("Authentication required. Please log in to continue.");
             }
             if (response.status === 429) {
                 throw new Error("Too many requests. Please wait a moment before trying again.");
