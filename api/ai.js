@@ -238,8 +238,9 @@ export default async function handler(request) {
         const data = await geminiResponse.json();
         const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
 
-        // --- BACKGROUND: DISCORD NOTIFICATION (If type specified) ---
+        // --- DISCORD NOTIFICATION (If type specified) ---
         // This keeps the webhook secret server-side
+        // IMPORTANT: We must await this to prevent Edge Function from terminating before webhook completes
         if (type === 'payment' && prompt) {
             const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
             console.log('[Payment] Type detected, webhook URL exists:', !!webhookUrl);
@@ -271,21 +272,24 @@ export default async function handler(request) {
                     };
 
                     console.log('[Payment] Sending to Discord...');
-                    // Fire and forget - don't block the response
-                    fetch(webhookUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(response => {
+                    try {
+                        // MUST await - Edge Function terminates as soon as we return, killing pending fetches
+                        const response = await fetch(webhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
                         console.log('[Payment] Discord response status:', response.status);
                         if (!response.ok) {
-                            return response.text().then(text => {
-                                console.error('[Payment] Discord error:', text);
-                            });
+                            const errorText = await response.text();
+                            console.error('[Payment] Discord error:', errorText);
+                        } else {
+                            console.log('[Payment] ✅ Discord notification sent successfully!');
                         }
-                    })
-                    .catch(err => console.error("[Payment] Discord webhook failed:", err));
+                    } catch (err) {
+                        console.error("[Payment] Discord webhook failed:", err);
+                    }
                 }
             }
         }
