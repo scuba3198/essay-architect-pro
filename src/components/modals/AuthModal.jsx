@@ -228,23 +228,6 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                             </div>
                         )}
 
-                        {/* Turnstile Security Badge for Signup/Login */}
-                        {(mode === 'signup' || mode === 'login') && (
-                            <div className="flex items-center gap-2 text-xs text-stone-500 bg-stone-50 border border-stone-200 p-2 rounded">
-                                <Shield size={14} className="text-stone-400" />
-                                <span className="font-medium">
-                                    {turnstileLoaded ? (
-                                        'Protected by Cloudflare security'
-                                    ) : (
-                                        <span className="flex items-center gap-1">
-                                            <Loader2 size={12} className="animate-spin" />
-                                            Loading security verification...
-                                        </span>
-                                    )}
-                                </span>
-                            </div>
-                        )}
-
                         <button
                             type="submit"
                             disabled={isLoading}
