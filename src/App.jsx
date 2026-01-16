@@ -390,15 +390,18 @@ const App = () => {
                     setAiUsageCount(data.usage_count || 0);
                     setExaminerUsageCount(data.examiner_count || 0);
                 } else if (!error || error.code === 'PGRST116') {
-                    // Record truly doesn't exist, create it
+                    // Record truly doesn't exist, create it with upsert to handle race conditions
                     setAiUsageCount(0);
                     setExaminerUsageCount(0);
                     try {
-                        const { error: insertError } = await supabase
+                        const { error: upsertError } = await supabase
                             .from('usage_tracking')
-                            .insert([{ visitor_id: vid, usage_count: 0, examiner_count: 0, alias: null }]);
-                        if (insertError) {
-                            console.error("Failed to create initial usage record:", insertError.message);
+                            .upsert([{ visitor_id: vid, usage_count: 0, examiner_count: 0, alias: null }], {
+                                onConflict: 'visitor_id',
+                                ignoreDuplicates: true
+                            });
+                        if (upsertError) {
+                            console.error("Failed to create initial usage record:", upsertError.message);
                         }
                     } catch (e) {
                         console.error("Critical error during usage sync:", e);
@@ -877,7 +880,7 @@ const App = () => {
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
             {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
 
-            {showAuth && <AuthModal onClose={() => { setShowAuth(false); setAuthMode('login'); }} onAuthSuccess={(user) => verifyAccess(user.email, true)} initialMode={authMode} />}
+            {showAuth && <AuthModal onClose={() => { setShowAuth(false); setAuthMode('login'); }} onAuthSuccess={(user) => verifyAccess(user, true)} initialMode={authMode} />}
             {showExaminer && (
                 <ExaminerModal
                     isOpen={showExaminer}
