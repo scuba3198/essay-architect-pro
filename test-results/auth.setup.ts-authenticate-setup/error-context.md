@@ -1,0 +1,201 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5] [cursor=pointer]:
+      - generic [ref=e6]: E
+      - generic [ref=e7]:
+        - heading "ESSAY ARCHITECT PRO" [level=1] [ref=e8]:
+          - text: ESSAY ARCHITECT PRO
+          - button [ref=e9]:
+            - img [ref=e10]
+        - paragraph [ref=e13]: v0.3.0 • IELTS & PTE Edition
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - button "The Guide" [ref=e16] [cursor=pointer]
+        - button "The Wizard" [ref=e18] [cursor=pointer]
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - img [ref=e21]
+          - generic [ref=e24]: 0:00
+        - generic [ref=e25]:
+          - button "Start" [ref=e26] [cursor=pointer]
+          - button "Reset" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+      - generic [ref=e32]:
+        - button "Login / Sign Up" [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - text: Login / Sign Up
+        - button "Upgrade" [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+          - text: Upgrade
+  - generic [ref=e43]:
+    - button [ref=e44] [cursor=pointer]:
+      - img [ref=e45]
+    - generic [ref=e48]:
+      - generic [ref=e49]: E
+      - heading "Welcome Back" [level=2] [ref=e50]
+      - paragraph [ref=e51]: Log in to access your premium features.
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]: Email Address
+        - generic [ref=e55]:
+          - img [ref=e56]
+          - textbox "name@example.com" [ref=e59]: phoenixrising656@gmail.com
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]: Password
+          - button "Password" [ref=e63] [cursor=pointer]: Forgot?
+        - generic [ref=e64]:
+          - img [ref=e65]
+          - textbox "••••••••" [ref=e68]: corleone123Q!@#
+      - generic [ref=e69]:
+        - img [ref=e70]
+        - generic [ref=e72]: Protected by Cloudflare security
+      - button [disabled] [ref=e73]:
+        - img [ref=e74]
+    - generic [ref=e76]:
+      - paragraph [ref=e77]: Don't have an account?
+      - button "Create Account" [ref=e78] [cursor=pointer]:
+        - img [ref=e79]
+        - text: Create Account
+  - main [ref=e82]:
+    - button "Feedback?" [ref=e83] [cursor=pointer]:
+      - img [ref=e84]
+      - generic [ref=e86]: Feedback?
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - generic [ref=e89]:
+          - heading "MASTER THE ARCHITECT PRO" [level=2] [ref=e90]:
+            - text: MASTER
+            - text: THE
+            - text: ARCHITECT PRO
+          - paragraph [ref=e91]: Essay Architect Pro isn't just a wizard—it's a comprehensive training ground. Here is how to get the most out of it.
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - generic [ref=e94]: "01"
+            - generic [ref=e95]:
+              - heading "The Wizard" [level=3] [ref=e96]
+              - paragraph [ref=e98]: Breaks your essay into manageable chunks (Intro, Body, Conclusion) to enforce perfect structure.
+          - generic [ref=e99]:
+            - generic [ref=e100]: "02"
+            - generic [ref=e101]:
+              - heading "AI Refiner" [level=3] [ref=e102]
+              - paragraph [ref=e104]: Stuck? Experience hyper-smart autocompletion and sentence polishing powered by our custom Next-Gen Pro AI engine.
+          - generic [ref=e105]:
+            - generic [ref=e106]: "03"
+            - generic [ref=e107]:
+              - heading "The Examiner" [level=3] [ref=e108]
+              - paragraph [ref=e110]: Receive instant, strict grading and feedback based on official IELTS/PTE criteria.
+          - generic [ref=e111]:
+            - generic [ref=e112]: "04"
+            - generic [ref=e113]:
+              - heading "Premium Access" [level=3] [ref=e114]
+              - paragraph [ref=e116]: No API keys or complex setups. Get instant, centralized AI grading optimized for the Nepali academic market.
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - heading "The Ultimate IELTS & PTE Writing Tool" [level=3] [ref=e119]
+            - paragraph [ref=e120]: Achieving a high band score in IELTS or PTE requires more than just vocabulary—it requires structure. Essay Architect PRO is the specialized tool that forces you to plan your essay paragraph by paragraph before you write.
+            - paragraph [ref=e121]:
+              - text: Stop practicing blindly. With our
+              - strong [ref=e122]: advanced AI examiner
+              - text: ", you receive instant feedback on your coherence, cohesion, and lexical resource, tailored specifically to the marking criteria of international English exams."
+          - generic [ref=e123]:
+            - heading "Why Structure Matters" [level=3] [ref=e124]
+            - list [ref=e125]:
+              - listitem [ref=e126]:
+                - generic [ref=e127]: •
+                - generic [ref=e128]: Eliminate writer's block with our step-by-step wizard.
+              - listitem [ref=e129]:
+                - generic [ref=e130]: •
+                - generic [ref=e131]: Ensure every paragraph has a clear topic sentence and example.
+              - listitem [ref=e132]:
+                - generic [ref=e133]: •
+                - generic [ref=e134]: Master opinion, discussion, and advantage/disadvantage essay types.
+              - listitem [ref=e135]:
+                - generic [ref=e136]: •
+                - generic [ref=e137]: Get band score estimates instantly.
+      - generic [ref=e139]:
+        - generic [ref=e140]:
+          - heading "Trusted by High Achievers" [level=2] [ref=e141]
+          - paragraph [ref=e142]: Join hundreds of students from Nepal who have smashed their writing goals.
+        - generic [ref=e143]:
+          - generic [ref=e144]:
+            - generic [ref=e145]:
+              - img [ref=e146]
+              - img [ref=e148]
+              - img [ref=e150]
+              - img [ref=e152]
+              - img [ref=e154]
+            - paragraph [ref=e156]: "\"I was stuck at 6.5 in writing for months. Essay Architect's structure wizard forced me to organize my thoughts before writing. The AI grading is scarily accurate to the real exam.\""
+            - generic [ref=e157]:
+              - heading "Aarav Sharma" [level=4] [ref=e158]
+              - paragraph [ref=e159]: IELTS Band 8.0
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - img [ref=e162]
+              - img [ref=e164]
+              - img [ref=e166]
+              - img [ref=e168]
+              - img [ref=e170]
+            - paragraph [ref=e172]: "\"The instant feedback on my vocabulary was a game changer. It doesn't just correct grammar; it suggests better academic words. Finally got my desired score for Australia!\""
+            - generic [ref=e173]:
+              - heading "Priya Karki" [level=4] [ref=e174]
+              - paragraph [ref=e175]: PTE 79+
+          - generic [ref=e176]:
+            - generic [ref=e177]:
+              - img [ref=e178]
+              - img [ref=e180]
+              - img [ref=e182]
+              - img [ref=e184]
+              - img [ref=e186]
+            - paragraph [ref=e188]: "\"As a Nepali student, I struggled with 'academic tone'. This tool taught me exactly how to sound formal and objective. Highly recommended for anyone serious about study abroad.\""
+            - generic [ref=e189]:
+              - heading "Sital Adhikari" [level=4] [ref=e190]
+              - paragraph [ref=e191]: IELTS Band 7.5
+          - generic [ref=e192]:
+            - generic [ref=e193]:
+              - img [ref=e194]
+              - img [ref=e196]
+              - img [ref=e198]
+              - img [ref=e200]
+              - img [ref=e202]
+            - paragraph [ref=e204]: "\"Worth every rupee. The 'Examiner' mode is like having a private tutor available 24/7. It highlighted my cohesion errors instantly.\""
+            - generic [ref=e205]:
+              - heading "Rohan Maharjan" [level=4] [ref=e206]
+              - paragraph [ref=e207]: IELTS Band 8.0
+      - generic [ref=e208]:
+        - img [ref=e210]
+        - generic [ref=e213]:
+          - generic [ref=e214]:
+            - heading "Ready to draft your first piece?" [level=3] [ref=e215]
+            - paragraph [ref=e216]: Put the theory into practice with our live wizard. Real-time preview, word counting, and structure enforcement included.
+            - button "Start Writing" [ref=e217] [cursor=pointer]
+          - generic [ref=e218]:
+            - generic [ref=e219]:
+              - generic [ref=e220]: Opinion Essays
+              - paragraph [ref=e221]: "\"To what extent do you agree?\""
+            - generic [ref=e222]:
+              - generic [ref=e223]: Discussion Essays
+              - paragraph [ref=e224]: "\"Discuss both views and give your opinion.\""
+  - contentinfo [ref=e225]:
+    - generic [ref=e226]:
+      - paragraph [ref=e227]:
+        - text: Architected by
+        - link "Mumukshu D.C." [ref=e228] [cursor=pointer]:
+          - /url: https://scuba3198.github.io/mumukshu-portfolio/
+      - generic [ref=e229]:
+        - link "WhatsApp" [ref=e230] [cursor=pointer]:
+          - /url: https://wa.me/9779862329617
+          - img [ref=e231]
+        - link "GitHub" [ref=e234] [cursor=pointer]:
+          - /url: https://github.com/scuba3198
+          - img [ref=e235]
+        - link "Facebook" [ref=e238] [cursor=pointer]:
+          - /url: https://www.facebook.com/profile.php?id=61585812331891
+          - img [ref=e239]
+    - generic [ref=e241]:
+      - button "Privacy Policy" [ref=e242] [cursor=pointer]
+      - button "Terms of Service" [ref=e243] [cursor=pointer]
+```
