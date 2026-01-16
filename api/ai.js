@@ -236,11 +236,16 @@ export default async function handler(request) {
         // This keeps the webhook secret server-side
         if (type === 'payment' && prompt) {
             const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+            console.log('[Payment] Type detected, webhook URL exists:', !!webhookUrl);
+
             if (webhookUrl) {
                 // Parse payment details from prompt: "NEW_PAYMENT_SUBMITTED: plan_name (price) by email"
                 const match = prompt.match(/NEW_PAYMENT_SUBMITTED:\s*(.+?)\s*\((.+?)\)\s*by\s*(.+)/);
+                console.log('[Payment] Prompt match result:', !!match);
+
                 if (match) {
                     const [, planName, price, userEmail] = match;
+                    console.log('[Payment] Parsed:', { planName, price, userEmail });
 
                     const embed = {
                         title: "💳 New Payment Submitted!",
@@ -254,15 +259,27 @@ export default async function handler(request) {
                         timestamp: new Date().toISOString()
                     };
 
+                    const payload = {
+                        content: "🔔 **New payment screenshot uploaded!** Please verify in Supabase.",
+                        embeds: [embed]
+                    };
+
+                    console.log('[Payment] Sending to Discord...');
                     // Fire and forget - don't block the response
                     fetch(webhookUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            content: "🔔 **New payment screenshot uploaded!** Please verify in Supabase.",
-                            embeds: [embed]
-                        })
-                    }).catch(err => console.error("Discord webhook failed:", err));
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => {
+                        console.log('[Payment] Discord response status:', response.status);
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                console.error('[Payment] Discord error:', text);
+                            });
+                        }
+                    })
+                    .catch(err => console.error("[Payment] Discord webhook failed:", err));
                 }
             }
         }
