@@ -96,10 +96,15 @@ const PaymentModal = ({ onClose, plan, onSuccess, userEmail, user: passedUser })
             console.log("Database record saved. Triggering notification and pixel...");
 
             // 4. Notify Backend (which notifies Discord)
-            import('../../lib/api').then(({ callProAI }) => {
-                callProAI(`NEW_PAYMENT_SUBMITTED: ${plan.name} (${plan.price}) by ${user.email}`, "", "payment")
-                    .catch(err => console.error("Backend notification signal failed:", err));
-            });
+            try {
+                const { callProAI } = await import('../../lib/api');
+                console.log("API module loaded, sending payment notification...");
+                await callProAI(`NEW_PAYMENT_SUBMITTED: ${plan.name} (${plan.price}) by ${user.email}`, "", "payment");
+                console.log("Payment notification sent successfully!");
+            } catch (err) {
+                console.error("Backend notification signal failed:", err);
+                // Don't block the user flow, but log it
+            }
 
             // 5. Track Facebook Pixel (Non-blocking)
             if (window.fbq) {

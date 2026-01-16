@@ -151,6 +151,12 @@ export default async function handler(request) {
 
         const { prompt, systemInstruction, type } = body;
 
+        // Log request details for debugging
+        console.log('[API] Request received with type:', type);
+        if (type === 'payment') {
+            console.log('[API] Payment request detected! Prompt:', prompt);
+        }
+
         // Basic input validation
         if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
             return new Response(
