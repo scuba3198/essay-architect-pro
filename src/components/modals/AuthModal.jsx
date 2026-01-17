@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Mail, Lock, Loader2, ArrowRight, UserPlus, LogIn, Shield } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { registerSession } from '../../lib/sessionManager';
+import { generateSecureToken } from '../../lib/crypto-utils';
 
 const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
     const [mode, setMode] = useState(initialMode); // 'login', 'signup', 'forgot_password', 'update_password'
@@ -49,7 +50,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
                 if (signInError) throw signInError;
 
                 // Register session for session management
-                const sessionToken = data.session?.access_token?.substring(0, 32) || Date.now().toString();
+                const sessionToken = data.session?.access_token?.substring(0, 32) || generateSecureToken(16);
                 await registerSession(data.user.id, sessionToken);
 
                 if (onAuthSuccess) onAuthSuccess(data.user);

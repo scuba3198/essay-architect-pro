@@ -39,6 +39,7 @@ import FeedbackModal from './components/modals/FeedbackModal';
 import { supabase } from './lib/supabase';
 import { getVisitorID } from './lib/device-id';
 import { validateSession, deactivateCurrentSession, registerSession } from './lib/sessionManager';
+import { generateSecureToken } from './lib/crypto-utils';
 
 import PrivacyModal from './components/modals/PrivacyModal';
 import AuthModal from './components/modals/AuthModal';
@@ -260,7 +261,7 @@ const App = () => {
 
                 // If no session record exists, register this session
                 if (!isValid && !wasLoggedOut) {
-                    const sessionToken = session.access_token?.substring(0, 32) || Date.now().toString();
+                    const sessionToken = session.access_token?.substring(0, 32) || generateSecureToken(16);
                     await registerSession(session.user.id, sessionToken);
                 }
 
