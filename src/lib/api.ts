@@ -4,8 +4,8 @@
  * All Rights Reserved.
  */
 
-import { supabase } from './supabase';
-import { getTurnstileToken } from './turnstile';
+import { supabase } from "./supabase";
+import { getTurnstileToken } from "./turnstile";
 
 // --- API Helper ---
 // Calls the secure server-side proxy instead of Gemini directly
@@ -17,57 +17,65 @@ import { getTurnstileToken } from './turnstile';
  * - Anonymous users: Uses Cloudflare Turnstile verification
  */
 export const callProAI = async (
-    prompt: string,
-    systemInstruction: string = "",
-    type: string = "completion"
+  prompt: string,
+  systemInstruction: string = "",
+  type: string = "completion",
 ): Promise<string | null> => {
-    try {
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
 
-        // Check if user is logged in
-        const { data: { session } } = await supabase.auth.getSession();
+    // Check if user is logged in
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-        if (session?.access_token) {
-            // Logged-in user: send JWT
-            headers['Authorization'] = `Bearer ${session.access_token}`;
-        } else {
-            // Anonymous user: get Turnstile token
-            try {
-                const turnstileToken = await getTurnstileToken();
-                headers['X-Turnstile-Token'] = turnstileToken;
-            } catch (turnstileError) {
-                console.error('Turnstile verification failed:', turnstileError);
-                throw new Error('Bot verification unavailable (network restriction). Please log in to continue.');
-            }
-        }
-
-        const response = await fetch('/api/ai', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ prompt, systemInstruction, type })
-        });
-
-        if (!response.ok) {
-            const errorData = (await response.json().catch(() => ({}))) as { error?: string };
-
-            if (response.status === 401) {
-                throw new Error("Authentication required. Please log in to continue.");
-            }
-            if (response.status === 429) {
-                throw new Error("Too many requests. Please wait a moment before trying again.");
-            }
-            if (response.status === 503) {
-                throw new Error("Pro AI services are currently undergoing maintenance. Please contact support.");
-            }
-            throw new Error(errorData.error || `AI Engine Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.text || null;
-    } catch (error) {
-        console.error("Pro AI Engine failure:", error);
-        throw error;
+    if (session?.access_token) {
+      // Logged-in user: send JWT
+      headers.Authorization = `Bearer ${session.access_token}`;
+    } else {
+      // Anonymous user: get Turnstile token
+      try {
+        const turnstileToken = await getTurnstileToken();
+        headers["X-Turnstile-Token"] = turnstileToken;
+      } catch (turnstileError) {
+        console.error("Turnstile verification failed:", turnstileError);
+        throw new Error(
+          "Bot verification unavailable (network restriction). Please log in to continue.",
+        );
+      }
     }
+
+    const response = await fetch("/api/ai", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ prompt, systemInstruction, type }),
+    });
+
+    if (!response.ok) {
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+
+      if (response.status === 401) {
+        throw new Error("Authentication required. Please log in to continue.");
+      }
+      if (response.status === 429) {
+        throw new Error("Too many requests. Please wait a moment before trying again.");
+      }
+      if (response.status === 503) {
+        throw new Error(
+          "Pro AI services are currently undergoing maintenance. Please contact support.",
+        );
+      }
+      throw new Error(errorData.error || `AI Engine Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.text || null;
+  } catch (error) {
+    console.error("Pro AI Engine failure:", error);
+    throw error;
+  }
 };
-
-

@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --font-serif: 'Playfair Display', serif;
-  --font-sans: 'Inter', sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
 }
 
 body {

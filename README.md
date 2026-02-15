@@ -33,8 +33,9 @@ The Pro version features a tiered access system managed via a manual-verificatio
 -   **Styling**: Custom CSS + Tailwind for a high-contrast, editorial design aesthetic.
 -   **Database & Auth**: [Supabase](https://supabase.com/) with hardened RLS policies and real-time session management.
 -   **AI Engine**: [Google Gemini 2.5 Flash](https://ai.google.dev/) via a secure **Vercel Edge Proxy (TypeScript)**.
+-   **Quality & Speed**: [Biome](https://biomejs.dev/) for sub-millisecond linting and formatting.
 -   **State Management**: Strongly typed React Hooks + `react-helmet-async` for SEO.
--   **Quality Assurance**: Fully typed codebase with zero `tsc` compiler errors.
+-   **Quality Assurance**: Fully typed codebase with zero `tsc` compiler errors and 100% Biome compliance.
 
 ## 🛸 UX Enhancements
 
@@ -95,6 +96,13 @@ The Pro version features a tiered access system managed via a manual-verificatio
     ```bash
     npm install
     npm run dev
+    ```
+
+4.  **Maintenance**
+    ```bash
+    npm run lint     # Check for errors
+    npm run lint:fix # Auto-fix errors
+    npm run format   # Format code
     ```
 
 ## 📄 License
