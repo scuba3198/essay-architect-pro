@@ -9,7 +9,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
             id: 'free',
             name: "Free Tier",
             tier: 0,
-            price: "Rs 0",
+            price: "FREE",
             duration: "Forever",
             description: "Basic access to get you started.",
             features: ["Limited AI Feedback", "Basic Structure Tools", "Community Support"],
@@ -32,6 +32,8 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
             name: "Preparation Pack",
             tier: 2,
             price: "Rs 499",
+            originalPrice: "Rs 1,499",
+            dailyPrice: "Only Rs 16/day",
             duration: "30 Days",
             description: "The most popular choice for serious prep.",
             features: ["Everything in Day Pass", "30 Days Access", "Academic Structure Tools"],
@@ -45,6 +47,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
             name: "Lifetime Pack",
             tier: 3,
             price: "Rs 1,500",
+            originalPrice: "Rs 15,000",
             duration: "Lifetime",
             description: "One-time payment, forever yours.",
             features: ["Lifetime AI Grading", "Prioritized Suggestions", "All Future Updates"],
@@ -125,8 +128,25 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="p-2 bg-stone-50 border border-stone-100">{plan.icon}</div>
                                         <div className="text-right">
-                                            <p className="text-3xl font-black text-stone-900 leading-none">{plan.price}</p>
-                                            <p className="text-[10px] text-stone-400 uppercase tracking-widest mt-1">/ {plan.duration}</p>
+                                            {plan.originalPrice && (
+                                                <p className="text-[10px] text-stone-400 line-through mb-1 font-bold">{plan.originalPrice}</p>
+                                            )}
+                                            <p className="text-3xl font-black text-stone-900 leading-none">
+                                                {plan.price === "FREE" ? (
+                                                    <span className="text-green-600">FREE</span>
+                                                ) : (
+                                                    <>
+                                                        <span className="text-sm font-bold align-top mr-0.5 select-none opacity-60">Rs</span>
+                                                        {plan.price.replace("Rs ", "")}
+                                                    </>
+                                                )}
+                                            </p>
+                                            <div className="flex flex-col items-end mt-1">
+                                                <p className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">/ {plan.duration}</p>
+                                                {plan.dailyPrice && (
+                                                    <p className="text-[9px] text-green-600 font-black uppercase tracking-tight mt-0.5 italic">{plan.dailyPrice}</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 
