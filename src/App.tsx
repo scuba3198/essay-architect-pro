@@ -187,8 +187,15 @@ const App: React.FC = () => {
   const [showFeedback, setShowFeedback] = useState<boolean>(false);
   const [notification, setNotification] = useState<Notification | null>(null);
 
-  const [tourStep, setTourStep] = useState<number>(-1);
-  const [hasSeenTour, setHasSeenTour] = useState<boolean>(false);
+  const [tourStep, setTourStep] = useState<number>(() => {
+    // Check if user has completed the tour from localStorage
+    const tourCompleted = localStorage.getItem("essay-architect-tour-completed");
+    return tourCompleted === "true" ? -1 : -1; // Start at -1, will be set to 0 on first theory tab visit
+  });
+  const [hasSeenTour, setHasSeenTour] = useState<boolean>(() => {
+    const tourCompleted = localStorage.getItem("essay-architect-tour-completed");
+    return tourCompleted === "true";
+  });
 
   const promptRef = useRef<HTMLTextAreaElement>(null);
 
@@ -555,11 +562,15 @@ const App: React.FC = () => {
       setTourStep(tourStep + 1);
     } else {
       setTourStep(-1);
+      setHasSeenTour(true);
+      localStorage.setItem("essay-architect-tour-completed", "true");
     }
   };
 
   const skipTour = () => {
     setTourStep(-1);
+    setHasSeenTour(true);
+    localStorage.setItem("essay-architect-tour-completed", "true");
   };
 
   const tourProps: TourProps = {
