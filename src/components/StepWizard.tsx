@@ -66,7 +66,7 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
 
     const handleVocabularyInsert = (section: EssaySectionKey, field: string, text: string) => {
         const textarea = textareaRefs.current[`${section}-${field}`];
-        const currentVal = (essay[section] as any)[field] || '';
+        const currentVal = (essay[section] as unknown as Record<string, string>)[field] || '';
 
         if (textarea) {
             const start = textarea.selectionStart;
@@ -117,7 +117,7 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
             let contextInfo = "";
 
             // Helper to get text safely
-            const getTxt = (sec: EssaySectionKey, fld: string) => (essay[sec] as any)?.[fld] || "";
+            const getTxt = (sec: EssaySectionKey, fld: string) => (essay[sec] as unknown as Record<string, string>)[fld] || "";
 
             if (section === 'intro') {
                 if (field === 'thesis') {
@@ -246,7 +246,7 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
                     <div>
                         <span className="text-xs font-black uppercase tracking-widest text-stone-500 mb-1 block">Chapter {currentStep + 1}</span>
                         <h2 className="text-3xl font-serif font-black text-stone-900 leading-none">
-                            {currentStepData.title}
+                            {currentStepData?.title}
                         </h2>
                     </div>
 
@@ -357,14 +357,14 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
                                     <label className="block text-lg font-bold font-serif text-stone-900">1. Topic Sentence</label>
                                     <p className="text-xs font-mono text-stone-500 uppercase">Write 1 Sentence • The Main Idea</p>
                                 </div>
-                                <RefineButton section={`body${currentStep}`} field="topicSentence" text={essay[`body${currentStep}`].topicSentence} />
+                                <RefineButton section={`body${currentStep}` as EssaySectionKey} field="topicSentence" text={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['topicSentence'] || ""} />
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-topicSentence`] = el)}
                                 className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[60px] md:min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="Firstly, the main reason for this is..."
-                                value={essay[`body${currentStep}`].topicSentence}
-                                onChange={(e) => handleInputChange(`body${currentStep}`, 'topicSentence', e.target.value)}
+                                value={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['topicSentence'] || ""}
+                                onChange={(e) => handleInputChange(`body${currentStep}` as EssaySectionKey, 'topicSentence', e.target.value)}
                             />
                             <VocabularyPill
                                 words={currentStep === 1 ? ['Firstly,', 'To begin with,', 'The primary reason is'] : ['Secondly,', 'Furthermore,', 'In addition,']}
@@ -378,14 +378,14 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
                                     <label className="block text-lg font-bold font-serif text-stone-900">2. Explanation</label>
                                     <p className="text-xs font-mono text-stone-500 uppercase">Write 1 Sentence • Expand on the point</p>
                                 </div>
-                                <RefineButton section={`body${currentStep}`} field="explanation" text={essay[`body${currentStep}`].explanation} />
+                                <RefineButton section={`body${currentStep}` as EssaySectionKey} field="explanation" text={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['explanation'] || ""} />
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-explanation`] = el)}
                                 className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[70px] md:min-h-[100px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="This is because..."
-                                value={essay[`body${currentStep}`].explanation}
-                                onChange={(e) => handleInputChange(`body${currentStep}`, 'explanation', e.target.value)}
+                                value={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['explanation'] || ""}
+                                onChange={(e) => handleInputChange(`body${currentStep}` as EssaySectionKey, 'explanation', e.target.value)}
                             />
                             <VocabularyPill
                                 words={['This means that', 'In other words,', 'This is due to the fact that']}
@@ -399,14 +399,14 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
                                     <label className="block text-lg font-bold font-serif text-stone-900">3. Example</label>
                                     <p className="text-xs font-mono text-stone-500 uppercase">Write 1 Sentence • Prove it</p>
                                 </div>
-                                <RefineButton section={`body${currentStep}`} field="example" text={essay[`body${currentStep}`].example} />
+                                <RefineButton section={`body${currentStep}` as EssaySectionKey} field="example" text={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['example'] || ""} />
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-example`] = el)}
                                 className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[60px] md:min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="For instance..."
-                                value={essay[`body${currentStep}`].example}
-                                onChange={(e) => handleInputChange(`body${currentStep}`, 'example', e.target.value)}
+                                value={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['example'] || ""}
+                                onChange={(e) => handleInputChange(`body${currentStep}` as EssaySectionKey, 'example', e.target.value)}
                             />
                             <VocabularyPill
                                 words={['For example,', 'For instance,', 'Take x as an example']}
@@ -420,14 +420,14 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
                                     <label className="block text-lg font-bold font-serif text-stone-900">4. Link (Optional)</label>
                                     <p className="text-xs font-mono text-stone-500 uppercase">Write 1 Sentence • Tie it back</p>
                                 </div>
-                                <RefineButton section={`body${currentStep}`} field="concluding" text={essay[`body${currentStep}`].concluding} />
+                                <RefineButton section={`body${currentStep}` as EssaySectionKey} field="concluding" text={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['concluding'] || ""} />
                             </div>
                             <textarea
                                 ref={(el) => (textareaRefs.current[`body${currentStep}-concluding`] = el)}
                                 className="w-full p-4 text-stone-900 text-lg leading-relaxed bg-[#f9f9f7] border-0 border-b-2 border-stone-300 focus:border-stone-900 focus:ring-0 focus:bg-yellow-50/30 transition-all min-h-[60px] md:min-h-[80px] resize-none placeholder:text-stone-300 placeholder:italic placeholder:font-serif"
                                 placeholder="Therefore..."
-                                value={essay[`body${currentStep}`].concluding}
-                                onChange={(e) => handleInputChange(`body${currentStep}`, 'concluding', e.target.value)}
+                                value={(essay[`body${currentStep}` as EssaySectionKey] as unknown as Record<string, string>)['concluding'] || ""}
+                                onChange={(e) => handleInputChange(`body${currentStep}` as EssaySectionKey, 'concluding', e.target.value)}
                             />
                             <VocabularyPill
                                 words={['Therefore,', 'Thus,', 'As a result,']}

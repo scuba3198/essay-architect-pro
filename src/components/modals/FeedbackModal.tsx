@@ -82,7 +82,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, initialEmail = "
             setTimeout(() => {
                 onClose();
             }, 3000);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Feedback submission error:", err);
             setError("Failed to send feedback. Please try again later.");
         } finally {

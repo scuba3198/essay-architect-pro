@@ -51,12 +51,7 @@ import ToSModal from './components/modals/ToSModal';
 
 import { Essay, Topic, Notification, Plan, TourProps, EssaySectionKey, User as UserType } from './types';
 
-// Declare global fbq for Facebook Pixel
-declare global {
-    interface Window {
-        fbq?: any;
-    }
-}
+
 
 const LearnCard: React.FC<{ title: string; desc: string; number: string }> = ({ title, desc, number }) => (
     <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
@@ -208,15 +203,16 @@ const App: React.FC = () => {
                     setNotification({ message: "No approved payment found for this email. If you just paid, please wait for manual verification (1-2 hours).", type: 'info' });
                 }
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Critical verifyAccess error:", err);
+            const message = err instanceof Error ? err.message : 'Unknown error';
             // Fail silent in silent mode, alert user otherwise
-            if (!isSilent) setNotification({ message: `Failed to verify access: ${err.message || 'Unknown error'}. Please refresh the page.`, type: 'error' });
+            if (!isSilent) setNotification({ message: `Failed to verify access: ${message}. Please refresh the page.`, type: 'error' });
         }
     };
 
     useEffect(() => {
-        setTopic(topics[0]);
+        setTopic(topics[0] ?? null);
         let isLoggingOut = false; // Flag to prevent race condition
 
         // Handle PKCE recovery token from URL query params
@@ -367,6 +363,7 @@ const App: React.FC = () => {
             const timer = setTimeout(adjustHeight, 10);
             return () => clearTimeout(timer);
         }
+        return undefined;
     }, [activeTab, topic]);
 
     // Initialize Fingerprint and Sync Usage
@@ -422,7 +419,7 @@ const App: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        let interval: any;
+        let interval: ReturnType<typeof setInterval> | undefined;
         if (isTimerRunning) {
             interval = setInterval(() => {
                 setTimer((prev) => prev + 1);
@@ -458,11 +455,11 @@ const App: React.FC = () => {
 
     const getNewRandomTopic = () => {
         if (topics.length <= 1) return;
-        let newTopic;
+        let newTopic = topics[0] as Topic;
         do {
-            newTopic = topics[Math.floor(Math.random() * topics.length)];
+            newTopic = topics[Math.floor(Math.random() * topics.length)] as Topic;
         } while (newTopic.id === topic?.id);
-        setTopic(newTopic);
+        setTopic(newTopic ?? null);
     };
 
     const handleInputChange = (section: EssaySectionKey, field: string, value: string) => {
@@ -737,7 +734,7 @@ const App: React.FC = () => {
                             <div className="flex items-center gap-2">
                                 <div className="hidden lg:flex flex-col items-end mr-2">
                                     <span className="text-[10px] font-black uppercase text-stone-900 tracking-widest truncate max-w-[120px]">
-                                        {user.user_metadata?.full_name || user.email}
+                                        {user.user_metadata?.['full_name'] || user.email}
                                     </span>
                                     {isPaid && <span className="text-[8px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1">
                                         <Zap size={8} fill="currentColor" /> {activePlan}
@@ -845,7 +842,7 @@ const App: React.FC = () => {
                                     <div className="flex items-center justify-between p-4 bg-stone-100 border border-stone-200">
                                         <div className="flex flex-col">
                                             <span className="text-xs font-black uppercase text-stone-900 tracking-widest">
-                                                {user.user_metadata?.full_name || user.email}
+                                                {user.user_metadata?.['full_name'] || user.email}
                                             </span>
                                             {isPaid && <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1 mt-1">
                                                 <Zap size={10} fill="currentColor" /> {activePlan}

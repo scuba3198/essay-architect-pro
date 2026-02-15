@@ -34,8 +34,8 @@ const RefineModal: React.FC<RefineModalProps> = ({ isOpen, onClose, originalText
             if (result && onUsage) {
                 onUsage();
             }
-        } catch (err: any) {
-            setError(err.message || "Failed to connect to the wizard AI.");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to connect to the wizard AI.");
         } finally {
             setLoading(false);
         }

@@ -3,18 +3,14 @@ import { Plan } from '../../types';
 import { X, CheckCircle2, ArrowLeft, Loader2, Upload, QrCode } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-declare global {
-    interface Window {
-        fbq?: any;
-    }
-}
+import { User } from '@supabase/supabase-js';
 
 interface PaymentModalProps {
     onClose: () => void;
     plan: Plan;
     onSuccess: (email: string) => void;
     userEmail: string | null;
-    user: any;
+    user: User | null;
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, plan, onSuccess, userEmail, user: passedUser }) => {
@@ -132,9 +128,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, plan, onSuccess, u
 
             console.log("Process complete! Moving to success screen.");
             setStep(3);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Critical upload flow failure:", error);
-            alert(`Upload failed: ${error.message || 'Unknown error'}. Please try again or contact support if the issue persists.`);
+            const message = error instanceof Error ? error.message : "Unknown error";
+            alert(`Upload failed: ${message}. Please try again or contact support if the issue persists.`);
         } finally {
             console.log("Setting isUploading to false");
             setIsUploading(false);

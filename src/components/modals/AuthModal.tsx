@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { User } from '@supabase/supabase-js';
 import { X, Mail, Lock, Loader2, ArrowRight, UserPlus, LogIn } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { registerSession } from '../../lib/sessionManager';
@@ -8,7 +9,7 @@ type AuthMode = 'login' | 'signup' | 'forgot_password' | 'update_password';
 
 interface AuthModalProps {
     onClose: () => void;
-    onAuthSuccess: (user: any) => void;
+    onAuthSuccess: (user: User) => void;
     initialMode?: AuthMode;
 }
 
@@ -91,9 +92,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, initialMo
                     });
                 }, 2000);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Auth error:", err);
-            setError(err.message || "An error occurred during authentication.");
+            const message = err instanceof Error ? err.message : "An error occurred during authentication.";
+            setError(message);
         } finally {
             setIsLoading(false);
         }

@@ -7,7 +7,7 @@
 
 import { supabase } from './supabase';
 import { getVisitorID } from './device-id';
-import { SessionResult, SessionValidation, DeviceLimitResult } from '../types';
+import { SessionResult, SessionValidation, DeviceLimitResult, UserSession } from '../types';
 
 /**
  * Hashes a token using SHA-256 for secure storage.
@@ -58,9 +58,10 @@ export const registerSession = async (userId: string, sessionToken: string): Pro
         await enforceDeviceLimit(userId);
 
         return { success: true };
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error('Failed to register session:', err);
-        return { success: false, error: err.message };
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        return { success: false, error: message };
     }
 };
 
@@ -171,9 +172,9 @@ export const enforceDeviceLimit = async (userId: string): Promise<DeviceLimitRes
 /**
  * Gets all active sessions for a user.
  * @param {string} userId - The user's UUID
- * @returns {Promise<any[]>}
+ * @returns {Promise<UserSession[]>}
  */
-export const getActiveSessions = async (userId: string): Promise<any[]> => {
+export const getActiveSessions = async (userId: string): Promise<UserSession[]> => {
     try {
         const { data, error } = await supabase
             .from('user_sessions')

@@ -36,10 +36,19 @@ interface RateLimitData {
 const rateLimitMap = new Map<string, RateLimitData>();
 
 /**
+ * Minimal User type for verification
+ */
+interface SupabaseUser {
+    id: string;
+    email?: string;
+    [key: string]: unknown;
+}
+
+/**
  * Verify Supabase JWT token
  * Returns user object if valid, null otherwise
  */
-async function verifySupabaseToken(token: string): Promise<any | null> {
+async function verifySupabaseToken(token: string): Promise<SupabaseUser | null> {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
@@ -225,7 +234,12 @@ export default async function handler(request: Request): Promise<Response> {
         // Call Gemini API
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-        const payload: any = {
+        interface GeminiPayload {
+            contents: { parts: { text: string }[] }[];
+            systemInstruction?: { parts: { text: string }[] };
+        }
+
+        const payload: GeminiPayload = {
             contents: [{ parts: [{ text: prompt }] }],
         };
 
@@ -251,7 +265,17 @@ export default async function handler(request: Request): Promise<Response> {
             );
         }
 
-        const data: any = await geminiResponse.json();
+        interface GeminiResponse {
+            candidates?: {
+                content?: {
+                    parts?: {
+                        text?: string;
+                    }[];
+                };
+            }[];
+        }
+
+        const data = (await geminiResponse.json()) as GeminiResponse;
         const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
 
         // --- DISCORD NOTIFICATION (If type specified) ---

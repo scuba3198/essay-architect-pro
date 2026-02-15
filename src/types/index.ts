@@ -73,5 +73,15 @@ export interface DeviceLimitResult {
     deactivatedCount: number;
 }
 
+export interface UserSession {
+    id: string;
+    user_id: string;
+    device_fingerprint: string;
+    session_token_hash?: string;
+    is_active: boolean;
+    created_at: string;
+    last_active_at: string;
+}
+
 // ─── Supabase User (re-export convenience) ───────────────
 export type { User } from '@supabase/supabase-js';

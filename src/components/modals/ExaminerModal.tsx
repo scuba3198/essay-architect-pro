@@ -133,9 +133,10 @@ Essay:
             const data = JSON.parse(jsonString);
             setFeedback(data);
             if (!isPaid) onIncrementUsage();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
-            setError(err.message || "The examiner is currently unavailable. Please try again.");
+            const message = err instanceof Error ? err.message : "The examiner is currently unavailable. Please try again.";
+            setError(message);
         } finally {
             setLoading(false);
         }

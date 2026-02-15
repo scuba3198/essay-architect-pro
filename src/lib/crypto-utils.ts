@@ -27,14 +27,16 @@ export function generateUUID(): string {
     if (!window.crypto) {
         throw new Error('Secure random generation not available. Please use a modern browser over HTTPS.');
     }
-    if (typeof (window.crypto as any).randomUUID === 'function') {
-        return (window.crypto as any).randomUUID();
+    if (typeof window.crypto.randomUUID === 'function') {
+        return window.crypto.randomUUID();
     }
     // Fallback for older browsers
     const array = new Uint8Array(16);
     window.crypto.getRandomValues(array);
-    array[6] = (array[6] & 0x0f) | 0x40; // Version 4
-    array[8] = (array[8] & 0x3f) | 0x80; // Variant 10
+    const val6 = array[6];
+    const val8 = array[8];
+    if (val6 !== undefined) array[6] = (val6 & 0x0f) | 0x40; // Version 4
+    if (val8 !== undefined) array[8] = (val8 & 0x3f) | 0x80; // Variant 10
     const hex = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
     return [
         hex.slice(0, 8),

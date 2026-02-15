@@ -10,6 +10,12 @@
 
 const DEVICE_ID_KEY = 'essay_architect_device_id';
 
+declare global {
+    interface Navigator {
+        deviceMemory?: number;
+    }
+}
+
 export const getVisitorID = async (): Promise<string> => {
     // Check localStorage first for cached device ID
     const cachedId = localStorage.getItem(DEVICE_ID_KEY);
@@ -25,7 +31,7 @@ export const getVisitorID = async (): Promise<string> => {
         window.screen.width + 'x' + window.screen.height,
         window.screen.colorDepth,
         navigator.hardwareConcurrency,
-        (navigator as any).deviceMemory,
+        navigator.deviceMemory,
         // Canvas Fingerprinting
         getCanvasFingerprint()
     ];

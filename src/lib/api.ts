@@ -48,7 +48,7 @@ export const callProAI = async (
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
+            const errorData = (await response.json().catch(() => ({}))) as { error?: string };
 
             if (response.status === 401) {
                 throw new Error("Authentication required. Please log in to continue.");

@@ -3,12 +3,23 @@
  * Handles loading and rendering the Turnstile widget for anonymous user verification
  */
 
+interface TurnstileOptions {
+    sitekey: string;
+    callback?: (token: string) => void;
+    'error-callback'?: () => void;
+    'expired-callback'?: () => void;
+    size?: 'normal' | 'flexible' | 'compact' | 'invisible';
+    theme?: 'light' | 'dark' | 'auto';
+    action?: string;
+    cData?: string;
+}
+
 declare global {
     interface Window {
         turnstile?: {
-            render: (container: string | HTMLElement, options: any) => string | null;
+            render: (container: string | HTMLElement, options: TurnstileOptions) => string | null;
             remove: (id: string) => void;
-            execute: (id: string) => Promise<any> | void;
+            execute: (id: string) => Promise<void> | void;
         };
     }
 }
@@ -141,8 +152,8 @@ export async function getTurnstileToken(): Promise<string> {
             if (typeof window.turnstile.execute === 'function' && widgetId !== null) {
                 try {
                     const execResult = window.turnstile.execute(widgetId);
-                    if (execResult && typeof (execResult as any).catch === 'function') {
-                        (execResult as any).catch(() => {
+                    if (execResult instanceof Promise) {
+                        execResult.catch(() => {
                             cleanup();
                             reject(new Error('Verification failed. Please try again.'));
                         });
