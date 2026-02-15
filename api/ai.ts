@@ -258,9 +258,8 @@ export default async function handler(request: Request): Promise<Response> {
             const errorText = await geminiResponse.text();
             console.error('Gemini API error:', geminiResponse.status, errorText);
 
-            // Return a user-friendly error without exposing API details
             return new Response(
-                JSON.stringify({ error: 'AI processing failed. Please try again.' }),
+                JSON.stringify({ error: `AI processing failed (${geminiResponse.status}): ${errorText}` }),
                 { status: 502, headers: { 'Content-Type': 'application/json' } }
             );
         }
