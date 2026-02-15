@@ -4,7 +4,7 @@
 
 Essay Architect Pro is a professional-grade AI writing suite designed specifically for students aiming for the highest bands (IELTS 8.5+ / PTE 85+). It transforms the chaotic process of essay writing into a precise, architectural discipline.
 
-![Version](https://img.shields.io/badge/version-0.3.0--pro-gold.svg) ![License](https://img.shields.io/badge/license-Proprietary-red.svg) ![Stack](https://img.shields.io/badge/stack-React%20%7C%20Supabase%20%7C%20Gemini-blue.svg)
+![Version](https://img.shields.io/badge/version-0.4.0--ts-blue.svg) ![License](https://img.shields.io/badge/license-Proprietary-red.svg) ![Stack](https://img.shields.io/badge/stack-TypeScript%20%7C%20React%20%7C%20Supabase-blue.svg)
 
 ## 🚀 Live Production Site
 **[https://pro.essay-architect.uk/](https://pro.essay-architect.uk/)**
@@ -29,11 +29,12 @@ The Pro version features a tiered access system managed via a manual-verificatio
 
 ## 🛠️ Performance Tech Stack
 
--   **Frontend**: React 18 + Vite (for sub-second HMR and optimized builds).
+-   **Frontend**: React 18 + **TypeScript** + Vite (for sub-second HMR and type-safe builds).
 -   **Styling**: Custom CSS + Tailwind for a high-contrast, editorial design aesthetic.
 -   **Database & Auth**: [Supabase](https://supabase.com/) with hardened RLS policies and real-time session management.
--   **AI Engine**: [Google Gemini 2.5 Flash](https://ai.google.dev/) via a secure **Vercel Edge Proxy**.
--   **State Management**: Optimized React Hooks + `react-helmet-async` for SEO and metadata management.
+-   **AI Engine**: [Google Gemini 2.5 Flash](https://ai.google.dev/) via a secure **Vercel Edge Proxy (TypeScript)**.
+-   **State Management**: Strongly typed React Hooks + `react-helmet-async` for SEO.
+-   **Quality Assurance**: Fully typed codebase with zero `tsc` compiler errors.
 
 ## 🛸 UX Enhancements
 
