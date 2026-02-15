@@ -129,7 +129,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
                                         <div className="p-2 bg-stone-50 border border-stone-100">{plan.icon}</div>
                                         <div className="text-right">
                                             {plan.originalPrice && (
-                                                <p className="text-[10px] text-stone-400 line-through mb-1 font-bold">{plan.originalPrice}</p>
+                                                <p className="text-sm text-stone-400 line-through mb-1 font-bold opacity-80">{plan.originalPrice}</p>
                                             )}
                                             <p className="text-3xl font-black text-stone-900 leading-none">
                                                 {plan.price === "FREE" ? (
@@ -144,7 +144,7 @@ const PricingModal = ({ onClose, onSelectPlan, activePlan, onShowAuth, isLoggedI
                                             <div className="flex flex-col items-end mt-1">
                                                 <p className="text-[10px] text-stone-400 uppercase tracking-widest font-medium">/ {plan.duration}</p>
                                                 {plan.dailyPrice && (
-                                                    <p className="text-[9px] text-green-600 font-black uppercase tracking-tight mt-0.5 italic">{plan.dailyPrice}</p>
+                                                    <p className="text-xs text-green-600 font-black uppercase tracking-tight mt-1 italic">{plan.dailyPrice}</p>
                                                 )}
                                             </div>
                                         </div>
