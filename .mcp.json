@@ -3,20 +3,6 @@
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=ofmfmmkijmpkwvmduuex"
-    },
-    "Ref": {
-      "type": "http",
-      "url": "https://api.ref.tools/mcp",
-      "headers": {
-        "x-ref-api-key": "ref-1df627a8eebc3501293c"
-      }
-    },
-    "context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-ed7d44c9-cce5-4955-9a8a-90c62f31c2a5"
-      }
     }
   }
 }
