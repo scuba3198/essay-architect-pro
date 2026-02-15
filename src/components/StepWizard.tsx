@@ -188,8 +188,9 @@ const StepWizard: React.FC<StepWizardProps> = ({ currentStep, setCurrentStep, es
                     onIncrementUsage();
                 }
             }
-        } catch (err) {
-            alert("Autocomplete failed. Check your API key.");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            alert(`Autocomplete failed: ${message}`);
         } finally {
             setGeneratingField(null);
         }

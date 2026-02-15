@@ -235,17 +235,17 @@ export default async function handler(request: Request): Promise<Response> {
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
         interface GeminiPayload {
-            contents: { parts: { text: string }[] }[];
-            systemInstruction?: { parts: { text: string }[] };
+            contents: { role?: string; parts: { text: string }[] }[];
+            system_instruction?: { parts: { text: string }[] };
         }
 
         const payload: GeminiPayload = {
-            contents: [{ parts: [{ text: prompt }] }],
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
         };
 
         // Add system instruction if provided
         if (systemInstruction && typeof systemInstruction === 'string' && systemInstruction.trim()) {
-            payload.systemInstruction = { parts: [{ text: systemInstruction }] };
+            payload.system_instruction = { parts: [{ text: systemInstruction }] };
         }
 
         const geminiResponse = await fetch(geminiUrl, {
