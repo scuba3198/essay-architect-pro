@@ -121,3 +121,8 @@ dist
 # Vite
 dist
 .vercel
+
+# Antigravity/Cursor/Claude noise
+.claude/
+.codex/
+.cursor/
