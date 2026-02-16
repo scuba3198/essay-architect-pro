@@ -437,7 +437,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                         string,
                         string
                       >
-                    ).topicSentence || ""
+                    )["topicSentence"] || ""
                   }
                 />
               </div>
@@ -451,7 +451,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                       string,
                       string
                     >
-                  ).topicSentence || ""
+                  )["topicSentence"] || ""
                 }
                 onChange={(e) =>
                   handleInputChange(
@@ -492,7 +492,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                         string,
                         string
                       >
-                    ).explanation || ""
+                    )["explanation"] || ""
                   }
                 />
               </div>
@@ -506,7 +506,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                       string,
                       string
                     >
-                  ).explanation || ""
+                  )["explanation"] || ""
                 }
                 onChange={(e) =>
                   handleInputChange(
@@ -543,7 +543,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                         string,
                         string
                       >
-                    ).example || ""
+                    )["example"] || ""
                   }
                 />
               </div>
@@ -557,7 +557,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                       string,
                       string
                     >
-                  ).example || ""
+                  )["example"] || ""
                 }
                 onChange={(e) =>
                   handleInputChange(
@@ -592,7 +592,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                         string,
                         string
                       >
-                    ).concluding || ""
+                    )["concluding"] || ""
                   }
                 />
               </div>
@@ -606,7 +606,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
                       string,
                       string
                     >
-                  ).concluding || ""
+                  )["concluding"] || ""
                 }
                 onChange={(e) =>
                   handleInputChange(

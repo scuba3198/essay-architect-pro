@@ -33,7 +33,7 @@ export const callProAI = async (
 
     if (session?.access_token) {
       // Logged-in user: send JWT
-      headers.Authorization = `Bearer ${session.access_token}`;
+      headers["Authorization"] = `Bearer ${session.access_token}`;
     } else {
       // Anonymous user: get Turnstile token
       try {

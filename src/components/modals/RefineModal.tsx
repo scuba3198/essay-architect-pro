@@ -1,6 +1,6 @@
 import { Sparkles, Wand2, X } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { callProAI } from "../../lib/api";
 
 interface RefineModalProps {
