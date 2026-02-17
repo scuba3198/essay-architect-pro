@@ -33,9 +33,9 @@ The Pro version features a tiered access system managed via a manual-verificatio
 -   **Styling**: Custom CSS + Tailwind for a high-contrast, editorial design aesthetic.
 -   **Database & Auth**: [Supabase](https://supabase.com/) with hardened RLS policies and real-time session management.
 -   **AI Engine**: [Google Gemini 2.5 Flash](https://ai.google.dev/) via a secure **Vercel Edge Proxy (TypeScript)**.
--   **Quality & Speed**: [Biome](https://biomejs.dev/) for sub-millisecond linting and formatting.
+-   **Quality & Speed**: [Oxlint](https://oxlint.dev/) for extremely fast linting.
 -   **State Management**: Strongly typed React Hooks + `react-helmet-async` for SEO.
--   **Quality Assurance**: Fully typed codebase with zero `tsc` compiler errors and 100% Biome compliance.
+-   **Quality Assurance**: Fully typed codebase with zero `tsc` compiler errors and 100% Oxlint compliance.
 
 ## 🛸 UX Enhancements
 
@@ -100,12 +100,9 @@ The Pro version features a tiered access system managed via a manual-verificatio
 
 4.  **Maintenance**
     ```bash
-    npm run lint     # Check for errors
-    npm run lint:fix # Auto-fix errors
-    npm run format   # Format code
+    npm run lint     # Check for errors using Oxlint
+    npm run lint:fix # Auto-fix errors using Oxlint
     ```
 
 ## 📄 License
 Architected for the community. Licensed under [Proprietary License](LICENSE).
-   
- 
