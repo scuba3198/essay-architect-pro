@@ -43,6 +43,7 @@ graph TD
 ```
 
 ### Layers
+
 1.  **Domain**: Pure business logic, types, errors, and validation schemas. No external dependencies.
 2.  **Infrastructure**: Implementation of external services (API, Auth, Logging).
 3.  **Application**: Orchestration of domain logic and infrastructure to fulfill user use cases.
@@ -50,20 +51,21 @@ graph TD
 
 ## 🛡️ Strict Compliance Features
 
--   **Type Safety**: `@tsconfig/strictest` enabled. No `any`.
--   **Validation**: Runtime validation with `zod` at all boundaries.
--   **Error Handling**: Functional error handling using `Result<T, E>`. No thrown exceptions in business logic.
--   **Observability**: Structured logging with `pino` and correlation IDs.
--   **Toolchain**:
-    -   `oxlint` for instant linting.
-    -   `vitest` for testing.
-    -   `dependency-cruiser` for architectural enforcement.
+- **Type Safety**: `@tsconfig/strictest` enabled. No `any`.
+- **Validation**: Runtime validation with `zod` at all boundaries.
+- **Error Handling**: Functional error handling using `Result<T, E>`. No thrown exceptions in business logic.
+- **Observability**: Structured logging with `pino` and correlation IDs.
+- **Toolchain**:
+  - `oxlint` for instant linting.
+  - `vitest` for testing.
+  - `dependency-cruiser` for architectural enforcement.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
--   Node.js (LTS)
--   npm
+
+- Node.js (LTS)
+- npm
 
 ### Installation
 
@@ -86,6 +88,7 @@ npm run check
 ```
 
 This runs:
+
 1.  Format (`prettier`)
 2.  Lint (`oxlint`)
 3.  Type Check (`tsc`)
