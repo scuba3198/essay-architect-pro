@@ -3,7 +3,7 @@ import { ArrowRight, Loader2, Lock, LogIn, Mail, UserPlus, X } from 'lucide-reac
 import type React from 'react';
 import { useState } from 'react';
 import { generateSecureToken } from '../../../infrastructure/security/crypto-utils';
-import { registerSession } from '../../../application/session/sessionManager';
+import { RegisterSessionUseCase } from '../../../application/session/RegisterSessionUseCase';
 import { supabase } from '../../../infrastructure/db/supabase';
 
 type AuthMode = 'login' | 'signup' | 'forgot_password' | 'update_password';
@@ -12,9 +12,15 @@ interface AuthModalProps {
   onClose: () => void;
   onAuthSuccess: (user: User) => void;
   initialMode?: AuthMode;
+  registerSessionUseCase: RegisterSessionUseCase;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, initialMode = 'login' }) => {
+const AuthModal: React.FC<AuthModalProps> = ({
+  onClose,
+  onAuthSuccess,
+  registerSessionUseCase,
+  initialMode = 'login',
+}) => {
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -64,7 +70,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, initialMo
         // Register session for session management
         const sessionToken =
           data.session?.access_token?.substring(0, 32) || generateSecureToken(16);
-        await registerSession(data.user.id, sessionToken);
+        await registerSessionUseCase.execute(data.user.id, sessionToken);
 
         if (onAuthSuccess) onAuthSuccess(data.user);
         onClose();

@@ -1,7 +1,7 @@
 import { Sparkles, Wand2, X } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { callProAI } from '../../../infrastructure/api/api';
+import { AIClient } from '../../../infrastructure/api/api';
 
 interface RefineModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface RefineModalProps {
   originalText: string;
   onAccept: (suggestion: string) => void;
   onUsage?: () => void;
+  aiClient: AIClient;
 }
 
 const RefineModal: React.FC<RefineModalProps> = ({
@@ -17,6 +18,7 @@ const RefineModal: React.FC<RefineModalProps> = ({
   originalText,
   onAccept,
   onUsage,
+  aiClient,
 }) => {
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -28,7 +30,7 @@ const RefineModal: React.FC<RefineModalProps> = ({
     setSuggestion(null);
     try {
       const prompt = `Rewrite the following sentence to be formal and concise, suitable for an IELTS/PTE essay, using 10th-grade reading level vocabulary (clear and accessible). Do not change the meaning. Return ONLY the rewritten sentence.\n\nOriginal: "${originalText}"`;
-      const result = await callProAI(prompt);
+      const result = await aiClient.callProAI(prompt);
       if (!result.ok) {
         throw result.error;
       }

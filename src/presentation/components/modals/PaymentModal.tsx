@@ -4,6 +4,7 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../infrastructure/db/supabase';
 import type { Plan } from '../../../domain/types';
+import { AIClient } from '../../../infrastructure/api/api';
 
 interface PaymentModalProps {
   onClose: () => void;
@@ -11,6 +12,7 @@ interface PaymentModalProps {
   onSuccess: (email: string) => void;
   userEmail: string | null;
   user: User | null;
+  aiClient: AIClient;
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -19,6 +21,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onSuccess,
   userEmail,
   user: passedUser,
+  aiClient,
 }) => {
   const [step, setStep] = useState<number>(1); // 1: Info, 2: Upload, 3: Success
   const [fileName, setFileName] = useState<string>('');
@@ -108,9 +111,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
       // 4. Notify Backend (which notifies Discord)
       try {
-        const { callProAI } = await import('../../../infrastructure/api/api');
         console.log('API module loaded, sending payment notification...');
-        const notificationResult = await callProAI(
+        const notificationResult = await aiClient.callProAI(
           JSON.stringify({
             planName: plan.name,
             price: plan.price,

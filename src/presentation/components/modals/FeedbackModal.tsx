@@ -1,15 +1,20 @@
 import { Heart, Send, Star, X } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
-import { getVisitorID } from '../../../infrastructure/device/device-id';
+import { DeviceService } from '../../../infrastructure/device/device-id';
 import { supabase } from '../../../infrastructure/db/supabase';
 
 interface FeedbackModalProps {
   onClose: () => void;
   initialEmail?: string;
+  deviceService: DeviceService;
 }
 
-const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, initialEmail = '' }) => {
+const FeedbackModal: React.FC<FeedbackModalProps> = ({
+  onClose,
+  deviceService,
+  initialEmail = '',
+}) => {
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
   const [email, setEmail] = useState<string>(initialEmail);
@@ -73,7 +78,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, initialEmail = '
     setError(null);
 
     try {
-      const visitorID = await getVisitorID();
+      const visitorID = await deviceService.getVisitorID();
       const feedbackRecord = {
         visitor_id: visitorID,
         rating: rating > 0 ? rating : null,

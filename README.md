@@ -1,111 +1,80 @@
-# Essay Architect Pro (Strict Edition)
+# Essay Architect Pro - Architectural Overview
 
-A professional academic writing assistant built with a strict 4-layer architecture, robust error handling, and a blazing-fast toolchain.
+This project follows a strict **Hexagonal Architecture** (Ports and Adapters) with **Single-Purpose Use Cases**, **Constructor Injection**, and **Functional Error Handling**.
 
-## 🏗️ Architecture
-
-This project strictly follows a **Domain-Centric** layered architecture to ensure separation of concerns and maintainability.
+## System Flow
 
 ```mermaid
 graph TD
-    subgraph Presentation ["Presentation Layer (UI)"]
-        UI[React Components]
-        Pages[App / Pages]
+    subgraph Presentation
+        App["App.tsx"]
+        StepWizard["StepWizard.tsx"]
+        ExaminerModal["ExaminerModal.tsx"]
     end
 
-    subgraph Application ["Application Layer (Use Cases)"]
-        Session[Session Manager]
-        Workflows[User Workflows]
+    subgraph Application
+        VSUC["ValidateSessionUseCase"]
+        RSUC["RegisterSessionUseCase"]
     end
 
-    subgraph Domain ["Domain Layer (Core Logic)"]
-        Types[Types & Interfaces]
-        Errors[AppError & Result]
-        Schemas[Zod Schemas]
+    subgraph Infrastructure
+        AIC["AIClient (OpenAI/Supabase)"]
+        DS["DeviceService (Fingerprinting)"]
+        Sub["SupabaseClient"]
+        Log["Pino Logger"]
     end
 
-    subgraph Infrastructure ["Infrastructure Layer (External)"]
-        API[API Client]
-        DB[Supabase]
-        Log[Pino Logger]
-        Sec[Security/Turnstile]
+    subgraph Domain
+        Result["Result Type"]
+        Schemas["Zod Schemas"]
     end
 
-    Presentation --> Application
-    Presentation --> Domain
-    Application --> Domain
-    Application --> Infrastructure
-    Infrastructure --> Domain
+    App --> VSUC
+    App --> RSUC
+    App --> AIC
+    App --> DS
 
-    %% Rules
-    Domain -. Forbidden .-> Infrastructure
-    Domain -. Forbidden .-> Presentation
+    VSUC --> Sub
+    VSUC --> DS
+    VSUC --> Log
+
+    RSUC --> Sub
+    RSUC --> DS
+    RSUC --> Log
+
+    AIC --> Sub
+    AIC --> Log
+
+    StepWizard --> AIC
+    ExaminerModal --> AIC
+
+    Infrastructure -.-> Domain
+    Application -.-> Domain
+    Presentation -.-> Domain
 ```
 
-### Layers
+## Key Architectural Principles
 
-1.  **Domain**: Pure business logic, types, errors, and validation schemas. No external dependencies.
-2.  **Infrastructure**: Implementation of external services (API, Auth, Logging).
-3.  **Application**: Orchestration of domain logic and infrastructure to fulfill user use cases.
-4.  **Presentation**: React components and UI logic.
+1.  **Dependency Injection**: All services in `infrastructure/` and `application/` use constructor injection. Singletons and global service locators are prohibited.
+2.  **Use Case Pattern**: Business logic is encapsulated in small, focused Use Case classes (e.g., `RegisterSessionUseCase`).
+3.  **Boundary Validation**: All external data (API responses, local storage) is validated using **Zod** schemas.
+4.  **Functional Error Handling**: Instead of throwing exceptions, services return a `Result<T, E>` object, forcing the caller to handle both success and failure states.
+5.  **Structured Logging**: `pino` is used for consistent, traceable logging across all layers.
+6.  **Traceability**: A `correlationId` is generated at the application layer to track the lifecycle of each request.
 
-## 🛡️ Strict Compliance Features
+## Project Structure
 
-- **Type Safety**: `@tsconfig/strictest` enabled. No `any`.
-- **Validation**: Runtime validation with `zod` at all boundaries.
-- **Error Handling**: Functional error handling using `Result<T, E>`. No thrown exceptions in business logic.
-- **Observability**: Structured logging with `pino` and correlation IDs.
-- **Toolchain**:
-  - `oxlint` for instant linting.
-  - `vitest` for testing.
-  - `dependency-cruiser` for architectural enforcement.
+- `src/domain/`: Pure logic, Zod schemas, and interfaces.
+- `src/infrastructure/`: Implementation of external services (APIs, DBs, Loggers).
+- `src/application/`: Orchestration of business logic using Use Cases.
+- `src/presentation/`: React components and UI logic.
 
-## 🚀 Getting Started
+## Verification Suite
 
-### Prerequisites
-
-- Node.js (LTS)
-- npm
-
-### Installation
-
-```bash
-npm install
-```
-
-### Development
-
-```bash
-npm run dev
-```
-
-### Verification (The "Check" Loop)
-
-Running the full suite of checks:
+Run the full verification suite with:
 
 ```bash
 npm run check
 ```
 
-This runs:
-
-1.  Format (`prettier`)
-2.  Lint (`oxlint`)
-3.  Type Check (`tsc`)
-4.  Tests (`vitest`)
-5.  Architecture Check (`dependency-cruiser`)
-
-## 📂 Project Structure
-
-```
-src/
-├── domain/           # Core types, errors, schemas
-├── infrastructure/   # API, logging, db, security
-├── application/      # Session management, logic
-├── presentation/     # React components, modals
-└── main.tsx          # Entry point
-```
-
-## 📜 License
-
-Proprietary Software.
+This executes: `format` → `lint` → `type-check` → `test` → `test:architecture`.

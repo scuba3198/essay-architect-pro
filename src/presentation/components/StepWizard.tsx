@@ -7,7 +7,7 @@
 import { ChevronLeft, ChevronRight, Lock, Sparkles, Wand2, Zap } from 'lucide-react';
 import type React from 'react';
 import { useRef, useState } from 'react';
-import { callProAI } from '../../infrastructure/api/api';
+import { AIClient } from '../../infrastructure/api/api';
 import type { Essay, EssaySectionKey, Topic, TourProps } from '../../domain/types';
 import RefineModal from './modals/RefineModal';
 import TourTooltip from './TourTooltip';
@@ -53,6 +53,7 @@ interface StepWizardProps {
   onLimitReached: () => void;
   freeUsageCount: number;
   onIncrementUsage: () => void;
+  aiClient: AIClient;
 }
 
 const StepWizard: React.FC<StepWizardProps> = ({
@@ -66,6 +67,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
   onLimitReached,
   freeUsageCount,
   onIncrementUsage,
+  aiClient,
 }) => {
   const steps = [
     {
@@ -219,7 +221,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
             3. LANGUAGE: Use 10th-grade reading level vocabulary (clear, academic, accessible).
             Return ONLY the text to be added.`;
 
-      const result = await callProAI(prompt);
+      const result = await aiClient.callProAI(prompt);
       if (result.ok) {
         const completion = result.value;
         const spacer = currentText.length > 0 && !currentText.match(/\s$/) ? ' ' : '';
@@ -290,6 +292,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
           onUsage={() => {
             if (!isPaid) onIncrementUsage();
           }}
+          aiClient={aiClient}
         />
       )}
 

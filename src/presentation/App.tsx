@@ -60,13 +60,20 @@ import StepWizard from './components/StepWizard';
 import TestimonialSection from './components/TestimonialSection';
 import TourTooltip from './components/TourTooltip';
 import { generateSecureToken } from '../infrastructure/security/crypto-utils';
-import { getVisitorID } from '../infrastructure/device/device-id';
-import {
-  deactivateCurrentSession,
-  registerSession,
-  validateSession,
-} from '../application/session/sessionManager';
+import { DeviceService } from '../infrastructure/device/device-id';
+import { RegisterSessionUseCase } from '../application/session/RegisterSessionUseCase';
+import { ValidateSessionUseCase } from '../application/session/ValidateSessionUseCase';
+import { DeactivateSessionUseCase } from '../application/session/DeactivateSessionUseCase';
+import { AIClient } from '../infrastructure/api/api';
+import { logger } from '../infrastructure/logging/logger';
 import { supabase } from '../infrastructure/db/supabase';
+
+// Service Instantiation (DI Container logic)
+const deviceService = new DeviceService(logger);
+const aiClient = new AIClient(supabase, logger);
+const registerSessionUseCase = new RegisterSessionUseCase(supabase, deviceService, logger);
+const validateSessionUseCase = new ValidateSessionUseCase(supabase, deviceService, logger);
+const deactivateSessionUseCase = new DeactivateSessionUseCase(supabase, logger);
 
 import type {
   Essay,
@@ -350,7 +357,7 @@ const App: React.FC = () => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
         // Validate session against two-device limit
-        const { isValid, wasLoggedOut } = await validateSession(session.user.id);
+        const { isValid, wasLoggedOut } = await validateSessionUseCase.execute(session.user.id);
 
         if (wasLoggedOut) {
           // Session was invalidated manually or by a rare database event
@@ -358,7 +365,7 @@ const App: React.FC = () => {
           try {
             await supabase.auth.signOut();
           } catch (err) {
-            console.error('SignOut error:', err);
+            logger.error({ err }, 'SignOut error');
           }
           setUser(null);
           setIsPaid(false);
@@ -374,7 +381,7 @@ const App: React.FC = () => {
         // If no session record exists, register this session
         if (!isValid && !wasLoggedOut) {
           const sessionToken = session.access_token?.substring(0, 32) || generateSecureToken(16);
-          await registerSession(session.user.id, sessionToken);
+          await registerSessionUseCase.execute(session.user.id, sessionToken);
         }
 
         setUser(session.user);
@@ -392,13 +399,13 @@ const App: React.FC = () => {
         // For SIGNED_IN event, session is already registered by AuthModal
         // For TOKEN_REFRESHED, validate the session
         if (event === 'TOKEN_REFRESHED') {
-          const { wasLoggedOut } = await validateSession(session.user.id);
+          const { wasLoggedOut } = await validateSessionUseCase.execute(session.user.id);
           if (wasLoggedOut) {
             isLoggingOut = true;
             try {
               await supabase.auth.signOut();
             } catch (err) {
-              console.error('SignOut error:', err);
+              logger.error({ err }, 'SignOut error');
             }
             setUser(null);
             setIsPaid(false);
@@ -437,12 +444,12 @@ const App: React.FC = () => {
     if (!user) return;
 
     const checkSession = async () => {
-      const { wasLoggedOut } = await validateSession(user.id);
+      const { wasLoggedOut } = await validateSessionUseCase.execute(user.id);
       if (wasLoggedOut) {
         try {
           await supabase.auth.signOut();
         } catch (err) {
-          console.error('SignOut error:', err);
+          logger.error({ err }, 'SignOut error during periodic check');
         }
         setUser(null);
         setIsPaid(false);
@@ -489,7 +496,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const initTracking = async () => {
       try {
-        const vid = await getVisitorID();
+        const vid = await deviceService.getVisitorID();
         setVisitorID(vid);
 
         // Fetch current usage from Supabase
@@ -502,7 +509,7 @@ const App: React.FC = () => {
         if (error) {
           // PGRST116 means no row found, which is handled in the 'else' block
           if (error.code !== 'PGRST116') {
-            console.error(`Usage fetch failed [${error.code}]:`, error.message);
+            logger.error({ code: error.code, msg: error.message }, 'Usage fetch failed');
             // Fallback to 0 if record missing or inaccessible
             setAiUsageCount(0);
             setExaminerUsageCount(0);
@@ -532,14 +539,14 @@ const App: React.FC = () => {
               },
             );
             if (upsertError) {
-              console.error('Failed to create initial usage record:', upsertError.message);
+              logger.error({ msg: upsertError.message }, 'Failed to create initial usage record');
             }
           } catch (e) {
-            console.error('Critical error during usage sync:', e);
+            logger.error({ err: e }, 'Critical error during usage sync');
           }
         }
       } catch (err) {
-        console.error('initTracking failed:', err);
+        logger.error({ err }, 'initTracking failed');
       }
     };
     initTracking();
@@ -729,9 +736,9 @@ const App: React.FC = () => {
       // Deactivate session in database before signing out
       if (user) {
         console.log('Deactivating session for user:', user.id);
-        const { success } = await deactivateCurrentSession(user.id);
-        if (success) console.log('Session deactivated successfully');
-        else console.warn('Session deactivation returned false');
+        const result = await deactivateSessionUseCase.execute(user.id);
+        if (result.ok) console.log('Session deactivated successfully');
+        else console.warn('Session deactivation failed:', result.error);
       }
       await supabase.auth.signOut();
     } catch (err) {
@@ -1095,6 +1102,7 @@ const App: React.FC = () => {
           }}
           onAuthSuccess={(user) => verifyAccess(user, true)}
           initialMode={authMode}
+          registerSessionUseCase={registerSessionUseCase}
         />
       )}
       {showExaminer && (
@@ -1109,6 +1117,7 @@ const App: React.FC = () => {
             setShowExaminer(false);
             setShowLimitModal(true);
           }}
+          aiClient={aiClient}
         />
       )}
 
@@ -1146,6 +1155,7 @@ const App: React.FC = () => {
             // User stays on current page after submission
             alert('Screenshot received! We will verify it within 1-2 hours.');
           }}
+          aiClient={aiClient}
         />
       )}
 
@@ -1156,7 +1166,11 @@ const App: React.FC = () => {
       />
 
       {showFeedback && (
-        <FeedbackModal onClose={() => setShowFeedback(false)} initialEmail={userEmail} />
+        <FeedbackModal
+          onClose={() => setShowFeedback(false)}
+          initialEmail={userEmail}
+          deviceService={deviceService}
+        />
       )}
 
       {showToS && <ToSModal onClose={() => setShowToS(false)} />}
@@ -1381,6 +1395,7 @@ const App: React.FC = () => {
                   freeUsageCount={aiUsageCount}
                   onIncrementUsage={incrementFreeUsage}
                   onLimitReached={() => setShowLimitModal(true)}
+                  aiClient={aiClient}
                 />
               </div>
             </div>

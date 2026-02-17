@@ -1,7 +1,7 @@
 import { GraduationCap, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { callProAI } from '../../../infrastructure/api/api';
+import { AIClient } from '../../../infrastructure/api/api';
 import { ExaminerFeedbackSchema, type ExaminerFeedback } from '../../../domain/schemas';
 
 interface ExaminerModalProps {
@@ -12,6 +12,7 @@ interface ExaminerModalProps {
   onIncrementUsage: () => void;
   examinerUsageCount: number;
   onLimitReached?: () => void;
+  aiClient: AIClient;
 }
 
 const ExaminerModal: React.FC<ExaminerModalProps> = ({
@@ -22,6 +23,7 @@ const ExaminerModal: React.FC<ExaminerModalProps> = ({
   onIncrementUsage,
   examinerUsageCount,
   onLimitReached,
+  aiClient,
 }) => {
   const [feedback, setFeedback] = useState<ExaminerFeedback | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -105,7 +107,7 @@ Essay:
                 ${essayText} `;
       }
 
-      const result = await callProAI(
+      const result = await aiClient.callProAI(
         prompt,
         'You are a helpful API that returns strictly valid JSON.',
       );
