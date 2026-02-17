@@ -24,7 +24,7 @@ declare const process: {
 };
 
 export const config = {
-  runtime: "edge", // Use edge runtime for faster cold starts
+  runtime: 'edge', // Use edge runtime for faster cold starts
 };
 
 interface RateLimitData {
@@ -53,7 +53,7 @@ async function verifySupabaseToken(token: string): Promise<SupabaseUser | null> 
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Supabase environment variables not configured");
+    console.error('Supabase environment variables not configured');
     return null;
   }
 
@@ -70,7 +70,7 @@ async function verifySupabaseToken(token: string): Promise<SupabaseUser | null> 
     }
     return null;
   } catch (error) {
-    console.error("Supabase token verification failed:", error);
+    console.error('Supabase token verification failed:', error);
     return null;
   }
 }
@@ -83,14 +83,14 @@ async function verifyTurnstileToken(token: string, clientIP: string): Promise<bo
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
 
   if (!secretKey) {
-    console.error("TURNSTILE_SECRET_KEY not configured");
+    console.error('TURNSTILE_SECRET_KEY not configured');
     return false;
   }
 
   try {
-    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         secret: secretKey,
         response: token,
@@ -101,17 +101,17 @@ async function verifyTurnstileToken(token: string, clientIP: string): Promise<bo
     const result: { success: boolean } = await response.json();
     return result.success === true;
   } catch (error) {
-    console.error("Turnstile verification failed:", error);
+    console.error('Turnstile verification failed:', error);
     return false;
   }
 }
 
 export default async function handler(request: Request): Promise<Response> {
   // Only allow POST requests
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
@@ -119,25 +119,25 @@ export default async function handler(request: Request): Promise<Response> {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    console.error("GEMINI_API_KEY not configured in Vercel environment");
-    return new Response(JSON.stringify({ error: "AI service temporarily unavailable" }), {
+    console.error('GEMINI_API_KEY not configured in Vercel environment');
+    return new Response(JSON.stringify({ error: 'AI service temporarily unavailable' }), {
       status: 503,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
   // Get client IP for rate limiting and Turnstile verification
   const clientIP =
-    request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
 
   // --- AUTHENTICATION CHECK ---
-  const authHeader = request.headers.get("Authorization");
-  const turnstileToken = request.headers.get("X-Turnstile-Token");
+  const authHeader = request.headers.get('Authorization');
+  const turnstileToken = request.headers.get('X-Turnstile-Token');
 
   let isAuthenticated = false;
 
   // Option 1: Check Supabase JWT (for logged-in users)
-  if (authHeader?.startsWith("Bearer ")) {
+  if (authHeader?.startsWith('Bearer ')) {
     const jwtToken = authHeader.substring(7);
     const user = await verifySupabaseToken(jwtToken);
     if (user) {
@@ -156,8 +156,8 @@ export default async function handler(request: Request): Promise<Response> {
   // Reject if neither authentication method passed
   if (!isAuthenticated) {
     return new Response(
-      JSON.stringify({ error: "Unauthorized. Please complete verification or log in." }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
+      JSON.stringify({ error: 'Unauthorized. Please complete verification or log in.' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } },
     );
   }
 
@@ -166,26 +166,26 @@ export default async function handler(request: Request): Promise<Response> {
     let body: { prompt: string; systemInstruction?: string; type?: string };
     try {
       body = await request.json();
-    } catch (_e) {
-      return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON payload' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     const { prompt, systemInstruction, type } = body;
 
     // Log request details for debugging
-    console.log("[API] Request received with type:", type);
-    if (type === "payment") {
-      console.log("[API] Payment request detected! Prompt:", prompt);
+    console.log('[API] Request received with type:', type);
+    if (type === 'payment') {
+      console.log('[API] Payment request detected! Prompt:', prompt);
     }
 
     // Basic input validation
-    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-      return new Response(JSON.stringify({ error: "Invalid request: prompt is required" }), {
+    if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+      return new Response(JSON.stringify({ error: 'Invalid request: prompt is required' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -199,7 +199,7 @@ export default async function handler(request: Request): Promise<Response> {
         JSON.stringify({
           error: `Prompt too long. Maximum length is ${MAX_PROMPT_LENGTH} characters.`,
         }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
       );
     }
 
@@ -208,7 +208,7 @@ export default async function handler(request: Request): Promise<Response> {
         JSON.stringify({
           error: `System instruction too long. Maximum length is ${MAX_SYSTEM_LENGTH} characters.`,
         }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
       );
     }
 
@@ -228,9 +228,9 @@ export default async function handler(request: Request): Promise<Response> {
     rateLimitMap.set(clientIP, clientData);
 
     if (clientData.count > maxRequests) {
-      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment." }), {
+      return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please wait a moment.' }), {
         status: 429,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -243,30 +243,30 @@ export default async function handler(request: Request): Promise<Response> {
     }
 
     const payload: GeminiPayload = {
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
     };
 
     // Add system instruction if provided
-    if (systemInstruction && typeof systemInstruction === "string" && systemInstruction.trim()) {
+    if (systemInstruction && typeof systemInstruction === 'string' && systemInstruction.trim()) {
       payload.system_instruction = { parts: [{ text: systemInstruction }] };
     }
 
     const geminiResponse = await fetch(geminiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
-      console.error("Gemini API error:", geminiResponse.status, errorText);
+      console.error('Gemini API error:', geminiResponse.status, errorText);
 
       // Return a user-friendly error without exposing API details
       return new Response(
         JSON.stringify({
-          error: "AI processing failed. Please try again or check your API key status.",
+          error: 'AI processing failed. Please try again or check your API key status.',
         }),
-        { status: 502, headers: { "Content-Type": "application/json" } },
+        { status: 502, headers: { 'Content-Type': 'application/json' } },
       );
     }
 
@@ -286,54 +286,59 @@ export default async function handler(request: Request): Promise<Response> {
     // --- DISCORD NOTIFICATION (If type specified) ---
     // This keeps the webhook secret server-side
     // IMPORTANT: We must await this to prevent Edge Function from terminating before webhook completes
-    if (type === "payment" && prompt) {
+    if (type === 'payment' && prompt) {
       const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-      console.log("[Payment] Type detected, webhook URL exists:", !!webhookUrl);
+      console.log('[Payment] Type detected, webhook URL exists:', !!webhookUrl);
 
       if (webhookUrl) {
         // Parse payment details from prompt: "NEW_PAYMENT_SUBMITTED: plan_name (price) by email"
-        const match = prompt.match(/NEW_PAYMENT_SUBMITTED:\s*(.+?)\s*\((.+?)\)\s*by\s*(.+)/);
-        console.log("[Payment] Prompt match result:", !!match);
+        // Parse payment details from JSON prompt
+        let paymentData: { planName: string; price: number; userEmail: string } | null = null;
+        try {
+          paymentData = JSON.parse(prompt);
+          console.log('[Payment] Parsed JSON payload:', paymentData);
+        } catch (e) {
+          console.error('[Payment] Failed to parse JSON payload:', e);
+        }
 
-        if (match) {
-          const [, planName, price, userEmail] = match;
-          console.log("[Payment] Parsed:", { planName, price, userEmail });
+        if (paymentData && paymentData.planName && paymentData.price && paymentData.userEmail) {
+          const { planName, price, userEmail } = paymentData;
 
           const embed = {
-            title: "💳 New Payment Submitted!",
+            title: '💳 New Payment Submitted!',
             color: 0x10b981, // Green
             fields: [
-              { name: "Plan", value: planName, inline: true },
-              { name: "Amount", value: price, inline: true },
-              { name: "Email", value: userEmail, inline: false },
+              { name: 'Plan', value: planName, inline: true },
+              { name: 'Amount', value: price, inline: true },
+              { name: 'Email', value: userEmail, inline: false },
             ],
-            footer: { text: "Essay Architect Pro - Payment Verification" },
+            footer: { text: 'Essay Architect Pro - Payment Verification' },
             timestamp: new Date().toISOString(),
           };
 
           const discordPayload = {
-            content: "🔔 **New payment screenshot uploaded!** Please verify in Supabase.",
+            content: '🔔 **New payment screenshot uploaded!** Please verify in Supabase.',
             embeds: [embed],
           };
 
-          console.log("[Payment] Sending to Discord...");
+          console.log('[Payment] Sending to Discord...');
           try {
             // MUST await - Edge Function terminates as soon as we return, killing pending fetches
             const response = await fetch(webhookUrl, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(discordPayload),
             });
 
-            console.log("[Payment] Discord response status:", response.status);
+            console.log('[Payment] Discord response status:', response.status);
             if (!response.ok) {
               const errorText = await response.text();
-              console.error("[Payment] Discord error:", errorText);
+              console.error('[Payment] Discord error:', errorText);
             } else {
-              console.log("[Payment] ✅ Discord notification sent successfully!");
+              console.log('[Payment] ✅ Discord notification sent successfully!');
             }
           } catch (err) {
-            console.error("[Payment] Discord webhook failed:", err);
+            console.error('[Payment] Discord webhook failed:', err);
           }
         }
       }
@@ -341,13 +346,13 @@ export default async function handler(request: Request): Promise<Response> {
 
     return new Response(JSON.stringify({ text: generatedText }), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error("AI Proxy error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    console.error('AI Proxy error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }

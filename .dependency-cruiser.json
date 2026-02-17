@@ -1,0 +1,60 @@
+{
+  "forbidden": [
+    {
+      "name": "no-circular",
+      "severity": "error",
+      "from": {},
+      "to": {
+        "circular": true
+      }
+    },
+    {
+      "name": "no-orphans",
+      "severity": "warn",
+      "from": {
+        "orphan": true,
+        "pathNot": ["^src/vite-env.d.ts$"]
+      },
+      "to": {}
+    },
+    {
+      "name": "domain-no-imports-from-others",
+      "severity": "error",
+      "from": {
+        "path": "^src/domain"
+      },
+      "to": {
+        "path": "^src/(infrastructure|application|presentation)"
+      }
+    },
+    {
+      "name": "infrastructure-no-imports-from-presentation",
+      "severity": "error",
+      "from": {
+        "path": "^src/infrastructure"
+      },
+      "to": {
+        "path": "^src/presentation"
+      }
+    },
+    {
+      "name": "application-no-imports-from-presentation",
+      "severity": "error",
+      "from": {
+        "path": "^src/application"
+      },
+      "to": {
+        "path": "^src/presentation"
+      }
+    }
+  ],
+  "options": {
+    "doNotFollow": {
+      "path": "node_modules"
+    },
+    "tsPreCompilationDeps": true,
+    "tsConfig": {
+      "fileName": "tsconfig.json"
+    }
+  }
+}

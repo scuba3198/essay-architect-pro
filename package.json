@@ -5,31 +5,42 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:vercel": "vercel dev",
-    "build": "vite build",
-    "lint": "oxlint src",
-    "lint:fix": "oxlint --fix src",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "lint": "oxlint . --deny-warnings",
+    "format": "prettier . --write --plugin=@prettier/plugin-oxc",
+    "type-check": "tsc --noEmit",
+    "test:architecture": "dependency-cruiser src --include-only '^src' --config .dependency-cruiser.json",
+    "test": "vitest run",
+    "check": "run-s format lint type-check test test:architecture"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.89.0",
     "lucide-react": "^0.263.1",
+    "pino": "^10.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-helmet-async": "^2.0.5"
+    "react-helmet-async": "^2.0.5",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "oxlint": "latest",
+    "@prettier/plugin-oxc": "^0.1.3",
     "@tsconfig/strictest": "^2.0.8",
+    "@types/jsdom": "^27.0.0",
     "@types/node": "^25.2.3",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.14",
+    "dependency-cruiser": "^17.3.8",
     "dotenv": "^17.2.3",
+    "jsdom": "^28.1.0",
+    "npm-run-all": "^4.1.5",
+    "oxlint": "latest",
     "postcss": "^8.4.27",
+    "prettier": "^3.8.1",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.9.3",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vitest": "^4.0.18"
   }
 }
