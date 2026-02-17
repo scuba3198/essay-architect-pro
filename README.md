@@ -38,8 +38,8 @@ graph TD
     Infrastructure --> Domain
 
     %% Rules
-    Domain -.-> Infrastructure : Forbidden
-    Domain -.-> Presentation : Forbidden
+    Domain -. Forbidden .-> Infrastructure
+    Domain -. Forbidden .-> Presentation
 ```
 
 ### Layers
