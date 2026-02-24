@@ -235,7 +235,7 @@ export default async function handler(request: Request): Promise<Response> {
     }
 
     // Call Gemini API
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
     interface GeminiPayload {
       contents: { role?: string; parts: { text: string }[] }[];
