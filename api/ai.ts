@@ -240,10 +240,16 @@ export default async function handler(request: Request): Promise<Response> {
     interface GeminiPayload {
       contents: { role?: string; parts: { text: string }[] }[];
       system_instruction?: { parts: { text: string }[] };
+      generationConfig?: {
+        thinking_level?: 'minimal' | 'low' | 'medium' | 'high';
+      };
     }
 
     const payload: GeminiPayload = {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        thinking_level: 'low',
+      },
     };
 
     // Add system instruction if provided
