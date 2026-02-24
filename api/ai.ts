@@ -241,14 +241,18 @@ export default async function handler(request: Request): Promise<Response> {
       contents: { role?: string; parts: { text: string }[] }[];
       system_instruction?: { parts: { text: string }[] };
       generationConfig?: {
-        thinking_level?: 'minimal' | 'low' | 'medium' | 'high';
+        thinking_config?: {
+          thinking_level?: 'MINIMAL' | 'LOW' | 'MEDIUM' | 'HIGH';
+        };
       };
     }
 
     const payload: GeminiPayload = {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        thinking_level: 'low',
+        thinking_config: {
+          thinking_level: 'LOW',
+        },
       },
     };
 
