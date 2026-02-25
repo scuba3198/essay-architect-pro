@@ -232,6 +232,10 @@ const StepWizard: React.FC<StepWizardProps> = ({
         if (!isPaid) {
           onIncrementUsage();
         }
+      } else {
+        // Handle failure result
+        const error = result.error;
+        alert(`Autocomplete failed: ${error.message}`);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';

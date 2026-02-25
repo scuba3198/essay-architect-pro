@@ -24,7 +24,7 @@ export class AIClient {
   constructor(
     private readonly supabase: SupabaseClient,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   /**
    * Calls the secure AI API proxy.
@@ -65,7 +65,7 @@ export class AIClient {
           log.error({ err: turnstileError }, 'Turnstile verification failed');
           return err(
             new AppError(
-              'Bot verification unavailable (network restriction). Please log in to continue.',
+              'Bot verification unavailable (possibly blocked by your network/firewall). Please try a different network or log in to continue.',
               'TURNSTILE_ERROR',
               true,
             ),

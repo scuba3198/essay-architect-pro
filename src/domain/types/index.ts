@@ -25,7 +25,6 @@ export interface Essay {
 
 // Section / field key unions (for handleInputChange)
 export type EssaySectionKey = keyof Essay;
-export type EssayFieldKey<S extends EssaySectionKey> = keyof Essay[S];
 
 // ─── Topic Model ─────────────────────────────────────────
 export interface Topic {
@@ -68,20 +67,6 @@ export interface SessionValidation {
   wasLoggedOut: boolean;
 }
 
-export interface DeviceLimitResult {
-  success: boolean;
-  deactivatedCount: number;
-}
-
-export interface UserSession {
-  id: string;
-  user_id: string;
-  device_fingerprint: string;
-  session_token_hash?: string;
-  is_active: boolean;
-  created_at: string;
-  last_active_at: string;
-}
 
 // ─── Supabase User (re-export convenience) ───────────────
 export type { User } from '@supabase/supabase-js';

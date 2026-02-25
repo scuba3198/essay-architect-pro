@@ -31,6 +31,4 @@ export const PTEFeedbackSchema = z.object({
 
 export const ExaminerFeedbackSchema = z.union([IELTSFeedbackSchema, PTEFeedbackSchema]);
 
-export type IELTSFeedback = z.infer<typeof IELTSFeedbackSchema>;
-export type PTEFeedback = z.infer<typeof PTEFeedbackSchema>;
 export type ExaminerFeedback = z.infer<typeof ExaminerFeedbackSchema>;
