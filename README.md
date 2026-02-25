@@ -69,12 +69,10 @@ graph TD
 - `src/application/`: Orchestration of business logic using Use Cases.
 - `src/presentation/`: React components and UI logic.
 
-## Verification Suite
-
 Run the full verification suite with:
 
 ```bash
 npm run check
 ```
 
-This executes: `format` → `lint` → `type-check` → `test` → `test:architecture`.
+This executes: `format` → `lint` → `type-check` → `test` → `test:architecture` → `knip`.
