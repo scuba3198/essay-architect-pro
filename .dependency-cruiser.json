@@ -13,10 +13,7 @@
       "severity": "warn",
       "from": {
         "orphan": true,
-        "pathNot": [
-          "^src/vite-env.d.ts$",
-          "^src/globals.d.ts$"
-        ]
+        "pathNot": ["^src/vite-env.d.ts$", "^src/globals.d.ts$"]
       },
       "to": {}
     },
