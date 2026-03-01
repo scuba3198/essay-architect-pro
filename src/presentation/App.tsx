@@ -612,7 +612,6 @@ const App: React.FC = () => {
   };
 
   const handleTopicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (!isTimerRunning) setIsTimerRunning(true);
     const newQuestion = e.target.value;
     setTopic((prev) =>
       prev
