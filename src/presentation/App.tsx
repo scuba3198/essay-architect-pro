@@ -441,9 +441,28 @@ const App: React.FC = () => {
     };
   }, [verifyAccess]);
 
-  // Deferred Facebook Pixel Initialization
+  // Deferred Third-Party Analytics Initialization
   useEffect(() => {
-    const initFB = () => {
+    const initAnalytics = () => {
+      // 1. Google Tag Manager
+      const gtagScript = document.createElement('script');
+      gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-63RTLLNS0T';
+      gtagScript.async = true;
+      document.head.appendChild(gtagScript);
+
+      // @ts-ignore
+      window.dataLayer = window.dataLayer || [];
+      // @ts-ignore
+      function gtag() {
+        // @ts-ignore
+        window.dataLayer.push(arguments);
+      }
+      // @ts-ignore
+      gtag('js', new Date());
+      // @ts-ignore
+      gtag('config', 'G-63RTLLNS0T');
+
+      // 2. Facebook Pixel
       // oxlint-disable-next-line no-unused-expressions
       void ((f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) => {
         if (f.fbq) return;
@@ -472,9 +491,9 @@ const App: React.FC = () => {
     };
 
     if (window.requestIdleCallback) {
-      window.requestIdleCallback(initFB, { timeout: 2000 });
+      window.requestIdleCallback(initAnalytics, { timeout: 2000 });
     } else {
-      setTimeout(initFB, 2000);
+      setTimeout(initAnalytics, 2000);
     }
   }, []);
 
