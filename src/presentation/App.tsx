@@ -451,15 +451,16 @@ const App: React.FC = () => {
       document.head.appendChild(gtagScript);
 
       // @ts-ignore
-      window.dataLayer = window.dataLayer || [];
+      const dataLayer = window.dataLayer || [];
       // @ts-ignore
-      function gtag() {
-        // @ts-ignore
-        window.dataLayer.push(arguments);
+      window.dataLayer = dataLayer;
+      // @ts-ignore
+      function gtag(...args: any[]) {
+        dataLayer.push(args);
       }
       // @ts-ignore
+      window.gtag = gtag;
       gtag('js', new Date());
-      // @ts-ignore
       gtag('config', 'G-63RTLLNS0T');
 
       // 2. Facebook Pixel
