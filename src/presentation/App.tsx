@@ -20,7 +20,7 @@ import {
   Zap,
 } from 'lucide-react';
 import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react';
 
 const WhatsAppIcon: React.FC<{ size?: number; className?: string }> = ({
   size = 24,
@@ -46,19 +46,21 @@ const WhatsAppIcon: React.FC<{ size?: number; className?: string }> = ({
 import { LogOut, User } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import FeedbackButton from './components/FeedbackButton';
-import AboutModal from './components/modals/AboutModal';
-import AuthModal from './components/modals/AuthModal';
-import ExaminerModal from './components/modals/ExaminerModal';
-import FeedbackModal from './components/modals/FeedbackModal';
-import LimitExhaustedModal from './components/modals/LimitExhaustedModal';
-import PaymentModal from './components/modals/PaymentModal';
-import PricingModal from './components/modals/PricingModal';
-import PrivacyModal from './components/modals/PrivacyModal';
-import ToSModal from './components/modals/ToSModal';
 import PreviewSection from './components/PreviewSection';
 import StepWizard from './components/StepWizard';
 import TestimonialSection from './components/TestimonialSection';
 import TourTooltip from './components/TourTooltip';
+
+// Lazy load modals to improve initial bundle size and FCP
+const AboutModal = lazy(() => import('./components/modals/AboutModal'));
+const AuthModal = lazy(() => import('./components/modals/AuthModal'));
+const ExaminerModal = lazy(() => import('./components/modals/ExaminerModal'));
+const FeedbackModal = lazy(() => import('./components/modals/FeedbackModal'));
+const LimitExhaustedModal = lazy(() => import('./components/modals/LimitExhaustedModal'));
+const PaymentModal = lazy(() => import('./components/modals/PaymentModal'));
+const PricingModal = lazy(() => import('./components/modals/PricingModal'));
+const PrivacyModal = lazy(() => import('./components/modals/PrivacyModal'));
+const ToSModal = lazy(() => import('./components/modals/ToSModal'));
 import { generateSecureToken } from '../infrastructure/security/crypto-utils';
 import { DeviceService } from '../infrastructure/device/device-id';
 import { RegisterSessionUseCase } from '../application/session/RegisterSessionUseCase';
@@ -438,6 +440,43 @@ const App: React.FC = () => {
       subscription.unsubscribe();
     };
   }, [verifyAccess]);
+
+  // Deferred Facebook Pixel Initialization
+  useEffect(() => {
+    const initFB = () => {
+      // oxlint-disable-next-line no-unused-expressions
+      void ((f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) => {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          // oxlint-disable-next-line no-unused-expressions
+          n.callMethod
+            ? // biome-ignore lint/complexity/noArguments: Standard Facebook Pixel code
+              n.callMethod.apply(n, arguments)
+            : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      // @ts-ignore
+      fbq('init', '1404059491073088');
+      // @ts-ignore
+      fbq('track', 'PageView');
+    };
+
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(initFB, { timeout: 2000 });
+    } else {
+      setTimeout(initFB, 2000);
+    }
+  }, []);
 
   // Periodic session validation - detect when this device was logged out by another device
   useEffect(() => {
@@ -1090,89 +1129,91 @@ const App: React.FC = () => {
         )}
       </header>
 
-      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
-      {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
+      <Suspense fallback={null}>
+        {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+        {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
 
-      {showAuth && (
-        <AuthModal
-          onClose={() => {
-            setShowAuth(false);
-            setAuthMode('login');
-          }}
-          onAuthSuccess={(user) => verifyAccess(user, true)}
-          initialMode={authMode}
-          registerSessionUseCase={registerSessionUseCase}
-        />
-      )}
-      {showExaminer && (
-        <ExaminerModal
-          isOpen={showExaminer}
-          onClose={() => setShowExaminer(false)}
-          essayText={generateFullEssay()}
-          isPaid={isPaid}
-          onIncrementUsage={incrementExaminerUsage}
-          examinerUsageCount={examinerUsageCount}
-          onLimitReached={() => {
-            setShowExaminer(false);
-            setShowLimitModal(true);
-          }}
-          aiClient={aiClient}
-        />
-      )}
+        {showAuth && (
+          <AuthModal
+            onClose={() => {
+              setShowAuth(false);
+              setAuthMode('login');
+            }}
+            onAuthSuccess={(user) => verifyAccess(user, true)}
+            initialMode={authMode}
+            registerSessionUseCase={registerSessionUseCase}
+          />
+        )}
+        {showExaminer && (
+          <ExaminerModal
+            isOpen={showExaminer}
+            onClose={() => setShowExaminer(false)}
+            essayText={generateFullEssay()}
+            isPaid={isPaid}
+            onIncrementUsage={incrementExaminerUsage}
+            examinerUsageCount={examinerUsageCount}
+            onLimitReached={() => {
+              setShowExaminer(false);
+              setShowLimitModal(true);
+            }}
+            aiClient={aiClient}
+          />
+        )}
 
-      {showPricing && (
-        <PricingModal
-          onClose={() => setShowPricing(false)}
-          activePlan={activePlan}
-          isLoggedIn={!!user}
-          onSelectPlan={(plan) => {
-            if (!user) {
+        {showPricing && (
+          <PricingModal
+            onClose={() => setShowPricing(false)}
+            activePlan={activePlan}
+            isLoggedIn={!!user}
+            onSelectPlan={(plan) => {
+              if (!user) {
+                setShowPricing(false);
+                setShowAuth(true);
+              } else {
+                setSelectedPlan(plan);
+                setShowPricing(false);
+                setShowPayment(true);
+              }
+            }}
+            onShowAuth={() => {
               setShowPricing(false);
               setShowAuth(true);
-            } else {
-              setSelectedPlan(plan);
-              setShowPricing(false);
-              setShowPayment(true);
-            }
-          }}
-          onShowAuth={() => {
-            setShowPricing(false);
-            setShowAuth(true);
-          }}
+            }}
+          />
+        )}
+
+        {showPayment && (
+          <PaymentModal
+            plan={selectedPlan as Plan}
+            userEmail={userEmail}
+            user={user}
+            onClose={() => setShowPayment(false)}
+            onSuccess={() => {
+              setShowPayment(false);
+              // Removed setPendingEmail (undefined) and setShowPricing (redundant)
+              // User stays on current page after submission
+              alert('Screenshot received! We will verify it within 1-2 hours.');
+            }}
+            aiClient={aiClient}
+          />
+        )}
+
+        <LimitExhaustedModal
+          isOpen={showLimitModal}
+          onClose={() => setShowLimitModal(false)}
+          onUpgrade={handleUpgradeFromLimit}
         />
-      )}
 
-      {showPayment && (
-        <PaymentModal
-          plan={selectedPlan as Plan}
-          userEmail={userEmail}
-          user={user}
-          onClose={() => setShowPayment(false)}
-          onSuccess={() => {
-            setShowPayment(false);
-            // Removed setPendingEmail (undefined) and setShowPricing (redundant)
-            // User stays on current page after submission
-            alert('Screenshot received! We will verify it within 1-2 hours.');
-          }}
-          aiClient={aiClient}
-        />
-      )}
+        {showFeedback && (
+          <FeedbackModal
+            onClose={() => setShowFeedback(false)}
+            initialEmail={userEmail}
+            deviceService={deviceService}
+          />
+        )}
 
-      <LimitExhaustedModal
-        isOpen={showLimitModal}
-        onClose={() => setShowLimitModal(false)}
-        onUpgrade={handleUpgradeFromLimit}
-      />
-
-      {showFeedback && (
-        <FeedbackModal
-          onClose={() => setShowFeedback(false)}
-          initialEmail={userEmail}
-          deviceService={deviceService}
-        />
-      )}
-
-      {showToS && <ToSModal onClose={() => setShowToS(false)} />}
+        {showToS && <ToSModal onClose={() => setShowToS(false)} />}
+      </Suspense>
 
       <main className="flex-1 overflow-hidden relative">
         <FeedbackButton onClick={() => setShowFeedback(true)} />

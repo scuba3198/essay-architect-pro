@@ -67,6 +67,5 @@ export interface SessionValidation {
   wasLoggedOut: boolean;
 }
 
-
 // ─── Supabase User (re-export convenience) ───────────────
 export type { User } from '@supabase/supabase-js';

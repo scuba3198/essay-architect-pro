@@ -24,7 +24,7 @@ export class AIClient {
   constructor(
     private readonly supabase: SupabaseClient,
     private readonly logger: Logger,
-  ) { }
+  ) {}
 
   /**
    * Calls the secure AI API proxy.
