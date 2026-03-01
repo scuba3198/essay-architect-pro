@@ -33,7 +33,7 @@ let loadPromise: Promise<void> | null = null;
 /**
  * Load the Turnstile script if not already loaded
  */
-export function loadTurnstileScript(): Promise<void> {
+function loadTurnstileScript(): Promise<void> {
   if (turnstileScriptLoaded) {
     return Promise.resolve();
   }

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const IELTSFeedbackSchema = z.object({
+const IELTSFeedbackSchema = z.object({
   overallScore: z.number().min(0).max(9),
   breakdown: z.object({
     TR: z.number(),
@@ -13,7 +13,7 @@ export const IELTSFeedbackSchema = z.object({
   weakness: z.string().nullable(),
 });
 
-export const PTEFeedbackSchema = z.object({
+const PTEFeedbackSchema = z.object({
   overallScore: z.number().min(10).max(90),
   breakdown: z.object({
     Content: z.number(),

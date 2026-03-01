@@ -1,0 +1,856 @@
+Score: 0.84
+--- AUDITS ---
+button-name: undefined (Score: 0)
+[
+  {
+    "node": {
+      "boundingRect": {
+        "bottom": 45,
+        "height": 18,
+        "left": 266,
+        "right": 284,
+        "top": 27,
+        "width": 18
+      },
+      "explanation": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "lhId": "1-0-BUTTON",
+      "nodeLabel": "div.flex > div.min-w-0 > h1.text-lg > button.text-stone-400",
+      "path": "1,HTML,1,BODY,1,DIV,0,DIV,0,HEADER,0,DIV,1,DIV,0,H1,1,BUTTON",
+      "selector": "div.flex > div.min-w-0 > h1.text-lg > button.text-stone-400",
+      "snippet": "<button type=\"button\" class=\"text-stone-400 hover:text-stone-900 transition-colors\">",
+      "type": "node"
+    }
+  },
+  {
+    "node": {
+      "boundingRect": {
+        "bottom": 56,
+        "height": 40,
+        "left": 356,
+        "right": 396,
+        "top": 16,
+        "width": 40
+      },
+      "explanation": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+      "lhId": "1-1-BUTTON",
+      "nodeLabel": "div#root > div.h-[100dvh] > header.bg-[#f4f1ea] > button.md:hidden",
+      "path": "1,HTML,1,BODY,1,DIV,0,DIV,0,HEADER,2,BUTTON",
+      "selector": "div#root > div.h-[100dvh] > header.bg-[#f4f1ea] > button.md:hidden",
+      "snippet": "<button type=\"button\" class=\"md:hidden text-stone-900 p-2 shrink-0\">",
+      "type": "node"
+    }
+  }
+]
+cache-insight: Est savings of 194 KiB (Score: 0.5)
+[
+  {
+    "cacheLifetimeMs": 1200000,
+    "totalBytes": 125356,
+    "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+    "wastedBytes": 110731.13333333333
+  },
+  {
+    "cacheLifetimeMs": 1200000,
+    "totalBytes": 99441,
+    "url": "https://connect.facebook.net/en_US/fbevents.js",
+    "wastedBytes": 87839.55
+  },
+  {
+    "cacheLifetimeMs": 0,
+    "totalBytes": 449,
+    "url": "https://www.facebook.com/tr/?id=1404059491073088&ev=PageView&dl=https%3A%2F%2Fpro.essay-architect.uk%2F&rl=&if=false&ts=1772391750842&sw=412&sh=823&v=2.9.272&r=stable&ec=0&o=12318&fbp=fb.1.1772391750831.598876086616050472&eid=ob3_plugin-set_6d27017de5f3be5a1790dd86f694d1bbdae077ac3f500b53efa34d88fde13030&ler=empty&pmd[title]=Essay%20Architect%20PRO%20%E2%80%A2%20Master%20Academic%20Writing&pmd[locale]=en&pmd[description]=The%20ultimate%20AI-powered%20essay%20writing%20and%20grading%20tool%20for%20IELTS%20and%20PTE.%20Practice%20with%20instant%20feedback%2C%20strict%20scoring%2C%20and%20structural%20guidance.&pmd[keywords]=IELTS%20writing%20tool%2C%20PTE%20essay%20grader%2C%20AI%20essay%20feedback%2C%20academic%20writing%20assistant%2C%20essay%20structure%20builder&plt=744.5&it=1772391750529&coo=false&ap[currency]=USD&ap[contents]=%5B%7B%22item_price%22%3A0%7D%5D&cf=1&expv2[0]=pl1&expv2[1]=el3&expv2[2]=bc1&expv2[3]=ra2&expv2[4]=rp2&expv2[5]=im1&expv2[6]=hf1&rqm=GET",
+    "wastedBytes": 449
+  }
+]
+color-contrast: undefined (Score: 0)
+[
+  {
+    "node": {
+      "boundingRect": {
+        "bottom": 788,
+        "height": 15,
+        "left": 55,
+        "right": 269,
+        "top": 773,
+        "width": 214
+      },
+      "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 4.25 (foreground color: #78716c, background color: #f4f1ea, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1",
+      "lhId": "1-2-P",
+      "nodeLabel": "ARCHITECTED BY MUMUKSHU D.C.",
+      "path": "1,HTML,1,BODY,1,DIV,0,DIV,2,FOOTER,0,DIV,0,P",
+      "selector": "div.h-[100dvh] > footer.bg-[#f4f1ea] > div.flex > p.text-[10px]",
+      "snippet": "<p class=\"text-[10px] font-bold uppercase tracking-widest text-stone-500\">",
+      "type": "node"
+    },
+    "subItems": {
+      "items": [
+        {
+          "relatedNode": {
+            "boundingRect": {
+              "bottom": 823,
+              "height": 65,
+              "left": 0,
+              "right": 412,
+              "top": 758,
+              "width": 412
+            },
+            "lhId": "1-3-FOOTER",
+            "nodeLabel": "ARCHITECTED BY MUMUKSHU D.C.\n\nPRIVACY POLICY\nTERMS OF SERVICE",
+            "path": "1,HTML,1,BODY,1,DIV,0,DIV,2,FOOTER",
+            "selector": "body > div#root > div.h-[100dvh] > footer.bg-[#f4f1ea]",
+            "snippet": "<footer class=\"bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-r…\">",
+            "type": "node"
+          }
+        }
+      ],
+      "type": "subitems"
+    }
+  },
+  {
+    "node": {
+      "boundingRect": {
+        "bottom": 811,
+        "height": 15,
+        "left": 90,
+        "right": 191,
+        "top": 796,
+        "width": 101
+      },
+      "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #a8a29e, background color: #f4f1ea, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1",
+      "lhId": "1-4-BUTTON",
+      "nodeLabel": "PRIVACY POLICY",
+      "path": "1,HTML,1,BODY,1,DIV,0,DIV,2,FOOTER,1,DIV,0,BUTTON",
+      "selector": "div.h-[100dvh] > footer.bg-[#f4f1ea] > div.flex > button.text-[10px]",
+      "snippet": "<button class=\"text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-…\">",
+      "type": "node"
+    },
+    "subItems": {
+      "items": [
+        {
+          "relatedNode": {
+            "boundingRect": {
+              "bottom": 823,
+              "height": 65,
+              "left": 0,
+              "right": 412,
+              "top": 758,
+              "width": 412
+            },
+            "lhId": "1-3-FOOTER",
+            "nodeLabel": "ARCHITECTED BY MUMUKSHU D.C.\n\nPRIVACY POLICY\nTERMS OF SERVICE",
+            "path": "1,HTML,1,BODY,1,DIV,0,DIV,2,FOOTER",
+            "selector": "body > div#root > div.h-[100dvh] > footer.bg-[#f4f1ea]",
+            "snippet": "<footer class=\"bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-r…\">",
+            "type": "node"
+          }
+        }
+      ],
+      "type": "subitems"
+    }
+  },
+  {
+    "node": {
+      "boundingRect": {
+        "bottom": 811,
+        "height": 15,
+        "left": 207,
+        "right": 323,
+        "top": 796,
+        "width": 116
+      },
+      "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #a8a29e, background color: #f4f1ea, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1",
+      "lhId": "1-5-BUTTON",
+      "nodeLabel": "TERMS OF SERVICE",
+      "path": "1,HTML,1,BODY,1,DIV,0,DIV,2,FOOTER,1,DIV,1,BUTTON",
+      "selector": "div.h-[100dvh] > footer.bg-[#f4f1ea] > div.flex > button.text-[10px]",
+      "snippet": "<button class=\"text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-…\">",
+      "type": "node"
+    },
+    "subItems": {
+      "items": [
+        {
+          "relatedNode": {
+            "boundingRect": {
+              "bottom": 823,
+              "height": 65,
+              "left": 0,
+              "right": 412,
+              "top": 758,
+              "width": 412
+            },
+            "lhId": "1-3-FOOTER",
+            "nodeLabel": "ARCHITECTED BY MUMUKSHU D.C.\n\nPRIVACY POLICY\nTERMS OF SERVICE",
+            "path": "1,HTML,1,BODY,1,DIV,0,DIV,2,FOOTER",
+            "selector": "body > div#root > div.h-[100dvh] > footer.bg-[#f4f1ea]",
+            "snippet": "<footer class=\"bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-r…\">",
+            "type": "node"
+          }
+        }
+      ],
+      "type": "subitems"
+    }
+  }
+]
+errors-in-console: undefined (Score: 0)
+[
+  {
+    "description": "[object Object]",
+    "source": "console.error",
+    "sourceLocation": {
+      "column": 29799,
+      "line": 32,
+      "type": "source-location",
+      "url": "https://pro.essay-architect.uk/assets/index-db32e5d0.js",
+      "urlProvider": "network"
+    }
+  },
+  {
+    "description": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "source": "network",
+    "sourceLocation": {
+      "column": 0,
+      "line": 0,
+      "type": "source-location",
+      "url": "https://ofmfmmkijmpkwvmduuex.supabase.co/rest/v1/usage_tracking?on_conflict=visitor_id&columns=%22visitor_id%22%2C%22usage_count%22%2C%22examiner_count%22%2C%22alias%22",
+      "urlProvider": "network"
+    }
+  },
+  {
+    "description": "SyntaxError: Unexpected identifier 'dataLayer'",
+    "source": "exception",
+    "sourceLocation": {
+      "column": 11,
+      "line": 60,
+      "type": "source-location",
+      "url": "https://pro.essay-architect.uk/",
+      "urlProvider": "network"
+    }
+  }
+]
+first-contentful-paint: 2.9 s (Score: 0.53)
+heading-order: undefined (Score: 0)
+[
+  {
+    "node": {
+      "boundingRect": {
+        "bottom": 2918,
+        "height": 28,
+        "left": 58,
+        "right": 348,
+        "top": 2890,
+        "width": 290
+      },
+      "explanation": "Fix any of the following:\n  Heading order invalid",
+      "lhId": "1-6-H4",
+      "nodeLabel": "Aarav Sharma",
+      "path": "1,HTML,1,BODY,1,DIV,0,DIV,1,MAIN,1,DIV,1,SECTION,0,DIV,1,DIV,0,DIV,2,DIV,0,H4",
+      "selector": "div.grid > div.bg-stone-100 > div > h4.font-serif",
+      "snippet": "<h4 class=\"font-serif font-black text-lg text-stone-900\">",
+      "type": "node"
+    }
+  }
+]
+interactive: 5.2 s (Score: 0.74)
+largest-contentful-paint: 3.6 s (Score: 0.6)
+legacy-javascript-insight: Est savings of 35 KiB (Score: 0.5)
+[
+  {
+    "subItems": {
+      "items": [
+        {
+          "location": {
+            "column": 1829,
+            "line": 19,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "@babel/plugin-transform-classes"
+        },
+        {
+          "location": {
+            "column": 83301,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "@babel/plugin-transform-regenerator"
+        },
+        {
+          "location": {
+            "column": 3382,
+            "line": 46,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "@babel/plugin-transform-spread"
+        },
+        {
+          "location": {
+            "column": 46013,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.from"
+        },
+        {
+          "location": {
+            "column": 46691,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.isArray"
+        },
+        {
+          "location": {
+            "column": 44992,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.concat"
+        },
+        {
+          "location": {
+            "column": 45417,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.filter"
+        },
+        {
+          "location": {
+            "column": 45680,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.find"
+        },
+        {
+          "location": {
+            "column": 45862,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.forEach"
+        },
+        {
+          "location": {
+            "column": 46180,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.includes"
+        },
+        {
+          "location": {
+            "column": 46491,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.indexOf"
+        },
+        {
+          "location": {
+            "column": 47326,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.map"
+        },
+        {
+          "location": {
+            "column": 47964,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.slice"
+        },
+        {
+          "location": {
+            "column": 48463,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.some"
+        },
+        {
+          "location": {
+            "column": 49886,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.create"
+        },
+        {
+          "location": {
+            "column": 50236,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.entries"
+        },
+        {
+          "location": {
+            "column": 50406,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.getOwnPropertyDescriptor"
+        },
+        {
+          "location": {
+            "column": 50597,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.getOwnPropertyDescriptors"
+        },
+        {
+          "location": {
+            "column": 50869,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.getPrototypeOf"
+        },
+        {
+          "location": {
+            "column": 51046,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.keys"
+        },
+        {
+          "location": {
+            "column": 51165,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.setPrototypeOf"
+        },
+        {
+          "location": {
+            "column": 51284,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Object.values"
+        },
+        {
+          "location": {
+            "column": 51436,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Promise.allSettled"
+        },
+        {
+          "location": {
+            "column": 51962,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Promise.any"
+        },
+        {
+          "location": {
+            "column": 57215,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "Reflect.construct"
+        },
+        {
+          "location": {
+            "column": 57950,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "String.prototype.endsWith"
+        },
+        {
+          "location": {
+            "column": 58268,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "String.prototype.includes"
+        },
+        {
+          "location": {
+            "column": 58999,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "String.prototype.startsWith"
+        },
+        {
+          "location": {
+            "column": 59290,
+            "line": 77,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+            "urlProvider": "network"
+          },
+          "signal": "String.prototype.trim"
+        }
+      ],
+      "type": "subitems"
+    },
+    "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+    "wastedBytes": 22653
+  },
+  {
+    "subItems": {
+      "items": [
+        {
+          "location": {
+            "column": 6382,
+            "line": 23,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "@babel/plugin-transform-classes"
+        },
+        {
+          "location": {
+            "column": 2819,
+            "line": 23,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "@babel/plugin-transform-regenerator"
+        },
+        {
+          "location": {
+            "column": 5990,
+            "line": 23,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "@babel/plugin-transform-spread"
+        },
+        {
+          "location": {
+            "column": 15837,
+            "line": 279,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "Array.from"
+        },
+        {
+          "location": {
+            "column": 2722,
+            "line": 279,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.filter"
+        },
+        {
+          "location": {
+            "column": 21490,
+            "line": 279,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.find"
+        },
+        {
+          "location": {
+            "column": 19706,
+            "line": 279,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.includes"
+        },
+        {
+          "location": {
+            "column": 2905,
+            "line": 279,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "Array.prototype.map"
+        },
+        {
+          "location": {
+            "column": 6104,
+            "line": 279,
+            "type": "source-location",
+            "url": "https://connect.facebook.net/en_US/fbevents.js",
+            "urlProvider": "network"
+          },
+          "signal": "String.prototype.startsWith"
+        }
+      ],
+      "type": "subitems"
+    },
+    "url": "https://connect.facebook.net/en_US/fbevents.js",
+    "wastedBytes": 12842
+  }
+]
+max-potential-fid: 140 ms (Score: 0.86)
+network-dependency-tree-insight: undefined (Score: 0)
+[
+  {
+    "type": "list-section",
+    "value": {
+      "chains": {
+        "204753FE137CCA4A1AD4EA306468651E": {
+          "children": {
+            "68.2": {
+              "children": {
+                "68.22": {
+                  "children": {},
+                  "isLongest": true,
+                  "navStartToEndTime": 799,
+                  "transferSize": 49244,
+                  "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2"
+                },
+                "68.47": {
+                  "children": {},
+                  "navStartToEndTime": 798,
+                  "transferSize": 22732,
+                  "url": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_qiTXtHA-X-oE0o.woff2"
+                },
+                "68.51": {
+                  "children": {},
+                  "navStartToEndTime": 799,
+                  "transferSize": 39272,
+                  "url": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgEM86xQ.woff2"
+                }
+              },
+              "isLongest": true,
+              "navStartToEndTime": 140,
+              "transferSize": 1726,
+              "url": "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;700&display=swap"
+            },
+            "68.4": {
+              "children": {},
+              "navStartToEndTime": 705,
+              "transferSize": 28092,
+              "url": "https://pro.essay-architect.uk/assets/index-db32e5d0.js"
+            },
+            "68.8": {
+              "children": {},
+              "navStartToEndTime": 706,
+              "transferSize": 9059,
+              "url": "https://pro.essay-architect.uk/assets/index-b34f30f3.css"
+            }
+          },
+          "isLongest": true,
+          "navStartToEndTime": 137,
+          "transferSize": 3064,
+          "url": "https://pro.essay-architect.uk/"
+        }
+      },
+      "longestChain": {
+        "duration": 799
+      },
+      "type": "network-tree"
+    }
+  },
+  {
+    "description": "[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The following are the origins that the page preconnected to.",
+    "title": "Preconnected origins",
+    "type": "list-section",
+    "value": {
+      "headings": [
+        {
+          "key": "origin",
+          "label": "Origin",
+          "subItemsHeading": {
+            "key": "warning"
+          },
+          "valueType": "text"
+        },
+        {
+          "key": "source",
+          "label": "Source",
+          "valueType": "node"
+        }
+      ],
+      "items": [
+        {
+          "origin": "https://fonts.googleapis.com/",
+          "source": {
+            "boundingRect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0
+            },
+            "lhId": "page-1-LINK",
+            "nodeLabel": "head > link",
+            "path": "1,HTML,0,HEAD,25,LINK",
+            "selector": "head > link",
+            "snippet": "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">",
+            "type": "node"
+          },
+          "subItems": {
+            "items": [],
+            "type": "subitems"
+          }
+        },
+        {
+          "origin": "https://fonts.gstatic.com/",
+          "source": {
+            "boundingRect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0
+            },
+            "lhId": "page-2-LINK",
+            "nodeLabel": "head > link",
+            "path": "1,HTML,0,HEAD,26,LINK",
+            "selector": "head > link",
+            "snippet": "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin=\"\">",
+            "type": "node"
+          },
+          "subItems": {
+            "items": [],
+            "type": "subitems"
+          }
+        },
+        {
+          "origin": "https://connect.facebook.net/",
+          "source": {
+            "boundingRect": {
+              "bottom": 0,
+              "height": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
+              "width": 0
+            },
+            "lhId": "page-3-LINK",
+            "nodeLabel": "head > link",
+            "path": "1,HTML,0,HEAD,27,LINK",
+            "selector": "head > link",
+            "snippet": "<link rel=\"preconnect\" href=\"https://connect.facebook.net\">",
+            "type": "node"
+          },
+          "subItems": {
+            "items": [],
+            "type": "subitems"
+          }
+        }
+      ],
+      "type": "table"
+    }
+  },
+  {
+    "description": "Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.",
+    "title": "Preconnect candidates",
+    "type": "list-section",
+    "value": {
+      "type": "text",
+      "value": "No additional origins are good candidates for preconnecting"
+    }
+  }
+]
+render-blocking-insight: Est savings of 1,220 ms (Score: 0)
+[
+  {
+    "totalBytes": 9059,
+    "url": "https://pro.essay-architect.uk/assets/index-b34f30f3.css",
+    "wastedMs": 172
+  },
+  {
+    "totalBytes": 1726,
+    "url": "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;700&display=swap",
+    "wastedMs": 780
+  }
+]
+speed-index: 2.9 s (Score: 0.95)
+total-blocking-time: 130 ms (Score: 0.96)
+unused-javascript: Est savings of 183 KiB (Score: 0)
+[
+  {
+    "totalBytes": 150623,
+    "url": "https://www.googletagmanager.com/gtag/js?id=G-63RTLLNS0T",
+    "wastedBytes": 80303,
+    "wastedPercent": 53.31357504308405
+  },
+  {
+    "totalBytes": 45458,
+    "url": "https://pro.essay-architect.uk/assets/supabase-63fd4ddc.js",
+    "wastedBytes": 36562,
+    "wastedPercent": 80.4311115525976
+  },
+  {
+    "totalBytes": 121559,
+    "url": "https://connect.facebook.net/signals/config/1404059491073088?v=2.9.272&r=stable&domain=pro.essay-architect.uk&hme=243a8305e15c8bf3a50c0d350a428553388d507240cf13e95dd0abfb8651365d&ex_m=100%2C192%2C141%2C22%2C69%2C70%2C134%2C65%2C64%2C11%2C149%2C86%2C16%2C128%2C121%2C72%2C75%2C127%2C146%2C151%2C8%2C4%2C5%2C7%2C6%2C3%2C87%2C97%2C152%2C157%2C206%2C59%2C173%2C174%2C52%2C250%2C30%2C71%2C218%2C217%2C216%2C23%2C32%2C99%2C58%2C10%2C60%2C93%2C94%2C95%2C101%2C124%2C31%2C29%2C126%2C123%2C122%2C142%2C73%2C145%2C143%2C144%2C47%2C57%2C117%2C15%2C148%2C42%2C238%2C239%2C237%2C26%2C27%2C28%2C45%2C135%2C74%2C108%2C18%2C20%2C41%2C37%2C39%2C38%2C80%2C88%2C92%2C106%2C133%2C136%2C43%2C107%2C24%2C21%2C113%2C66%2C35%2C138%2C137%2C139%2C130%2C129%2C25%2C34%2C56%2C105%2C147%2C67%2C17%2C140%2C110%2C78%2C63%2C19%2C81%2C82%2C33%2C262%2C199%2C188%2C189%2C187%2C265%2C257%2C49%2C200%2C103%2C125%2C77%2C115%2C51%2C44%2C46%2C109%2C114%2C120%2C55%2C61%2C50%2C53%2C96%2C150%2C1%2C118%2C14%2C116%2C12%2C2%2C54%2C89%2C62%2C112%2C85%2C84%2C153%2C154%2C90%2C91%2C9%2C119%2C98%2C48%2C131%2C83%2C76%2C68%2C111%2C102%2C40%2C132%2C0%2C79%2C36%2C104%2C13%2C155",
+    "wastedBytes": 36351,
+    "wastedPercent": 29.903621567132987
+  }
+]

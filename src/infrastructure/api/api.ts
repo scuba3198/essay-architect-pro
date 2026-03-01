@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from 'pino';
 import { Result, ok, err } from '../../domain/result';
-import { AppError, AuthenticationError, NetworkError } from '../../domain/error';
+import { AppError } from '../../domain/error';
 import { generateCorrelationId } from '../logging/correlation';
 import { getTurnstileToken } from '../security/turnstile';
 
@@ -88,7 +88,11 @@ export class AIClient {
         if (response.status === 401) {
           log.warn('Authentication failed');
           return err(
-            new AuthenticationError('Authentication required. Please log in to continue.'),
+            new AppError(
+              'Authentication required. Please log in to continue.',
+              'AUTH_ERROR',
+              false,
+            ),
           );
         }
         if (response.status === 429) {
@@ -127,7 +131,13 @@ export class AIClient {
       return ok(data.text);
     } catch (error) {
       log.error({ err: error }, 'Pro AI Engine network failure');
-      return err(new NetworkError(error instanceof Error ? error.message : 'Network failure'));
+      return err(
+        new AppError(
+          error instanceof Error ? error.message : 'Network failure',
+          'NETWORK_ERROR',
+          true,
+        ),
+      );
     }
   }
 }
