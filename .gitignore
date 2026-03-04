@@ -126,3 +126,5 @@ dist
 .claude/
 .codex/
 .cursor/
+.agent/
+.agents/
