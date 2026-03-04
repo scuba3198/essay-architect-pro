@@ -114,6 +114,7 @@ export class RegisterSessionUseCase {
             {
               user_id: userId,
               visitor_id: visitorId,
+              device_fingerprint: visitorId, // Satisfy legacy NOT NULL database constraint
               session_token: sessionToken,
               is_active: true,
             },
