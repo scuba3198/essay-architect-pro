@@ -4,8 +4,6 @@
  * Generates a stable ID based on the browser's hardware and software signature.
  */
 
-import { Logger } from 'pino';
-
 const DEVICE_ID_KEY = 'essay_architect_device_id';
 
 declare global {
@@ -14,51 +12,84 @@ declare global {
   }
 }
 
+import { Effect } from 'effect';
+import { AppError } from '../../domain/error';
+
 /**
  * Service for device identification and fingerprinting.
  */
 export class DeviceService {
-  constructor(private readonly logger: Logger) {}
-
   /**
    * Generates or retrieves a stable visitor ID.
-   * @returns {Promise<string>} - The unique visitor ID
+   * @returns {Effect.Effect<string, AppError>} - The unique visitor ID
    */
-  public async getVisitorID(): Promise<string> {
-    // Check localStorage first for cached device ID
-    const cachedId = localStorage.getItem(DEVICE_ID_KEY);
-    if (cachedId) {
-      return cachedId;
-    }
+  public getVisitorID(): Effect.Effect<string, AppError> {
+    const program = Effect.gen(this, function* () {
+      // Check localStorage first for cached device ID
+      const cachedId = yield* Effect.try({
+        try: () => localStorage.getItem(DEVICE_ID_KEY),
+        catch: (e) =>
+          new AppError({
+            message: `LocalStorage read failed: ${e}`,
+            code: 'STORAGE_ERROR',
+            shouldLog: true,
+          }),
+      }).pipe(Effect.catchAll(() => Effect.succeed(null)));
 
-    this.logger.debug('Generating new device fingerprint');
+      if (cachedId) {
+        return cachedId;
+      }
 
-    // Generate new fingerprint if not cached
-    const components: (string | number | undefined)[] = [
-      navigator.userAgent,
-      navigator.language,
-      new Date().getTimezoneOffset(),
-      `${window.screen.width}x${window.screen.height}`,
-      window.screen.colorDepth,
-      navigator.hardwareConcurrency,
-      navigator.deviceMemory,
-      // Canvas Fingerprinting
-      this.getCanvasFingerprint(),
-    ];
+      yield* Effect.logDebug('Generating new device fingerprint');
 
-    const fingerprintString = components.join('###');
+      const canvasFingerprint = yield* this.getCanvasFingerprint();
 
-    // Hash the result for a clean ID
-    const msgUint8 = new TextEncoder().encode(fingerprintString);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      // Generate new fingerprint if not cached
+      const components: (string | number | undefined)[] = [
+        navigator.userAgent,
+        navigator.language,
+        new Date().getTimezoneOffset(),
+        `${window.screen.width}x${window.screen.height}`,
+        window.screen.colorDepth,
+        navigator.hardwareConcurrency,
+        navigator.deviceMemory,
+        // Canvas Fingerprinting
+        canvasFingerprint,
+      ];
 
-    // Cache in localStorage for consistency across tabs
-    localStorage.setItem(DEVICE_ID_KEY, hashHex);
+      const fingerprintString = components.join('###');
 
-    this.logger.info({ deviceId: hashHex }, 'New device fingerprint generated');
-    return hashHex;
+      // Hash the result for a clean ID
+      const msgUint8 = new TextEncoder().encode(fingerprintString);
+      const hashBuffer = yield* Effect.tryPromise({
+        try: () => crypto.subtle.digest('SHA-256', msgUint8),
+        catch: (e) =>
+          new AppError({
+            message: `Crypto digest failed: ${e}`,
+            code: 'CRYPTO_ERROR',
+            shouldLog: true,
+          }),
+      });
+
+      const hashArray = Array.from(new Uint8Array(hashBuffer as ArrayBuffer));
+      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+
+      // Cache in localStorage for consistency across tabs
+      yield* Effect.try({
+        try: () => localStorage.setItem(DEVICE_ID_KEY, hashHex),
+        catch: (e) =>
+          new AppError({
+            message: `LocalStorage write failed: ${e}`,
+            code: 'STORAGE_ERROR',
+            shouldLog: true,
+          }),
+      }).pipe(Effect.catchAll(() => Effect.succeed(void 0)));
+
+      yield* Effect.logInfo('New device fingerprint generated', { deviceId: hashHex });
+      return hashHex;
+    });
+
+    return program.pipe(Effect.annotateLogs({ service: 'DeviceService' }));
   }
 
   /**
@@ -66,29 +97,34 @@ export class DeviceService {
    * RATIONALE: Provides an additional layer of uniqueness to the device ID.
    * @private
    */
-  private getCanvasFingerprint(): string {
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return 'no-canvas';
+  private getCanvasFingerprint(): Effect.Effect<string, never> {
+    return Effect.try({
+      try: () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return 'no-canvas';
 
-      canvas.width = 200;
-      canvas.height = 50;
+        canvas.width = 200;
+        canvas.height = 50;
 
-      ctx.textBaseline = 'top';
-      ctx.font = "14px 'Arial'";
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = '#f60';
-      ctx.fillRect(125, 1, 62, 20);
-      ctx.fillStyle = '#069';
-      ctx.fillText('EssayArchitect_Ghost_v1', 2, 15);
-      ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-      ctx.fillText('EssayArchitect_Ghost_v1', 4, 17);
+        ctx.textBaseline = 'top';
+        ctx.font = "14px 'Arial'";
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('EssayArchitect_Ghost_v1', 2, 15);
+        ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+        ctx.fillText('EssayArchitect_Ghost_v1', 4, 17);
 
-      return canvas.toDataURL();
-    } catch (e) {
-      this.logger.warn({ err: e }, 'Canvas fingerprinting failed');
-      return 'canvas-err';
-    }
+        return canvas.toDataURL();
+      },
+      catch: (e) => {
+        return e;
+      },
+    }).pipe(
+      Effect.tapError((e) => Effect.logWarning('Canvas fingerprinting failed', { error: e })),
+      Effect.catchAll(() => Effect.succeed('canvas-err')),
+    );
   }
 }

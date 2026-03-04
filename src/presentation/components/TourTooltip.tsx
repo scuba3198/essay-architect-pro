@@ -41,69 +41,34 @@ const TourTooltip: React.FC<TourTooltipProps> = ({
         const TOOLTIP_WIDTH = 288; // w-72 = 18rem = 288px
         const PADDING = 16; // Screen edge padding
 
-        let top = 0;
-        let left = 0;
-        let arrowLeft = 0;
-        // let arrowTop = 0; // Not used in the new logic
-
         // Helper to clamp value
         const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 
         const centerX = rect.left + rect.width / 2;
-        // const centerY = rect.top + (rect.height / 2); // Not used in the new logic
 
         // Determine Vertical Position (Top/Bottom) with auto-flip
-        let isTop = position.toLowerCase().includes('top');
+        const initialIsTop = position.toLowerCase().includes('top');
+        const isTop = initialIsTop ? rect.top >= 200 : window.innerHeight - rect.bottom < 200;
 
-        // Preliminary calculation to check for overflow
-        if (isTop) {
-          // Check if there's enough space above
-          // We need roughly 150-200px. Let's start with check.
-          // rect.top is the distance from viewport top to element top.
-          if (rect.top < 200) {
-            isTop = false; // Flip to bottom
-          }
-        } else {
-          // Check if there's enough space below
-          const spaceBelow = window.innerHeight - rect.bottom;
-          if (spaceBelow < 200) {
-            isTop = true; // Flip to top
-          }
-        }
-
-        if (isTop) {
-          top = rect.top + window.scrollY - 24;
-        } else {
-          top = rect.bottom + window.scrollY + 24;
-        }
+        const top = isTop ? rect.top + window.scrollY - 24 : rect.bottom + window.scrollY + 24;
 
         // Determine Horizontal Position
-        // Default preference: Center aligned
-        let preferredLeft = centerX - TOOLTIP_WIDTH / 2;
-
-        // Adjust preference based on props if needed (e.g. left/right specific)
-        if (position === 'bottomLeft' || position === 'topLeft') {
-          // Align right edge of tooltip to right edge of target
-          preferredLeft = rect.right - TOOLTIP_WIDTH;
-        } else if (position === 'bottomRight' || position === 'topRight') {
-          // Align left edge of tooltip to lift edge of target
-          preferredLeft = rect.left;
-        }
+        const basePreferredLeft = centerX - TOOLTIP_WIDTH / 2;
+        const preferredLeft =
+          position === 'bottomLeft' || position === 'topLeft'
+            ? rect.right - TOOLTIP_WIDTH
+            : position === 'bottomRight' || position === 'topRight'
+              ? rect.left
+              : basePreferredLeft;
 
         // Clamp to Viewport
         const maxLeft = window.innerWidth - TOOLTIP_WIDTH - PADDING;
         const clampedLeft = clamp(preferredLeft, PADDING, maxLeft);
-
-        left = clampedLeft + window.scrollX;
+        const left = clampedLeft + window.scrollX;
 
         // Calculate Arrow Position (relative to tooltip)
-        // Arrow should point to centerX
-        // tooltip is at clampedLeft.
-        // arrowX = centerX - clampedLeft
-        arrowLeft = centerX - clampedLeft;
-
-        // Clamp arrow to be inside tooltip (don't detach)
-        arrowLeft = clamp(arrowLeft, 10, TOOLTIP_WIDTH - 10);
+        const arrowX = centerX - clampedLeft;
+        const arrowLeft = clamp(arrowX, 10, TOOLTIP_WIDTH - 10);
 
         setLayout({ top, left, arrowLeft, isTop });
       }

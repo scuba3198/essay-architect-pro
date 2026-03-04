@@ -21,12 +21,12 @@ graph TD
         AIC["AIClient (OpenAI/Supabase)"]
         DS["DeviceService (Fingerprinting)"]
         Sub["SupabaseClient"]
-        Log["Pino Logger"]
+        Log["JSON Logger"]
     end
 
     subgraph Domain
-        Result["Result Type"]
-        Schemas["Zod Schemas"]
+        Result["Effect Fail/CatchAll"]
+        Schemas["@effect/schema"]
     end
 
     App --> VSUC
@@ -55,12 +55,16 @@ graph TD
 
 ## Key Architectural Principles
 
-1.  **Dependency Injection**: All services in `infrastructure/` and `application/` use constructor injection. Singletons and global service locators are prohibited.
-2.  **Use Case Pattern**: Business logic is encapsulated in small, focused Use Case classes (e.g., `RegisterSessionUseCase`).
-3.  **Boundary Validation**: All external data (API responses, local storage) is validated using **Zod** schemas.
-4.  **Functional Error Handling**: Instead of throwing exceptions, services return a `Result<T, E>` object, forcing the caller to handle both success and failure states.
-5.  **Structured Logging**: `pino` is used for consistent, traceable logging across all layers.
-6.  **Traceability**: A `correlationId` is generated at the application layer to track the lifecycle of each request.
+1.  **Effect ecosystem as the Standard Library**: We use `Effect` for all control flow, dependency injection, concurrency, error handling, and validation.
+2.  **Zero Escape Hatches**: 
+    - No `throw` or `try/catch` (all errors are modeled in the type signature using `Effect.fail` and `AppError extends Data.TaggedError`).
+    - No `async/await` in production (all async boundaries managed via `Effect.gen` and `Effect.tryPromise`).
+    - No `let`, `Mutation`, or `for` loops (state is immutable; iteration is declarative).
+    - No `any` or loose indexing in production.
+    - No `Zod` (we exclusively use `@effect/schema`).
+3.  **Structured Observability**: A custom JSON logger replaces standard console output, providing machine-readable logs with timestamps, correlation IDs, and stable tags across all layers.
+4.  **Use Case Pattern**: Business logic is encapsulated in small, focused Use Case classes (e.g., `RegisterSessionUseCase`).
+5.  **Dependency Injection**: All services use full Effect constructor injection and Context providers. Singletons and global service locators are prohibited.
 
 ## Project Structure
 

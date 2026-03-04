@@ -1,104 +1,142 @@
+import { Effect } from 'effect';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Logger } from 'pino';
 import { DeviceService } from '../../infrastructure/device/device-id';
-import { SessionResult } from '../../domain/types';
+import { AppError } from '../../domain/error';
 
 /**
- * Hash a token using SHA-256 for secure storage.
- * @param token - The token to hash
- * @returns {Promise<string>} - Hex-encoded hash
- */
-const hashToken = async (token: string): Promise<string> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(token);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-};
-
-/**
- * Use Case for registering a new user session.
- * RATIONALE: Single-purpose class following the Command pattern for session orchestration.
- * Enforces a two-device limit using LRU eviction.
+ * Registers a new session for a user, enforcing the two-device limit.
  */
 export class RegisterSessionUseCase {
-  private readonly MAX_DEVICES = 2;
-
+  /**
+   * @param {SupabaseClient} supabase - Supabase client
+   * @param {DeviceService} deviceService - Device identification service
+   */
   constructor(
     private readonly supabase: SupabaseClient,
     private readonly deviceService: DeviceService,
-    private readonly logger: Logger,
   ) {}
 
   /**
-   * Registers a session for a user and device.
-   * @param userId - The user ID
-   * @param sessionToken - The raw session token to hash and store
+   * Executes the registration logic.
+   * RATIONALE: Centralizing session registration ensures that the two-device limit
+   * is always checked before allowing a new session.
    */
-  public async execute(userId: string, sessionToken: string): Promise<SessionResult> {
-    const log = this.logger.child({ userId, operation: 'RegisterSession' });
+  public execute(userId: string, sessionToken: string): Effect.Effect<void, AppError> {
+    const program = Effect.gen(this, function* () {
+      yield* Effect.logDebug('Starting session registration');
 
-    try {
-      const deviceFingerprint = await this.deviceService.getVisitorID();
-      const tokenHash = await hashToken(sessionToken);
+      const visitorId = yield* this.deviceService.getVisitorID();
 
-      log.debug({ deviceFingerprint }, 'Upserting session record');
+      // Get existing sessions
+      const { data: sessions, error: fetchError } = yield* Effect.tryPromise({
+        try: () =>
+          this.supabase
+            .from('user_sessions')
+            .select('*')
+            .eq('user_id', userId)
+            .order('last_active', { ascending: true }),
+        catch: (error) =>
+          new AppError({
+            message: `Failed to fetch sessions: ${error} `,
+            code: 'DATABASE_ERROR',
+            shouldLog: true,
+          }),
+      });
 
-      const { error } = await this.supabase.from('user_sessions').upsert(
-        {
-          user_id: userId,
-          device_fingerprint: deviceFingerprint,
-          session_token: tokenHash,
-          session_token_hash: tokenHash,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          last_active_at: new Date().toISOString(),
-        },
-        {
-          onConflict: 'user_id,device_fingerprint',
-        },
-      );
+      if (fetchError) {
+        return yield* Effect.fail(
+          new AppError({
+            message: fetchError.message,
+            code: 'DATABASE_ERROR',
+            shouldLog: true,
+          }),
+        );
+      }
 
-      if (error) throw error;
+      // Check if session already exists for this device
+      const existingSession = sessions?.find((s) => s.visitor_id === visitorId);
+      if (existingSession) {
+        yield* Effect.logInfo('Updating existing session');
+        const { error: updateError } = yield* Effect.tryPromise({
+          try: () =>
+            this.supabase
+              .from('user_sessions')
+              .update({
+                session_token: sessionToken,
+                last_active: new Date().toISOString(),
+                is_active: true,
+              })
+              .eq('id', existingSession.id),
+          catch: (error) =>
+            new AppError({
+              message: `Failed to update session: ${error} `,
+              code: 'DATABASE_ERROR',
+              shouldLog: true,
+            }),
+        });
 
-      await this.enforceDeviceLimit(userId, log);
+        if (updateError) {
+          return yield* Effect.fail(
+            new AppError({
+              message: updateError.message,
+              code: 'DATABASE_ERROR',
+              shouldLog: true,
+            }),
+          );
+        }
+        return;
+      }
 
-      return { success: true };
-    } catch (err: unknown) {
-      log.error({ err }, 'Failed to register session');
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      return { success: false, error: message };
-    }
-  }
+      // Enforce 2-device limit by removing oldest session if needed
+      if (sessions && sessions.length >= 2) {
+        const oldestSession = sessions[0];
+        if (oldestSession) {
+          yield* Effect.logInfo('Enforcing 2-device limit, removing oldest session', {
+            oldestSessionId: oldestSession.id,
+          });
+          yield* Effect.tryPromise({
+            try: () => this.supabase.from('user_sessions').delete().eq('id', oldestSession.id),
+            catch: (error) =>
+              new AppError({
+                message: `Failed to delete oldest session: ${error} `,
+                code: 'DATABASE_ERROR',
+                shouldLog: true,
+              }),
+          });
+        }
+      }
 
-  /**
-   * Enforces the two-device limit by deactivating the least recently used sessions.
-   * @private
-   */
-  private async enforceDeviceLimit(userId: string, log: Logger): Promise<void> {
-    const { data: sessions, error } = await this.supabase
-      .from('user_sessions')
-      .select('id, device_fingerprint, last_active_at')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .order('last_active_at', { ascending: false });
+      // Register new session
+      yield* Effect.logInfo('Registering new session');
+      const { error: insertError } = yield* Effect.tryPromise({
+        try: () =>
+          this.supabase.from('user_sessions').insert([
+            {
+              user_id: userId,
+              visitor_id: visitorId,
+              session_token: sessionToken,
+              is_active: true,
+            },
+          ]),
+        catch: (error) =>
+          new AppError({
+            message: `Failed to insert session: ${error} `,
+            code: 'DATABASE_ERROR',
+            shouldLog: true,
+          }),
+      });
 
-    if (error) throw error;
+      if (insertError) {
+        return yield* Effect.fail(
+          new AppError({
+            message: insertError.message,
+            code: 'DATABASE_ERROR',
+            shouldLog: true,
+          }),
+        );
+      }
+    });
 
-    if (!sessions || sessions.length <= this.MAX_DEVICES) {
-      return;
-    }
-
-    const sessionsToDeactivate = sessions.slice(this.MAX_DEVICES);
-    const idsToDeactivate = sessionsToDeactivate.map((s) => s.id);
-
-    const { error: updateError } = await this.supabase
-      .from('user_sessions')
-      .update({ is_active: false })
-      .in('id', idsToDeactivate);
-
-    if (updateError) throw updateError;
-
-    log.info({ deactivatedCount: idsToDeactivate.length }, 'Enforced device limit (LRU eviction)');
+    return program.pipe(Effect.annotateLogs({ userId, operation: 'RegisterSession' }));
   }
 }

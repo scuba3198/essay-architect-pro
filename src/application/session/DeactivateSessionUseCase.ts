@@ -1,44 +1,47 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { Logger } from 'pino';
-import { Result } from '../../domain/result';
+import { Effect } from 'effect';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { AppError } from '../../domain/error';
 
 /**
- * Use case for deactivating a user session (logout).
+ * Deactivates all sessions for a user (on logout).
  */
 export class DeactivateSessionUseCase {
-  constructor(
-    private readonly supabase: SupabaseClient,
-    private readonly logger: Logger,
-  ) {}
+  /**
+   * @param {SupabaseClient} supabase - Supabase client
+   */
+  constructor(private readonly supabase: SupabaseClient) {}
 
   /**
-   * Deactivates the current session for a specific user.
-   *
-   * @param userId - The ID of the user whose session should be deactivated.
-   * @returns A promise resolving to a Result indicating success or failure.
+   * Executes the deactivation logic.
+   * RATIONALE: Ensures that when a user logs out, their session records
+   * are marked as inactive to prevent them from counting against the device limit.
    */
-  async execute(userId: string): Promise<Result<{ success: boolean }>> {
-    this.logger.info({ userId }, 'Deactivating session');
+  public execute(userId: string): Effect.Effect<void, AppError> {
+    const program = Effect.gen(this, function* () {
+      yield* Effect.logInfo('Deactivating all sessions for user');
 
-    try {
-      const { error } = await this.supabase
-        .from('sessions')
-        .update({ is_active: false })
-        .eq('user_id', userId)
-        .eq('is_active', true);
+      const { error } = yield* Effect.tryPromise({
+        try: () =>
+          this.supabase.from('user_sessions').update({ is_active: false }).eq('user_id', userId),
+        catch: (err) =>
+          new AppError({
+            message: `Deactivation failed: ${err}`,
+            code: 'DATABASE_ERROR',
+            shouldLog: true,
+          }),
+      });
 
       if (error) {
-        this.logger.error({ userId, error }, 'Failed to deactivate session');
-        return { ok: false, error: new Error(error.message) };
+        return yield* Effect.fail(
+          new AppError({
+            message: error.message,
+            code: 'DATABASE_ERROR',
+            shouldLog: true,
+          }),
+        );
       }
+    });
 
-      this.logger.info({ userId }, 'Session deactivated successfully');
-      return { ok: true, value: { success: true } };
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error('Unknown error during session deactivation');
-      this.logger.error({ userId, error }, 'Unexpected error during session deactivation');
-      return { ok: false, error };
-    }
+    return program.pipe(Effect.annotateLogs({ userId, operation: 'DeactivateSession' }));
   }
 }

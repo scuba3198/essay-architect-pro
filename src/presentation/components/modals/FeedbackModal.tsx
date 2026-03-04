@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { DeviceService } from '../../../infrastructure/device/device-id';
 import { supabase } from '../../../infrastructure/db/supabase';
 
+import { Effect } from 'effect';
+import { appRuntime } from '../../../infrastructure/runtime';
+
 interface FeedbackModalProps {
   onClose: () => void;
   initialEmail?: string;
@@ -22,14 +25,14 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendDiscordNotification = async (feedbackData: {
+  const sendDiscordNotification = (feedbackData: {
     rating: number | null;
     email: string | null;
     comment: string | null;
     visitor_id: string;
   }) => {
     const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
-    if (!webhookUrl) return;
+    if (!webhookUrl) return Effect.succeed(void 0);
 
     const stars = feedbackData.rating ? '⭐'.repeat(feedbackData.rating) : 'No rating';
 
@@ -53,21 +56,26 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       timestamp: new Date().toISOString(),
     };
 
-    try {
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: '🔔 **New feedback architected!** @here',
-          embeds: [embed],
+    return Effect.tryPromise({
+      try: () =>
+        fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: '🔔 **New feedback architected!** @here',
+            embeds: [embed],
+          }),
         }),
-      });
-    } catch (err) {
-      console.error('Failed to send Discord notification:', err);
-    }
+      catch: (err) => new Error(`Discord notification failed: ${err}`),
+    }).pipe(
+      Effect.catchAll((err) => {
+        console.error(err);
+        return Effect.succeed(void 0);
+      }),
+    );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0 && !comment.trim()) {
       setError('Please provide a rating or a comment.');
@@ -77,32 +85,42 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     setIsSubmitting(true);
     setError(null);
 
-    try {
-      const visitorID = await deviceService.getVisitorID();
-      const feedbackRecord = {
-        visitor_id: visitorID,
-        rating: rating > 0 ? rating : null,
-        comment: comment.trim() || null,
-        email: email.trim() || null,
-      };
+    appRuntime.runPromise(
+      Effect.gen(function* () {
+        const visitorID = yield* deviceService.getVisitorID();
+        const feedbackRecord = {
+          visitor_id: visitorID,
+          rating: rating > 0 ? rating : null,
+          comment: comment.trim() || null,
+          email: email.trim() || null,
+        };
 
-      const { error: supabaseError } = await supabase.from('feedback').insert([feedbackRecord]);
+        const { error: supabaseError } = yield* Effect.tryPromise({
+          try: () => supabase.from('feedback').insert([feedbackRecord]),
+          catch: (err) => new Error(`Supabase insert failed: ${err}`),
+        });
 
-      if (supabaseError) throw supabaseError;
+        if (supabaseError) return yield* Effect.fail(supabaseError);
 
-      // Send Discord Notification (Fire and forget)
-      sendDiscordNotification(feedbackRecord);
+        // Send Discord Notification (Fire and forget)
+        yield* Effect.forkDaemon(sendDiscordNotification(feedbackRecord));
 
-      setSubmitted(true);
-      setTimeout(() => {
-        onClose();
-      }, 3000);
-    } catch (err: unknown) {
-      console.error('Feedback submission error:', err);
-      setError('Failed to send feedback. Please try again later.');
-    } finally {
-      setIsSubmitting(false);
-    }
+        setSubmitted(true);
+        yield* Effect.forkDaemon(
+          Effect.gen(function* () {
+            yield* Effect.sleep('3 seconds');
+            onClose();
+          }),
+        );
+      }).pipe(
+        Effect.catchAll((err) => {
+          console.error('Feedback submission error:', err);
+          setError('Failed to send feedback. Please try again later.');
+          return Effect.succeed(void 0);
+        }),
+        Effect.ensuring(Effect.sync(() => setIsSubmitting(false))),
+      ),
+    );
   };
 
   if (submitted) {

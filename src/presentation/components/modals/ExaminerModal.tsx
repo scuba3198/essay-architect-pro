@@ -1,7 +1,10 @@
 import { GraduationCap, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { Effect } from 'effect';
+import { appRuntime } from '../../../infrastructure/runtime';
 import { AIClient } from '../../../infrastructure/api/api';
+import { Schema } from '@effect/schema';
 import { ExaminerFeedbackSchema, type ExaminerFeedback } from '../../../domain/schemas';
 
 interface ExaminerModalProps {
@@ -39,21 +42,22 @@ const ExaminerModal: React.FC<ExaminerModalProps> = ({
     }
   }, [isOpen]);
 
-  const getFeedback = async (type: 'ielts' | 'pte') => {
+  const getFeedback = (type: 'ielts' | 'pte') => {
     setLoading(true);
     setError(null);
     setFeedback(null);
 
-    try {
-      // Calculate word count locally to prevent AI hallucination
-      const wordCount = essayText
-        .trim()
-        .split(/\s+/)
-        .filter((word) => word.length > 0).length;
-      let prompt = '';
+    appRuntime.runPromise(
+      Effect.gen(function* () {
+        // Calculate word count locally to prevent AI hallucination
+        const wordCount = essayText
+          .trim()
+          .split(/\s+/)
+          .filter((word) => word.length > 0).length;
 
-      if (type === 'ielts') {
-        prompt = `Act as a strict IELTS Examiner.Analyze the following essay based on the official 4 marking criteria: Task Response(TR), Coherence & Cohesion(CC), Lexical Resource(LR), and Grammatical Range & Accuracy(GRA).
+        const prompt =
+          type === 'ielts'
+            ? `Act as a strict IELTS Examiner.Analyze the following essay based on the official 4 marking criteria: Task Response(TR), Coherence & Cohesion(CC), Lexical Resource(LR), and Grammatical Range & Accuracy(GRA).
 
     METADATA:
     - Exact Word Count: ${wordCount} words. (Use this for length - based penalties if under 250 words).
@@ -68,10 +72,8 @@ const ExaminerModal: React.FC<ExaminerModalProps> = ({
 }.
 
 Essay:
-                ${essayText} `;
-      } else {
-        // PTE Prompt - Updated to 7 Official Traits
-        prompt = `Act as a strict PTE Academic Examiner.Analyze the following essay based on the official 7 scoring traits for the 'Write Essay' task.
+                ${essayText} `
+            : `Act as a strict PTE Academic Examiner.Analyze the following essay based on the official 7 scoring traits for the 'Write Essay' task.
 
     METADATA:
     - Exact Word Count: ${wordCount} words. 
@@ -105,44 +107,43 @@ Essay:
 
 Essay:
                 ${essayText} `;
-      }
 
-      const result = await aiClient.callProAI(
-        prompt,
-        'You are a helpful API that returns strictly valid JSON.',
-      );
+        const resultText = yield* aiClient.callProAI(
+          prompt,
+          'You are a helpful API that returns strictly valid JSON.',
+        );
 
-      if (!result.ok) {
-        throw result.error;
-      }
+        // Robust JSON extraction
+        const jsonMatch = resultText?.match(/\{[\s\S]*\}/);
+        const jsonString = jsonMatch ? jsonMatch[0] : resultText;
 
-      const resultText = result.value;
+        if (!jsonString) {
+          return yield* Effect.fail(new Error('Could not parse examiner feedback.'));
+        }
 
-      // Robust JSON extraction
-      let jsonString = resultText;
-      const jsonMatch = resultText?.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        jsonString = jsonMatch[0];
-      }
+        const data = yield* Effect.try({
+          try: () => JSON.parse(jsonString),
+          catch: (err) => new Error(`JSON parsing failed: ${err}`),
+        });
 
-      if (!jsonString) throw new Error('Could not parse examiner feedback.');
-      const data = JSON.parse(jsonString);
+        // Validate with Effect Schema
+        const validatedData = yield* Schema.decodeUnknown(ExaminerFeedbackSchema)(data);
 
-      // Validate with Zod
-      const validatedData = ExaminerFeedbackSchema.parse(data);
-
-      setFeedback(validatedData);
-      if (!isPaid) onIncrementUsage();
-    } catch (err: unknown) {
-      console.error(err);
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'The examiner is currently unavailable. Please try again.';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+        setFeedback(validatedData);
+        if (!isPaid) onIncrementUsage();
+      }).pipe(
+        Effect.catchAll((err) => {
+          console.error(err);
+          const message =
+            err instanceof Error
+              ? err.message
+              : 'The examiner is currently unavailable. Please try again.';
+          setError(message);
+          return Effect.succeed(void 0);
+        }),
+        Effect.ensuring(Effect.sync(() => setLoading(false))),
+      ),
+    );
   };
 
   const handleSelectExam = (type: 'ielts' | 'pte') => {
