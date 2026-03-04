@@ -3,169 +3,156 @@
  * Handles loading and rendering the Turnstile widget for anonymous user verification
  */
 
-interface TurnstileOptions {
-  sitekey: string;
-  callback?: (token: string) => void;
-  'error-callback'?: () => void;
-  'expired-callback'?: () => void;
-  size?: 'normal' | 'flexible' | 'compact' | 'invisible';
-  theme?: 'light' | 'dark' | 'auto';
-  action?: string;
-  cData?: string;
-}
-
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (container: string | HTMLElement, options: TurnstileOptions) => string | null;
-      remove: (id: string) => void;
-      execute: (id: string) => Promise<void> | void;
-    };
-  }
-}
+import { Effect, Cause } from 'effect';
+import { AppError } from '../../domain/error';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAACKMj0SomqwjwY9E';
-const TURNSTILE_SCRIPT_TIMEOUT_MS = 8000;
-let turnstileScriptLoaded = false;
-let turnstileScriptLoading = false;
-let loadPromise: Promise<void> | null = null;
 
 /**
- * Load the Turnstile script if not already loaded
+ * Load the Turnstile script.
+ * Resolves immediately if already available.
  */
-function loadTurnstileScript(): Promise<void> {
-  if (turnstileScriptLoaded) {
-    return Promise.resolve();
+const loadTurnstileScript = Effect.async<void, AppError>((resume) => {
+  if (window.turnstile && typeof window.turnstile.render === 'function') {
+    resume(Effect.succeed(void 0));
+    return;
   }
 
-  if (turnstileScriptLoading && loadPromise) {
-    return loadPromise;
-  }
-
-  turnstileScriptLoading = true;
-
-  loadPromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    script.async = true;
-    script.defer = true;
-
-    const cleanup = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      script.onload = null;
-      script.onerror = null;
-    };
-
-    timeoutId = setTimeout(() => {
-      cleanup();
-      turnstileScriptLoading = false;
-      reject(new Error('Turnstile script load timed out.'));
-    }, TURNSTILE_SCRIPT_TIMEOUT_MS);
-
-    script.onload = () => {
-      cleanup();
-      if (!window.turnstile || typeof window.turnstile.render !== 'function') {
-        turnstileScriptLoading = false;
-        reject(new Error('Turnstile failed to initialize.'));
-        return;
+  // Check if currently loading to prevent duplicates
+  if (document.querySelector('script[src*="cloudflare.com/turnstile"]')) {
+    // Poll until window.turnstile is available
+    const interval = setInterval(() => {
+      if (window.turnstile && typeof window.turnstile.render === 'function') {
+        clearInterval(interval);
+        resume(Effect.succeed(void 0));
       }
-      turnstileScriptLoaded = true;
-      turnstileScriptLoading = false;
-      resolve();
-    };
+    }, 100);
 
-    script.onerror = () => {
-      cleanup();
-      turnstileScriptLoading = false;
-      reject(new Error('Failed to load Turnstile script'));
-    };
+    return Effect.sync(() => clearInterval(interval));
+  }
 
-    document.head.appendChild(script);
+  const script = document.createElement('script');
+  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  script.async = true;
+  script.defer = true;
+
+  script.onload = () => {
+    if (!window.turnstile || typeof window.turnstile.render !== 'function') {
+      resume(
+        Effect.fail(
+          new AppError({
+            message: 'Turnstile failed to initialize.',
+            code: 'TURNSTILE_INIT_ERROR',
+          }),
+        ),
+      );
+      return;
+    }
+    resume(Effect.succeed(void 0));
+  };
+
+  script.onerror = () => {
+    resume(
+      Effect.fail(
+        new AppError({ message: 'Failed to load Turnstile script', code: 'TURNSTILE_LOAD_ERROR' }),
+      ),
+    );
+  };
+
+  document.head.appendChild(script);
+
+  return Effect.sync(() => {
+    script.onload = null;
+    script.onerror = null;
   });
-
-  return loadPromise;
-}
+}).pipe(
+  Effect.timeout('8 seconds'),
+  Effect.mapError((e) =>
+    Cause.isTimeoutException(e)
+      ? new AppError({ message: 'Turnstile script load timed out.', code: 'TURNSTILE_TIMEOUT' })
+      : e,
+  ),
+);
 
 /**
  * Get a Turnstile token for anonymous API verification
  * Creates an invisible widget, gets the token, and cleans up
- * @returns {Promise<string>} The Turnstile token
+ * @returns {Effect.Effect<string, AppError>} The Turnstile token
  */
-export async function getTurnstileToken(): Promise<string> {
-  await loadTurnstileScript();
+export const getTurnstileToken = (): Effect.Effect<string, AppError> =>
+  Effect.gen(function* () {
+    yield* loadTurnstileScript;
 
-  return new Promise((resolve, reject) => {
-    if (!window.turnstile || typeof window.turnstile.render !== 'function') {
-      reject(new Error('Turnstile is not available.'));
-      return;
-    }
-
-    // Create a hidden container for the widget
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.top = '-9999px';
-    container.style.left = '-9999px';
-    document.body.appendChild(container);
-
-    let widgetId: string | null = null;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const cleanup = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      if (widgetId !== null && window.turnstile) {
-        try {
-          window.turnstile.remove(widgetId);
-        } catch {
-          // Ignore cleanup errors
-        }
+    return yield* Effect.async<string, AppError>((resume) => {
+      if (!window.turnstile || typeof window.turnstile.render !== 'function') {
+        resume(
+          Effect.fail(
+            new AppError({ message: 'Turnstile is not available.', code: 'TURNSTILE_UNAVAILABLE' }),
+          ),
+        );
+        return;
       }
-      if (container.parentNode) {
-        container.parentNode.removeChild(container);
-      }
-    };
 
-    // Timeout after 30 seconds
-    timeoutId = setTimeout(() => {
-      cleanup();
-      reject(new Error('Turnstile verification timed out. Please try again.'));
-    }, 30000);
+      // Create a hidden container for the widget
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.top = '-9999px';
+      container.style.left = '-9999px';
+      document.body.appendChild(container);
 
-    try {
-      widgetId = window.turnstile.render(container, {
+      const widgetId = window.turnstile.render(container, {
         sitekey: TURNSTILE_SITE_KEY,
         callback: (token: string) => {
-          cleanup();
-          resolve(token);
+          resume(Effect.succeed(token));
         },
         'error-callback': () => {
-          cleanup();
-          reject(new Error('Verification failed. Please try again.'));
+          resume(
+            Effect.fail(
+              new AppError({
+                message: 'Verification failed. Please try again.',
+                code: 'TURNSTILE_VERIFY_ERROR',
+              }),
+            ),
+          );
         },
         'expired-callback': () => {
-          cleanup();
-          reject(new Error('Verification expired. Please try again.'));
+          resume(
+            Effect.fail(
+              new AppError({
+                message: 'Verification expired. Please try again.',
+                code: 'TURNSTILE_EXPIRED',
+              }),
+            ),
+          );
         },
-        size: 'invisible',
       });
 
-      if (typeof window.turnstile.execute === 'function' && widgetId !== null) {
-        try {
-          const execResult = window.turnstile.execute(widgetId);
-          if (execResult instanceof Promise) {
-            execResult.catch(() => {
-              cleanup();
-              reject(new Error('Verification failed. Please try again.'));
-            });
-          }
-        } catch (error) {
-          cleanup();
-          reject(error as Error);
+      // We rely on auto-execution (which is default). No need to call window.turnstile.execute()
+      // manually as that throws 'already executing' errors for visible/managed widget types.
+
+      // Cleanup mechanism that Effect runs if interrupted or finished
+      return Effect.sync(() => {
+        if (widgetId !== null && window.turnstile) {
+          Effect.runSync(
+            Effect.try({
+              try: () => window.turnstile?.remove(widgetId),
+              catch: () => void 0,
+            }).pipe(Effect.catchAll(() => Effect.succeed(void 0))),
+          );
         }
-      }
-    } catch (error) {
-      cleanup();
-      reject(error as Error);
-    }
+        if (container.parentNode) {
+          container.parentNode.removeChild(container);
+        }
+      });
+    }).pipe(
+      Effect.timeout('30 seconds'),
+      Effect.mapError((e) =>
+        Cause.isTimeoutException(e)
+          ? new AppError({
+              message: 'Bot verification timed out. Please try again.',
+              code: 'TURNSTILE_TIMEOUT',
+            })
+          : e,
+      ),
+    );
   });
-}

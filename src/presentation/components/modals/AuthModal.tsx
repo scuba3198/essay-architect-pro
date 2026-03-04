@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { generateSecureToken } from '../../../infrastructure/security/crypto-utils';
 import { RegisterSessionUseCase } from '../../../application/session/RegisterSessionUseCase';
 import { supabase } from '../../../infrastructure/db/supabase';
+import { Effect } from 'effect';
+import { appRuntime } from '../../../infrastructure/runtime';
 
 type AuthMode = 'login' | 'signup' | 'forgot_password' | 'update_password';
 
@@ -30,87 +32,104 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     setMessage(null);
 
-    try {
-      // Note: Turnstile bot protection is only used for anonymous AI requests.
-      // Login/signup uses Supabase's built-in email verification and rate limiting for security.
-      // This prevents network blocking issues (corporate firewalls, etc.) from preventing authentication.
-
-      if (mode === 'signup') {
-        if (password !== confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-              full_name: fullName,
-            },
-          },
-        });
-        if (signUpError) throw signUpError;
-        setMessage(
-          'Sign up successful! Please check your email (including spam folder) for a verification link.',
-        );
-        setMode('login');
-      } else if (mode === 'login') {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInError) throw signInError;
-
-        // Register session for session management
-        const sessionToken =
-          data.session?.access_token?.substring(0, 32) || generateSecureToken(16);
-        await registerSessionUseCase.execute(data.user.id, sessionToken);
-
-        if (onAuthSuccess) onAuthSuccess(data.user);
-        onClose();
-      } else if (mode === 'forgot_password') {
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin,
-        });
-        if (resetError) throw resetError;
-        setMessage(
-          'Password reset link sent! Please check your email (including spam folder) and click the link to reset your password.',
-        );
-      } else if (mode === 'update_password') {
-        if (password !== confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
-        const { error: updateError } = await supabase.auth.updateUser({
-          password: password,
-        });
-        if (updateError) throw updateError;
-        setMessage('Password updated successfully! You will be redirected shortly.');
-        setTimeout(() => {
-          setMode('login');
-          onClose();
-          // Implicitly logged in by Supabase after password update usually,
-          // but triggering success might be good.
-          // However, updateUser returns user data too.
-          // Let's grab user and notify success.
-          supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user && onAuthSuccess) onAuthSuccess(user);
+    appRuntime.runPromise(
+      Effect.gen(function* () {
+        if (mode === 'signup') {
+          if (password !== confirmPassword) {
+            return yield* Effect.fail(new Error('Passwords do not match'));
+          }
+          const { error: signUpError } = yield* Effect.tryPromise({
+            try: () =>
+              supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                  emailRedirectTo: window.location.origin,
+                  data: {
+                    full_name: fullName,
+                  },
+                },
+              }),
+            catch: (err) => new Error(`Sign up failed: ${err}`),
           });
-        }, 2000);
-      }
-    } catch (err: unknown) {
-      console.error('Auth error:', err);
-      const message =
-        err instanceof Error ? err.message : 'An error occurred during authentication.';
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
+          if (signUpError) return yield* Effect.fail(signUpError);
+          setMessage(
+            'Sign up successful! Please check your email (including spam folder) for a verification link.',
+          );
+          setMode('login');
+        } else if (mode === 'login') {
+          const { data, error: signInError } = yield* Effect.tryPromise({
+            try: () =>
+              supabase.auth.signInWithPassword({
+                email,
+                password,
+              }),
+            catch: (err) => new Error(`Login failed: ${err}`),
+          });
+          if (signInError) return yield* Effect.fail(signInError);
+
+          // Register session for session management
+          const token = data.session?.access_token?.substring(0, 32);
+          const sessionToken = token || (yield* generateSecureToken(16));
+          yield* registerSessionUseCase.execute(data.user.id, sessionToken);
+
+          if (onAuthSuccess) onAuthSuccess(data.user);
+          onClose();
+        } else if (mode === 'forgot_password') {
+          const { error: resetError } = yield* Effect.tryPromise({
+            try: () =>
+              supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin,
+              }),
+            catch: (err) => new Error(`Password reset failed: ${err}`),
+          });
+          if (resetError) return yield* Effect.fail(resetError);
+          setMessage(
+            'Password reset link sent! Please check your email (including spam folder) and click the link to reset your password.',
+          );
+        } else if (mode === 'update_password') {
+          if (password !== confirmPassword) {
+            return yield* Effect.fail(new Error('Passwords do not match'));
+          }
+          const { error: updateError } = yield* Effect.tryPromise({
+            try: () =>
+              supabase.auth.updateUser({
+                password: password,
+              }),
+            catch: (err) => new Error(`Update password failed: ${err}`),
+          });
+          if (updateError) return yield* Effect.fail(updateError);
+          setMessage('Password updated successfully! You will be redirected shortly.');
+
+          yield* Effect.forkDaemon(
+            Effect.gen(function* () {
+              yield* Effect.sleep('2 seconds');
+              setMode('login');
+              onClose();
+              const {
+                data: { user },
+              } = yield* Effect.tryPromise(() => supabase.auth.getUser());
+              if (user && onAuthSuccess) onAuthSuccess(user);
+            }),
+          );
+        }
+      }).pipe(
+        Effect.catchAll((err) => {
+          console.error('Auth error:', err);
+          const msg =
+            err instanceof Error ? err.message : 'An error occurred during authentication.';
+          setError(msg);
+          return Effect.succeed(void 0);
+        }),
+        Effect.ensuring(Effect.sync(() => setIsLoading(false))),
+      ),
+    );
   };
 
   const getTitle = () => {

@@ -27,6 +27,30 @@ export const config = {
   runtime: 'edge', // Use edge runtime for faster cold starts
 };
 
+// ─── Structured Logging ──────────────────────────────────────────────────────
+// Edge functions cannot use Effect's runtime. This helper satisfies the
+// structured logging rule (machine-readable JSON, timestamp, level, service)
+// without any external dependencies.
+
+type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
+
+function log(level: LogLevel, message: string, context?: Record<string, unknown>): void {
+  const record: Record<string, unknown> = {
+    timestamp: new Date().toISOString(),
+    level,
+    service: 'essay-architect-pro/api/ai',
+    message,
+    ...context,
+  };
+  if (level === 'ERROR' || level === 'WARN') {
+    console.error(JSON.stringify(record));
+  } else {
+    console.log(JSON.stringify(record));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface RateLimitData {
   count: number;
   resetTime: number;
@@ -53,7 +77,9 @@ async function verifySupabaseToken(token: string): Promise<SupabaseUser | null> 
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Supabase environment variables not configured');
+    log('ERROR', 'Supabase environment variables not configured', {
+      code: 'MISSING_SUPABASE_CONFIG',
+    });
     return null;
   }
 
@@ -70,7 +96,10 @@ async function verifySupabaseToken(token: string): Promise<SupabaseUser | null> 
     }
     return null;
   } catch (error) {
-    console.error('Supabase token verification failed:', error);
+    log('ERROR', 'Supabase token verification failed', {
+      code: 'SUPABASE_VERIFY_ERROR',
+      error: String(error),
+    });
     return null;
   }
 }
@@ -83,7 +112,7 @@ async function verifyTurnstileToken(token: string, clientIP: string): Promise<bo
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
 
   if (!secretKey) {
-    console.error('TURNSTILE_SECRET_KEY not configured');
+    log('ERROR', 'TURNSTILE_SECRET_KEY not configured', { code: 'MISSING_TURNSTILE_CONFIG' });
     return false;
   }
 
@@ -101,12 +130,17 @@ async function verifyTurnstileToken(token: string, clientIP: string): Promise<bo
     const result: { success: boolean } = await response.json();
     return result.success === true;
   } catch (error) {
-    console.error('Turnstile verification failed:', error);
+    log('ERROR', 'Turnstile verification failed', {
+      code: 'TURNSTILE_VERIFY_ERROR',
+      error: String(error),
+    });
     return false;
   }
 }
 
 export default async function handler(request: Request): Promise<Response> {
+  const correlationId = request.headers.get('X-Correlation-ID') ?? crypto.randomUUID();
+
   // Only allow POST requests
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -119,7 +153,10 @@ export default async function handler(request: Request): Promise<Response> {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    console.error('GEMINI_API_KEY not configured in Vercel environment');
+    log('ERROR', 'GEMINI_API_KEY not configured in Vercel environment', {
+      code: 'MISSING_API_KEY',
+      correlationId,
+    });
     return new Response(JSON.stringify({ error: 'AI service temporarily unavailable' }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' },
@@ -175,11 +212,7 @@ export default async function handler(request: Request): Promise<Response> {
 
     const { prompt, systemInstruction, type } = body;
 
-    // Log request details for debugging
-    console.log('[API] Request received with type:', type);
-    if (type === 'payment') {
-      console.log('[API] Payment request detected! Prompt:', prompt);
-    }
+    log('INFO', 'Request received', { correlationId, type });
 
     // Basic input validation
     if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
@@ -190,7 +223,6 @@ export default async function handler(request: Request): Promise<Response> {
     }
 
     // --- SECURITY: INPUT LENGTH VALIDATION ---
-    // Prevent oversized payloads to conserve tokens and prevent DoS-style requests
     const MAX_PROMPT_LENGTH = 8000;
     const MAX_SYSTEM_LENGTH = 2000;
 
@@ -268,10 +300,14 @@ export default async function handler(request: Request): Promise<Response> {
     });
 
     if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.error('Gemini API error:', geminiResponse.status, errorText);
+      // Read and discard the raw error body — do NOT forward API details to client
+      await geminiResponse.text();
+      log('ERROR', 'Gemini API error', {
+        code: 'GEMINI_API_ERROR',
+        correlationId,
+        status: geminiResponse.status,
+      });
 
-      // Return a user-friendly error without exposing API details
       return new Response(
         JSON.stringify({
           error: 'AI processing failed. Please try again or check your API key status.',
@@ -294,21 +330,19 @@ export default async function handler(request: Request): Promise<Response> {
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
 
     // --- DISCORD NOTIFICATION (If type specified) ---
-    // This keeps the webhook secret server-side
-    // IMPORTANT: We must await this to prevent Edge Function from terminating before webhook completes
     if (type === 'payment' && prompt) {
       const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-      console.log('[Payment] Type detected, webhook URL exists:', !!webhookUrl);
 
       if (webhookUrl) {
-        // Parse payment details from prompt: "NEW_PAYMENT_SUBMITTED: plan_name (price) by email"
-        // Parse payment details from JSON prompt
         let paymentData: { planName: string; price: number; userEmail: string } | null = null;
         try {
           paymentData = JSON.parse(prompt);
-          console.log('[Payment] Parsed JSON payload:', paymentData);
         } catch (e) {
-          console.error('[Payment] Failed to parse JSON payload:', e);
+          log('ERROR', 'Failed to parse payment JSON payload', {
+            code: 'PAYMENT_PARSE_ERROR',
+            correlationId,
+            error: String(e),
+          });
         }
 
         if (paymentData && paymentData.planName && paymentData.price && paymentData.userEmail) {
@@ -316,7 +350,7 @@ export default async function handler(request: Request): Promise<Response> {
 
           const embed = {
             title: '💳 New Payment Submitted!',
-            color: 0x10b981, // Green
+            color: 0x10b981,
             fields: [
               { name: 'Plan', value: planName, inline: true },
               { name: 'Amount', value: price, inline: true },
@@ -331,24 +365,32 @@ export default async function handler(request: Request): Promise<Response> {
             embeds: [embed],
           };
 
-          console.log('[Payment] Sending to Discord...');
+          log('INFO', 'Sending payment notification to Discord', { correlationId, planName });
           try {
-            // MUST await - Edge Function terminates as soon as we return, killing pending fetches
-            const response = await fetch(webhookUrl, {
+            // MUST await - Edge Function terminates as soon as we return
+            const discordResponse = await fetch(webhookUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(discordPayload),
             });
 
-            console.log('[Payment] Discord response status:', response.status);
-            if (!response.ok) {
-              const errorText = await response.text();
-              console.error('[Payment] Discord error:', errorText);
+            if (!discordResponse.ok) {
+              const errorText = await discordResponse.text();
+              log('ERROR', 'Discord webhook error', {
+                code: 'DISCORD_WEBHOOK_ERROR',
+                correlationId,
+                status: discordResponse.status,
+                error: errorText,
+              });
             } else {
-              console.log('[Payment] ✅ Discord notification sent successfully!');
+              log('INFO', 'Discord payment notification sent', { correlationId });
             }
           } catch (err) {
-            console.error('[Payment] Discord webhook failed:', err);
+            log('ERROR', 'Discord webhook request failed', {
+              code: 'DISCORD_WEBHOOK_FAILED',
+              correlationId,
+              error: String(err),
+            });
           }
         }
       }
@@ -359,7 +401,11 @@ export default async function handler(request: Request): Promise<Response> {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('AI Proxy error:', error);
+    log('ERROR', 'AI Proxy unhandled error', {
+      code: 'INTERNAL_SERVER_ERROR',
+      correlationId,
+      error: String(error),
+    });
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

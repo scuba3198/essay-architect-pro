@@ -56,16 +56,5 @@ export interface TourProps {
   totalSteps: number;
 }
 
-// ─── Session Manager Types ───────────────────────────────
-export interface SessionResult {
-  success: boolean;
-  error?: string;
-}
-
-export interface SessionValidation {
-  isValid: boolean;
-  wasLoggedOut: boolean;
-}
-
 // ─── Supabase User (re-export convenience) ───────────────
 export type { User } from '@supabase/supabase-js';

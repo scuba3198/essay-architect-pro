@@ -15,4 +15,13 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    proxy: {
+      // Proxy API requests to Vercel's local dev server
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
 });

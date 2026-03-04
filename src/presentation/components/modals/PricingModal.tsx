@@ -129,20 +129,17 @@ const PricingModal: React.FC<PricingModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan) => {
               const isActive = activePlan === plan.name || (plan.id === 'free' && !activePlan);
-              let isLower = plan.tier < currentTier;
+              const isLower = plan.id !== 'free' && plan.tier < currentTier;
               const isHigher = plan.tier > currentTier;
 
-              // Specific logic for Free Tier
-              if (plan.id === 'free') {
-                isLower = false; // Never treat free as "lower" in a way that disables it if we want to show it as active base
-              }
-
-              let buttonText = 'Select Plan';
-              if (isActive) buttonText = 'Currently Active';
-              if (isLower && plan.id !== 'free') buttonText = 'Plan Owned';
-              if (isHigher && currentTier >= 0)
-                buttonText = `Upgrade to ${plan.id === 'lifetime' ? 'Lifetime' : 'Pack'}`;
-              if (plan.id === 'free' && activePlan) buttonText = 'Included';
+              const buttonText = (function () {
+                if (isActive) return 'Currently Active';
+                if (isLower) return 'Plan Owned';
+                if (isHigher && currentTier >= 0)
+                  return `Upgrade to ${plan.id === 'lifetime' ? 'Lifetime' : 'Pack'}`;
+                if (plan.id === 'free' && activePlan) return 'Included';
+                return 'Select Plan';
+              })();
 
               return (
                 <div

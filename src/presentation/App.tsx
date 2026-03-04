@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { Effect, Match, Schedule, Fiber, Ref } from 'effect';
 
 const WhatsAppIcon: React.FC<{ size?: number; className?: string }> = ({
   size = 24,
@@ -67,15 +68,15 @@ import { RegisterSessionUseCase } from '../application/session/RegisterSessionUs
 import { ValidateSessionUseCase } from '../application/session/ValidateSessionUseCase';
 import { DeactivateSessionUseCase } from '../application/session/DeactivateSessionUseCase';
 import { AIClient } from '../infrastructure/api/api';
-import { logger } from '../infrastructure/logging/logger';
 import { supabase } from '../infrastructure/db/supabase';
+import { appRuntime } from '../infrastructure/runtime';
 
 // Service Instantiation (DI Container logic)
-const deviceService = new DeviceService(logger);
-const aiClient = new AIClient(supabase, logger);
-const registerSessionUseCase = new RegisterSessionUseCase(supabase, deviceService, logger);
-const validateSessionUseCase = new ValidateSessionUseCase(supabase, deviceService, logger);
-const deactivateSessionUseCase = new DeactivateSessionUseCase(supabase, logger);
+const deviceService = new DeviceService();
+const aiClient = new AIClient(supabase);
+const registerSessionUseCase = new RegisterSessionUseCase(supabase, deviceService);
+const validateSessionUseCase = new ValidateSessionUseCase(supabase, deviceService);
+const deactivateSessionUseCase = new DeactivateSessionUseCase(supabase);
 
 import type {
   Essay,
@@ -219,156 +220,197 @@ const App: React.FC = () => {
     conclusion: { summary: '', finalThought: '' },
   });
 
-  const verifyAccess = useCallback(async (user: UserType | null, isSilent: boolean = false) => {
-    if (!user) {
-      setIsPaid(false);
-      setActivePlan(null);
-      setUserEmail('');
-      return;
-    }
-
-    // Always set the user's email when they're logged in
-    setUserEmail(user.email || '');
-
-    try {
-      // Optimized: Filter by status at DB level and limit to latest approved payment
-      // Uses composite index: idx_payments_user_status_created
-      const { data, error } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (error) {
-        console.error('Payment check fetch error:', error);
-        // On network error, keep current state to avoid UI flicker
-        return;
-      }
-
-      // Since we filtered at DB level, data contains only approved payments
-      if (data && data.length > 0) {
-        const latest = data[0];
-
-        const createdAt = new Date(latest.created_at).getTime();
-        const now = Date.now();
-        const hoursPassed = (now - createdAt) / (1000 * 60 * 60);
-
-        let isValid = false;
-        let expiryMessage = '';
-
-        if (latest.plan_name === 'Consultancy Killer' || latest.plan_name === 'Lifetime Pack') {
-          isValid = true;
-          expiryMessage = 'Welcome back! Your Lifetime access is active.';
-          // Normalize legacy plan name for UI display
-          if (latest.plan_name === 'Consultancy Killer') latest.plan_name = 'Lifetime Pack';
-        } else if (latest.plan_name === 'Preparation Pack') {
-          const daysLeft = Math.floor(30 - hoursPassed / 24);
-          if (daysLeft >= 0) {
-            isValid = true;
-            expiryMessage = `Access Unlocked! You have ${daysLeft} days remaining on your Preparation Pack.`;
-          } else {
-            expiryMessage = 'Your 30-day Preparation Pack has expired.';
+  const verifyAccess = useCallback(
+    (user: UserType | null, isSilent: boolean = false) =>
+      appRuntime.runPromise(
+        Effect.gen(function* () {
+          if (!user) {
+            setIsPaid(false);
+            setActivePlan(null);
+            setUserEmail('');
+            return;
           }
-        } else if (latest.plan_name === "Crammer's Pass") {
-          const hoursLeft = Math.floor(24 - hoursPassed);
-          if (hoursLeft >= 0) {
-            isValid = true;
-            expiryMessage = `Access Unlocked! You have ${hoursLeft} hours remaining on your Crammer's Pass.`;
-          } else {
-            expiryMessage = "Your 24-hour Crammer's Pass has expired.";
-          }
-        }
 
-        if (isValid) {
-          setIsPaid(true);
-          setActivePlan(latest.plan_name);
-          if (!isSilent) setNotification({ message: expiryMessage, type: 'success' });
-        } else {
-          // Plan expired
-          setIsPaid(false);
-          setActivePlan(null);
-          if (!isSilent)
-            setNotification({
-              message:
-                expiryMessage || 'No active plan found. Your previous plan may have expired.',
-              type: 'info',
-            });
-        }
-      } else {
-        // No approved record found - Revoke access
-        setIsPaid(false);
-        setActivePlan(null);
+          // Always set the user's email when they're logged in
+          setUserEmail(user.email || '');
 
-        if (!isSilent) {
-          setNotification({
-            message:
-              'No approved payment found for this email. If you just paid, please wait for manual verification (1-2 hours).',
-            type: 'info',
+          const { data, error } = yield* Effect.tryPromise({
+            try: () =>
+              supabase
+                .from('payments')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('status', 'approved')
+                .order('created_at', { ascending: false })
+                .limit(1),
+            catch: (err) => new Error(`Payment fetch check error: ${err}`),
           });
-        }
-      }
-    } catch (err: unknown) {
-      console.error('Critical verifyAccess error:', err);
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      // Fail silent in silent mode, alert user otherwise
-      if (!isSilent)
-        setNotification({
-          message: `Failed to verify access: ${message}. Please refresh the page.`,
-          type: 'error',
-        });
-    }
-  }, []);
+
+          if (error) {
+            console.error('Payment check fetch error:', error);
+            // On network error, keep current state to avoid UI flicker
+            return;
+          }
+
+          if (data && data.length > 0) {
+            const latest = data[0];
+
+            const createdAt = new Date(latest.created_at).getTime();
+            const now = Date.now();
+            const hoursPassed = (now - createdAt) / (1000 * 60 * 60);
+
+            const planConfig = Match.value(latest.plan_name).pipe(
+              Match.when('Consultancy Killer', () => ({
+                valid: true,
+                msg: 'Welcome back! Your Lifetime access is active.',
+                name: 'Lifetime Pack',
+              })),
+              Match.when('Lifetime Pack', () => ({
+                valid: true,
+                msg: 'Welcome back! Your Lifetime access is active.',
+                name: 'Lifetime Pack',
+              })),
+              Match.when('Preparation Pack', () => {
+                const daysLeft = Math.floor(30 - hoursPassed / 24);
+                return daysLeft >= 0
+                  ? {
+                      valid: true,
+                      msg: `Access Unlocked! You have ${daysLeft} days remaining on your Preparation Pack.`,
+                      name: 'Preparation Pack',
+                    }
+                  : {
+                      valid: false,
+                      msg: 'Your 30-day Preparation Pack has expired.',
+                      name: 'Preparation Pack',
+                    };
+              }),
+              Match.when("Crammer's Pass", () => {
+                const hoursLeft = Math.floor(24 - hoursPassed);
+                return hoursLeft >= 0
+                  ? {
+                      valid: true,
+                      msg: `Access Unlocked! You have ${hoursLeft} hours remaining on your Crammer's Pass.`,
+                      name: "Crammer's Pass",
+                    }
+                  : {
+                      valid: false,
+                      msg: "Your 24-hour Crammer's Pass has expired.",
+                      name: "Crammer's Pass",
+                    };
+              }),
+              Match.orElse(() => ({
+                valid: false,
+                msg: 'Unknown plan type encountered.',
+                name: latest.plan_name,
+              })),
+            );
+
+            if (planConfig.valid) {
+              setIsPaid(true);
+              setActivePlan(planConfig.name);
+              if (!isSilent) setNotification({ message: planConfig.msg, type: 'success' });
+            } else {
+              // Plan expired
+              setIsPaid(false);
+              setActivePlan(null);
+              if (!isSilent)
+                setNotification({
+                  message:
+                    planConfig.msg || 'No active plan found. Your previous plan may have expired.',
+                  type: 'info',
+                });
+            }
+          } else {
+            // No approved record found - Revoke access
+            setIsPaid(false);
+            setActivePlan(null);
+
+            if (!isSilent) {
+              setNotification({
+                message:
+                  'No approved payment found for this email. If you just paid, please wait for manual verification (1-2 hours).',
+                type: 'info',
+              });
+            }
+          }
+        }).pipe(
+          Effect.catchAll((err) => {
+            console.error('Critical verifyAccess error:', err);
+            const message = err.message;
+            if (!isSilent)
+              setNotification({
+                message: `Failed to verify access: ${message}. Please refresh the page.`,
+                type: 'error',
+              });
+            return Effect.succeed(void 0);
+          }),
+        ),
+      ),
+    [],
+  );
 
   useEffect(() => {
     setTopic(topics[0] ?? null);
-    let isLoggingOut = false; // Flag to prevent race condition
 
-    // Handle PKCE recovery token from URL query params
-    const urlParams = new URLSearchParams(window.location.search);
-    const verificationType = urlParams.get('verification_type');
-    const tokenHash = urlParams.get('token_hash');
+    const program = Effect.gen(function* () {
+      const isLoggingOutRef = yield* Ref.make(false);
 
-    if (verificationType === 'recovery' && tokenHash) {
-      // Exchange the token and open the update password modal
-      supabase.auth
-        .verifyOtp({
-          type: 'recovery',
-          token_hash: tokenHash,
-        })
-        .then(({ error }) => {
-          if (error) {
-            console.error('Recovery token verification failed:', error);
-            setNotification({
-              message:
-                'Failed to verify recovery link. It may have expired. Please request a new one.',
-              type: 'error',
-            });
-          } else {
-            // Token verified, open the update password modal
-            setAuthMode('update_password');
-            setShowAuth(true);
-            // Clean up URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
+      // Handle PKCE recovery token from URL query params
+      const urlParams = new URLSearchParams(window.location.search);
+      const verificationType = urlParams.get('verification_type');
+      const tokenHash = urlParams.get('token_hash');
+
+      if (verificationType === 'recovery' && tokenHash) {
+        const { error } = yield* Effect.tryPromise({
+          try: () =>
+            supabase.auth.verifyOtp({
+              type: 'recovery',
+              token_hash: tokenHash,
+            }),
+          catch: (err) => new Error(`Verify OTP failed: ${err}`),
         });
-    }
 
-    // Auth Listener with two-device session validation
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+        if (error) {
+          console.error('Recovery token verification failed:', error);
+          setNotification({
+            message:
+              'Failed to verify recovery link. It may have expired. Please request a new one.',
+            type: 'error',
+          });
+        } else {
+          // Token verified, open the update password modal
+          setAuthMode('update_password');
+          setShowAuth(true);
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+
+      // Initial session check
+      const {
+        data: { session },
+      } = yield* Effect.tryPromise({
+        try: () => supabase.auth.getSession(),
+        catch: (err) => new Error(`Get session failed: ${err}`),
+      });
+
       if (session) {
         // Validate session against two-device limit
-        const { isValid, wasLoggedOut } = await validateSessionUseCase.execute(session.user.id);
+        const { isValid, wasLoggedOut } = yield* validateSessionUseCase.execute(session.user.id);
 
         if (wasLoggedOut) {
           // Session was invalidated manually or by a rare database event
-          isLoggingOut = true;
-          try {
-            await supabase.auth.signOut();
-          } catch (err) {
-            logger.error({ err }, 'SignOut error');
-          }
+          yield* Ref.set(isLoggingOutRef, true);
+          yield* Effect.tryPromise({
+            try: () => supabase.auth.signOut(),
+            catch: (err) => new Error(`SignOut failed: ${err}`),
+          }).pipe(
+            Effect.catchAll((err) => {
+              appRuntime.runSync(Effect.logError('SignOut error', { err }));
+              return Effect.succeed(void 0);
+            }),
+          );
+
           setUser(null);
           setIsPaid(false);
           setUserEmail('');
@@ -377,67 +419,93 @@ const App: React.FC = () => {
             message: 'Your session has expired. Please log in again.',
             type: 'info',
           });
-          return;
-        }
-
-        // If no session record exists, register this session
-        if (!isValid && !wasLoggedOut) {
-          const sessionToken = session.access_token?.substring(0, 32) || generateSecureToken(16);
-          await registerSessionUseCase.execute(session.user.id, sessionToken);
-        }
-
-        setUser(session.user);
-        verifyAccess(session.user, true);
-      }
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Skip if we're in the middle of a forced logout
-      if (isLoggingOut) return;
-
-      if (session) {
-        // For SIGNED_IN event, session is already registered by AuthModal
-        // For TOKEN_REFRESHED, validate the session
-        if (event === 'TOKEN_REFRESHED') {
-          const { wasLoggedOut } = await validateSessionUseCase.execute(session.user.id);
-          if (wasLoggedOut) {
-            isLoggingOut = true;
-            try {
-              await supabase.auth.signOut();
-            } catch (err) {
-              logger.error({ err }, 'SignOut error');
-            }
-            setUser(null);
-            setIsPaid(false);
-            setUserEmail('');
-            setActivePlan(null);
-            setNotification({
-              message: 'Your session has expired. Please log in again.',
-              type: 'info',
-            });
-            return;
+        } else {
+          // If no session record exists, register this session
+          if (!isValid) {
+            const token = session.access_token?.substring(0, 32);
+            const sessionToken = token || (yield* generateSecureToken(16));
+            yield* registerSessionUseCase.execute(session.user.id, sessionToken);
           }
+
+          setUser(session.user);
+          verifyAccess(session.user, true);
         }
-
-        setUser(session.user);
-        verifyAccess(session.user, true);
-      } else {
-        setUser(null);
-        setIsPaid(false);
-        setUserEmail('');
-        setActivePlan(null);
       }
 
-      if (event === 'PASSWORD_RECOVERY') {
-        setAuthMode('update_password');
-        setShowAuth(true);
-      }
-    });
+      // Auth Listener with two-device session validation
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        appRuntime.runPromise(
+          Effect.gen(function* () {
+            // Skip if we're in the middle of a forced logout
+            const isLoggingOut = yield* Ref.get(isLoggingOutRef);
+            if (isLoggingOut) return;
+
+            if (session) {
+              // For SIGNED_IN event, session is already registered by AuthModal
+              // For TOKEN_REFRESHED, validate the session
+              if (event === 'TOKEN_REFRESHED') {
+                const { wasLoggedOut } = yield* validateSessionUseCase.execute(session.user.id);
+                if (wasLoggedOut) {
+                  yield* Ref.set(isLoggingOutRef, true);
+                  yield* Effect.tryPromise({
+                    try: () => supabase.auth.signOut(),
+                    catch: (err) => new Error(`SignOut failed: ${err}`),
+                  }).pipe(
+                    Effect.catchAll((err) => {
+                      appRuntime.runSync(Effect.logError('SignOut error', { err }));
+                      return Effect.succeed(void 0);
+                    }),
+                  );
+                  setUser(null);
+                  setIsPaid(false);
+                  setUserEmail('');
+                  setActivePlan(null);
+                  setNotification({
+                    message: 'Your session has expired. Please log in again.',
+                    type: 'info',
+                  });
+                  return;
+                }
+              }
+
+              setUser(session.user);
+              verifyAccess(session.user, true);
+            } else {
+              setUser(null);
+              setIsPaid(false);
+              setUserEmail('');
+              setActivePlan(null);
+            }
+
+            if (event === 'PASSWORD_RECOVERY') {
+              setAuthMode('update_password');
+              setShowAuth(true);
+            }
+          }).pipe(
+            Effect.catchAll((err) => {
+              appRuntime.runSync(Effect.logError('Auth state change error', { err }));
+              return Effect.succeed(void 0);
+            }),
+          ),
+        );
+      });
+
+      return subscription;
+    }).pipe(
+      Effect.catchAll((err) => {
+        appRuntime.runSync(Effect.logError('Auth initialization error', { err }));
+        return Effect.fail(err);
+      }),
+    );
+
+    const subscriptionPromise = appRuntime.runPromise(program);
 
     return () => {
-      subscription.unsubscribe();
+      subscriptionPromise
+        .then((sub) => sub?.unsubscribe())
+        .catch((err) => appRuntime.runSync(Effect.logError('Unsubscribe error', { err })));
     };
   }, [verifyAccess]);
 
@@ -450,45 +518,15 @@ const App: React.FC = () => {
       gtagScript.async = true;
       document.head.appendChild(gtagScript);
 
-      // @ts-ignore
+      // 1. Google Analytics (gtag.js)
       const dataLayer = window.dataLayer || [];
-      // @ts-ignore
       window.dataLayer = dataLayer;
-      // @ts-ignore
-      function gtag(...args: any[]) {
+      function gtag(...args: unknown[]) {
         dataLayer.push(args);
       }
-      // @ts-ignore
       window.gtag = gtag;
       gtag('js', new Date());
       gtag('config', 'G-63RTLLNS0T');
-
-      // 2. Facebook Pixel
-      // oxlint-disable-next-line no-unused-expressions
-      void ((f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) => {
-        if (f.fbq) return;
-        n = f.fbq = function () {
-          // oxlint-disable-next-line no-unused-expressions
-          n.callMethod
-            ? // biome-ignore lint/complexity/noArguments: Standard Facebook Pixel code
-              n.callMethod.apply(n, arguments)
-            : n.queue.push(arguments);
-        };
-        if (!f._fbq) f._fbq = n;
-        n.push = n;
-        n.loaded = !0;
-        n.version = '2.0';
-        n.queue = [];
-        t = b.createElement(e);
-        t.async = !0;
-        t.src = v;
-        s = b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t, s);
-      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-      // @ts-ignore
-      fbq('init', '1404059491073088');
-      // @ts-ignore
-      fbq('track', 'PageView');
     };
 
     if (window.requestIdleCallback) {
@@ -502,25 +540,32 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    const checkSession = async () => {
-      const { wasLoggedOut } = await validateSessionUseCase.execute(user.id);
-      if (wasLoggedOut) {
-        try {
-          await supabase.auth.signOut();
-        } catch (err) {
-          logger.error({ err }, 'SignOut error during periodic check');
-        }
-        setUser(null);
-        setIsPaid(false);
-        setUserEmail('');
-        setActivePlan(null);
-        setNotification({
-          message:
-            'You have been logged out because you signed in on another device. (Two-device limit)',
-          type: 'info',
-        });
-      }
-    };
+    const checkSession = () =>
+      appRuntime.runPromise(
+        Effect.gen(function* () {
+          const { wasLoggedOut } = yield* validateSessionUseCase.execute(user.id);
+          if (wasLoggedOut) {
+            yield* Effect.tryPromise({
+              try: () => supabase.auth.signOut(),
+              catch: (err) => new Error(`SignOut error: ${err}`),
+            }).pipe(
+              Effect.catchAll((err) => {
+                appRuntime.runSync(Effect.logError('SignOut error during periodic check', { err }));
+                return Effect.succeed(void 0);
+              }),
+            );
+            setUser(null);
+            setIsPaid(false);
+            setUserEmail('');
+            setActivePlan(null);
+            setNotification({
+              message:
+                'You have been logged out because you signed in on another device. (Two-device limit)',
+              type: 'info',
+            });
+          }
+        }).pipe(Effect.catchAll(() => Effect.succeed(void 0))),
+      );
 
     // Check every 30 seconds
     const interval = setInterval(checkSession, 30000);
@@ -553,72 +598,96 @@ const App: React.FC = () => {
 
   // Initialize Fingerprint and Sync Usage
   useEffect(() => {
-    const initTracking = async () => {
-      try {
-        const vid = await deviceService.getVisitorID();
-        setVisitorID(vid);
+    const initTracking = () =>
+      appRuntime.runPromise(
+        Effect.gen(function* () {
+          const vid = yield* deviceService.getVisitorID();
+          setVisitorID(vid);
 
-        // Fetch current usage from Supabase
-        const { data, error } = await supabase
-          .from('usage_tracking')
-          .select('usage_count, examiner_count')
-          .eq('visitor_id', vid)
-          .maybeSingle();
+          // Fetch current usage from Supabase
+          const { data, error } = yield* Effect.tryPromise({
+            try: () =>
+              supabase
+                .from('usage_tracking')
+                .select('usage_count, examiner_count')
+                .eq('visitor_id', vid)
+                .maybeSingle(),
+            catch: (err) => new Error(`Usage fetch failed: ${err}`),
+          });
 
-        if (error) {
-          // PGRST116 means no row found, which is handled in the 'else' block
-          if (error.code !== 'PGRST116') {
-            logger.error({ code: error.code, msg: error.message }, 'Usage fetch failed');
-            // Fallback to 0 if record missing or inaccessible
+          if (error) {
+            // PGRST116 means no row found, which is handled in the 'else' block
+            if (error.code !== 'PGRST116') {
+              appRuntime.runSync(
+                Effect.logError('Usage fetch failed', { code: error.code, msg: error.message }),
+              );
+              // Fallback to 0 if record missing or inaccessible
+              setAiUsageCount(0);
+              setExaminerUsageCount(0);
+            }
+          }
+
+          if (data) {
+            setAiUsageCount(data.usage_count || 0);
+            setExaminerUsageCount(data.examiner_count || 0);
+          } else if (!error || error.code === 'PGRST116') {
+            // Record truly doesn't exist, create it with upsert to handle race conditions
             setAiUsageCount(0);
             setExaminerUsageCount(0);
-          }
-        }
 
-        if (data) {
-          setAiUsageCount(data.usage_count || 0);
-          setExaminerUsageCount(data.examiner_count || 0);
-        } else if (!error || error.code === 'PGRST116') {
-          // Record truly doesn't exist, create it with upsert to handle race conditions
-          setAiUsageCount(0);
-          setExaminerUsageCount(0);
-          try {
-            const { error: upsertError } = await supabase.from('usage_tracking').upsert(
-              [
-                {
-                  visitor_id: vid,
-                  usage_count: 0,
-                  examiner_count: 0,
-                  alias: null,
-                },
-              ],
-              {
-                onConflict: 'visitor_id',
-                ignoreDuplicates: true,
-              },
-            );
+            const { error: upsertError } = yield* Effect.tryPromise({
+              try: () =>
+                supabase.from('usage_tracking').upsert(
+                  [
+                    {
+                      visitor_id: vid,
+                      usage_count: 0,
+                      examiner_count: 0,
+                      alias: null,
+                    },
+                  ],
+                  {
+                    onConflict: 'visitor_id',
+                    ignoreDuplicates: true,
+                  },
+                ),
+              catch: (err) => new Error(`Failed to create initial usage record: ${err}`),
+            });
+
             if (upsertError) {
-              logger.error({ msg: upsertError.message }, 'Failed to create initial usage record');
+              appRuntime.runSync(
+                Effect.logError('Failed to create initial usage record', {
+                  msg: upsertError.message,
+                }),
+              );
             }
-          } catch (e) {
-            logger.error({ err: e }, 'Critical error during usage sync');
           }
-        }
-      } catch (err) {
-        logger.error({ err }, 'initTracking failed');
-      }
-    };
+        }).pipe(
+          Effect.catchAll((err) => {
+            appRuntime.runSync(Effect.logError('initTracking failed', { err }));
+            return Effect.succeed(void 0);
+          }),
+        ),
+      );
     initTracking();
   }, []);
 
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
-    if (isTimerRunning) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
+    if (!isTimerRunning) return;
+
+    const fiber = Effect.runFork(
+      Effect.repeat(
+        Effect.gen(function* () {
+          yield* Effect.sleep('1 second');
+          setTimer((prev) => prev + 1);
+        }),
+        Schedule.forever,
+      ),
+    );
+
+    return () => {
+      Effect.runFork(Fiber.interrupt(fiber));
+    };
   }, [isTimerRunning]);
 
   const formatTime = (seconds: number): string => {
@@ -651,12 +720,9 @@ const App: React.FC = () => {
   };
 
   const getNewRandomTopic = () => {
-    if (topics.length <= 1) return;
-    let newTopic = topics[0] as Topic;
-    do {
-      newTopic = topics[Math.floor(Math.random() * topics.length)] as Topic;
-    } while (newTopic.id === topic?.id);
-    setTopic(newTopic ?? null);
+    const otherTopics = topics.filter((t) => t.id !== topic?.id);
+    if (otherTopics.length === 0) return;
+    setTopic(otherTopics[Math.floor(Math.random() * otherTopics.length)] ?? null);
   };
 
   const handleInputChange = (section: EssaySectionKey, field: string, value: string) => {
@@ -715,50 +781,65 @@ const App: React.FC = () => {
     }
   };
 
-  const incrementFreeUsage = async () => {
-    if (!visitorID) return;
+  const incrementFreeUsage = () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        if (!visitorID) return;
 
-    const newCount = aiUsageCount + 1;
-    setAiUsageCount(newCount);
+        const newCount = aiUsageCount + 1;
+        setAiUsageCount(newCount);
 
-    // Sync to Supabase using secure RPC
-    try {
-      const { error } = await supabase.rpc('increment_usage_count', {
-        target_visitor_id: visitorID,
-        counter_type: 'ai',
-      });
-      if (error) {
-        console.error('RPC Error (AI Usage):', error.message, error.details);
-        // Rollback local state if sync failed so user sees accurate persisted data
-        setAiUsageCount((prev) => prev - 1);
-      }
-    } catch (err) {
-      console.error('Failed to sync AI usage:', err);
-      setAiUsageCount((prev) => prev - 1);
-    }
-  };
+        const { error } = yield* Effect.tryPromise({
+          try: () =>
+            supabase.rpc('increment_usage_count', {
+              target_visitor_id: visitorID,
+              counter_type: 'ai',
+            }),
+          catch: (err) => new Error(`Failed to sync AI usage: ${err}`),
+        });
 
-  const incrementExaminerUsage = async () => {
-    if (!visitorID || isPaid) return;
+        if (error) {
+          console.error('RPC Error (AI Usage):', error.message, error.details);
+          setAiUsageCount((prev) => prev - 1);
+        }
+      }).pipe(
+        Effect.catchAll((err) => {
+          console.error(err.message);
+          setAiUsageCount((prev) => prev - 1);
+          return Effect.succeed(void 0);
+        }),
+      ),
+    );
 
-    const newCount = examinerUsageCount + 1;
-    setExaminerUsageCount(newCount);
+  const incrementExaminerUsage = () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        if (!visitorID || isPaid) return;
 
-    // Sync to Supabase using secure RPC
-    try {
-      const { error } = await supabase.rpc('increment_usage_count', {
-        target_visitor_id: visitorID,
-        counter_type: 'examiner',
-      });
-      if (error) {
-        console.error('RPC Error (Examiner Usage):', error.message, error.details);
-        setExaminerUsageCount((prev) => prev - 1);
-      }
-    } catch (err) {
-      console.error('Failed to sync examiner usage:', err);
-      setExaminerUsageCount((prev) => prev - 1);
-    }
-  };
+        const newCount = examinerUsageCount + 1;
+        setExaminerUsageCount(newCount);
+
+        const { error } = yield* Effect.tryPromise({
+          try: () =>
+            supabase.rpc('increment_usage_count', {
+              target_visitor_id: visitorID,
+              counter_type: 'examiner',
+            }),
+          catch: (err) => new Error(`Failed to sync examiner usage: ${err}`),
+        });
+
+        if (error) {
+          console.error('RPC Error (Examiner Usage):', error.message, error.details);
+          setExaminerUsageCount((prev) => prev - 1);
+        }
+      }).pipe(
+        Effect.catchAll((err) => {
+          console.error(err.message);
+          setExaminerUsageCount((prev) => prev - 1);
+          return Effect.succeed(void 0);
+        }),
+      ),
+    );
 
   const calculateWordCount = (text: string): number => {
     return text
@@ -769,49 +850,70 @@ const App: React.FC = () => {
 
   const totalWordCount = calculateWordCount(generateFullEssay());
 
-  const copyToClipboard = () => {
-    const text = generateFullEssay();
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
-      if (btn) {
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="uppercase font-black">Copied!</span>';
-        setTimeout(() => (btn.innerHTML = originalText), 2000);
-      }
-    } catch (err) {
-      console.error('Unable to copy', err);
-    }
-    document.body.removeChild(textArea);
-  };
+  const copyToClipboard = () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const text = generateFullEssay();
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
 
-  const handleLogout = async () => {
-    try {
-      // Deactivate session in database before signing out
-      if (user) {
-        console.log('Deactivating session for user:', user.id);
-        const result = await deactivateSessionUseCase.execute(user.id);
-        if (result.ok) console.log('Session deactivated successfully');
-        else console.warn('Session deactivation failed:', result.error);
-      }
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      // Manual state reset to ensure UI updates immediately
-      setUser(null);
-      setIsPaid(false);
-      setUserEmail('');
-      setActivePlan(null);
+        yield* Effect.try({
+          try: () => document.execCommand('copy'),
+          catch: (err) => new Error(`Unable to copy: ${err}`),
+        });
 
-      // Force a complete page reload to clear all library and browser states
-      window.location.href = window.location.origin;
-    }
-  };
+        const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+        if (btn) {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<span class="uppercase font-black">Copied!</span>';
+          yield* Effect.forkDaemon(
+            Effect.gen(function* () {
+              yield* Effect.sleep('2 seconds');
+              btn.innerHTML = originalText;
+            }),
+          );
+        }
+
+        document.body.removeChild(textArea);
+      }).pipe(
+        Effect.catchAll((err) => {
+          console.error(err.message);
+          return Effect.succeed(void 0);
+        }),
+      ),
+    );
+
+  const handleLogout = () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        if (user) {
+          console.log('Deactivating session for user:', user.id);
+          yield* deactivateSessionUseCase.execute(user.id).pipe(
+            Effect.tapError((error) =>
+              Effect.sync(() => console.warn('Session deactivation failed:', error)),
+            ),
+            Effect.catchAll(() => Effect.succeed(void 0)),
+          );
+          console.log('Session deactivated successfully');
+        }
+
+        yield* Effect.tryPromise({
+          try: () => supabase.auth.signOut(),
+          catch: (err) => new Error(`Logout error: ${err}`),
+        });
+
+        // Manual state reset to ensure UI updates immediately
+        setUser(null);
+        setIsPaid(false);
+        setUserEmail('');
+        setActivePlan(null);
+
+        // Force a complete page reload to clear all library and browser states
+        window.location.href = window.location.origin;
+      }),
+    );
 
   return (
     <div className="h-[100dvh] bg-[#f4f1ea] text-stone-900 font-sans flex flex-col overflow-hidden selection:bg-yellow-300 selection:text-stone-900">

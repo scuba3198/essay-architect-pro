@@ -7,6 +7,8 @@
 import { ChevronLeft, ChevronRight, Lock, Sparkles, Wand2, Zap } from 'lucide-react';
 import type React from 'react';
 import { useRef, useState } from 'react';
+import { Effect, Match } from 'effect';
+import { appRuntime } from '../../infrastructure/runtime';
 import { AIClient } from '../../infrastructure/api/api';
 import type { Essay, EssaySectionKey, Topic, TourProps } from '../../domain/types';
 import RefineModal from './modals/RefineModal';
@@ -147,66 +149,85 @@ const StepWizard: React.FC<StepWizardProps> = ({
     }
   };
 
-  const handleAutocomplete = async (
-    section: EssaySectionKey,
-    field: string,
-    currentText: string,
-  ) => {
+  const handleAutocomplete = (section: EssaySectionKey, field: string, currentText: string) => {
     const canUseFree = freeUsageCount < 10;
     if (!isPaid && !canUseFree) {
       onLimitReached();
       return;
     }
     setGeneratingField(`${section}-${field}`);
-    try {
-      // Build sophisticated context based on the entire essay flow so far
-      let contextInfo = '';
 
-      // Helper to get text safely
-      const getTxt = (sec: EssaySectionKey, fld: string) =>
-        (essay[sec] as unknown as Record<string, string>)[fld] || '';
+    appRuntime.runPromise(
+      Effect.gen(function* () {
+        // Build sophisticated context based on the entire essay flow so far
+        // Helper to get text safely
+        const getTxt = (sec: EssaySectionKey, fld: string) =>
+          (essay[sec] as unknown as Record<string, string>)[fld] || '';
 
-      if (section === 'intro') {
-        if (field === 'thesis') {
-          contextInfo = `Preceding Paraphrase: "${getTxt('intro', 'paraphrase')}"`;
-        }
-      } else if (section === 'body1') {
-        // For Body 1, knowing the thesis is crucial
-        const thesis = getTxt('intro', 'thesis');
+        const contextInfo = Match.value([section, field] as const).pipe(
+          // Intro
+          Match.when(
+            ['intro', 'thesis'],
+            () => `Preceding Paraphrase: "${getTxt('intro', 'paraphrase')}"`,
+          ),
 
-        if (field === 'topicSentence') {
-          contextInfo = `Essay Thesis: "${thesis}"`;
-        } else if (field === 'explanation') {
-          contextInfo = `Topic Sentence: "${getTxt('body1', 'topicSentence')}"`;
-        } else if (field === 'example') {
-          contextInfo = `Argument Context: "${getTxt('body1', 'topicSentence')} ${getTxt('body1', 'explanation')}"`;
-        } else if (field === 'concluding') {
-          contextInfo = `Argument Context: "${getTxt('body1', 'topicSentence')} ${getTxt('body1', 'explanation')} ${getTxt('body1', 'example')}"`;
-        }
-      } else if (section === 'body2') {
-        // For Body 2, we need Thesis AND Body 1 to determine if it's a "Furthermore" or "However" paragraph
-        const thesis = getTxt('intro', 'thesis');
-        const body1Topic = getTxt('body1', 'topicSentence');
+          // Body 1
+          Match.when(
+            ['body1', 'topicSentence'],
+            () => `Essay Thesis: "${getTxt('intro', 'thesis')}"`,
+          ),
+          Match.when(
+            ['body1', 'explanation'],
+            () => `Topic Sentence: "${getTxt('body1', 'topicSentence')}"`,
+          ),
+          Match.when(
+            ['body1', 'example'],
+            () =>
+              `Argument Context: "${getTxt('body1', 'topicSentence')} ${getTxt('body1', 'explanation')}"`,
+          ),
+          Match.when(
+            ['body1', 'concluding'],
+            () =>
+              `Argument Context: "${getTxt('body1', 'topicSentence')} ${getTxt('body1', 'explanation')} ${getTxt('body1', 'example')}"`,
+          ),
 
-        if (field === 'topicSentence') {
-          contextInfo = `Essay Thesis: "${thesis}".\nPrevious Paragraph Main Point: "${body1Topic}". (Ensure smooth transition/flow from previous paragraph - e.g. using 'However' if contrasting, or 'Furthermore' if supporting).`;
-        } else if (field === 'explanation') {
-          contextInfo = `Topic Sentence: "${getTxt('body2', 'topicSentence')}"`;
-        } else if (field === 'example') {
-          contextInfo = `Argument Context: "${getTxt('body2', 'topicSentence')} ${getTxt('body2', 'explanation')}"`;
-        } else if (field === 'concluding') {
-          contextInfo = `Argument Context: "${getTxt('body2', 'topicSentence')} ${getTxt('body2', 'explanation')} ${getTxt('body2', 'example')}"`;
-        }
-      } else if (section === 'conclusion') {
-        if (field === 'summary') {
-          // Needs to recap main points
-          contextInfo = `Thesis: "${getTxt('intro', 'thesis')}".\nBody 1 Point: "${getTxt('body1', 'topicSentence')}".\nBody 2 Point: "${getTxt('body2', 'topicSentence')}".`;
-        } else if (field === 'finalThought') {
-          contextInfo = `Preceding Summary: "${getTxt('conclusion', 'summary')}"`;
-        }
-      }
+          // Body 2
+          Match.when(
+            ['body2', 'topicSentence'],
+            () =>
+              `Essay Thesis: "${getTxt('intro', 'thesis')}".\nPrevious Paragraph Main Point: "${getTxt('body1', 'topicSentence')}". (Ensure smooth transition/flow from previous paragraph - e.g. using 'However' if contrasting, or 'Furthermore' if supporting).`,
+          ),
+          Match.when(
+            ['body2', 'explanation'],
+            () => `Topic Sentence: "${getTxt('body2', 'topicSentence')}"`,
+          ),
+          Match.when(
+            ['body2', 'example'],
+            () =>
+              `Argument Context: "${getTxt('body2', 'topicSentence')} ${getTxt('body2', 'explanation')}"`,
+          ),
+          Match.when(
+            ['body2', 'concluding'],
+            () =>
+              `Argument Context: "${getTxt('body2', 'topicSentence')} ${getTxt('body2', 'explanation')} ${getTxt('body2', 'example')}"`,
+          ),
 
-      const prompt = `Act as an academic essay writer.
+          // Conclusion
+          Match.when(
+            ['conclusion', 'summary'],
+            () =>
+              `Thesis: "${getTxt('intro', 'thesis')}".\nBody 1 Point: "${getTxt('body1', 'topicSentence')}".\nBody 2 Point: "${getTxt('body2', 'topicSentence')}".`,
+          ),
+          Match.when(
+            ['conclusion', 'finalThought'],
+            () => `Preceding Summary: "${getTxt('conclusion', 'summary')}"`,
+          ),
+
+          // Fallback
+          Match.orElse(() => ''),
+        );
+
+        const prompt = `Act as an academic essay writer.
             Essay Topic: "${topic?.question}". 
             Current Section: ${section.toUpperCase()} - ${field}.
             
@@ -221,9 +242,7 @@ const StepWizard: React.FC<StepWizardProps> = ({
             3. LANGUAGE: Use 10th-grade reading level vocabulary (clear, academic, accessible).
             Return ONLY the text to be added.`;
 
-      const result = await aiClient.callProAI(prompt);
-      if (result.ok) {
-        const completion = result.value;
+        const completion = yield* aiClient.callProAI(prompt);
         const spacer = currentText.length > 0 && !currentText.match(/\s$/) ? ' ' : '';
         const newVal = currentText + spacer + completion.trim();
         handleInputChange(section, field, newVal);
@@ -232,17 +251,15 @@ const StepWizard: React.FC<StepWizardProps> = ({
         if (!isPaid) {
           onIncrementUsage();
         }
-      } else {
-        // Handle failure result
-        const error = result.error;
-        alert(`Autocomplete failed: ${error.message}`);
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      alert(`Autocomplete failed: ${message}`);
-    } finally {
-      setGeneratingField(null);
-    }
+      }).pipe(
+        Effect.catchAll((err) => {
+          const message = err instanceof Error ? err.message : 'Unknown error';
+          alert(`Autocomplete failed: ${message}`);
+          return Effect.succeed(void 0);
+        }),
+        Effect.ensuring(Effect.sync(() => setGeneratingField(null))),
+      ),
+    );
   };
 
   interface RefineButtonProps {

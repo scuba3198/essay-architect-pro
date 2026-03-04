@@ -2,6 +2,8 @@ import type { User } from '@supabase/supabase-js';
 import { ArrowLeft, CheckCircle2, Loader2, QrCode, Upload, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { Effect } from 'effect';
+import { appRuntime } from '../../../infrastructure/runtime';
 import { supabase } from '../../../infrastructure/db/supabase';
 import type { Plan } from '../../../domain/types';
 import { AIClient } from '../../../infrastructure/api/api';
@@ -40,7 +42,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
       console.log('No file selected');
@@ -51,111 +53,136 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     setIsUploading(true);
     setFileName(file.name);
 
-    try {
-      // 1. Get User ID for RLS policies (Use passedUser if available to avoid extra DB roundtrip)
-      let user = passedUser;
-      if (!user) {
-        console.log('No user prop, fetching user...');
-        const {
-          data: { user: fetchedUser },
-          error: authError,
-        } = await supabase.auth.getUser();
-        if (authError || !fetchedUser)
-          throw new Error('User authentication failed. Please try logging in again.');
-        user = fetchedUser;
-      }
-
-      console.log('Authenticated as:', user.email, 'id:', user.id);
-
-      // 2. Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop() || 'png';
-      const uniqueFileName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
-      const filePath = `screenshots/${user.id}/${uniqueFileName}`;
-
-      console.log('Uploading to storage path:', filePath);
-      const { error: uploadError } = await supabase.storage.from('payments').upload(filePath, file);
-
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        throw uploadError;
-      }
-
-      console.log('Upload successful, getting public URL...');
-
-      // 3. Get Public URL
-      const { data: urlData } = supabase.storage.from('payments').getPublicUrl(filePath);
-      const publicUrl = urlData.publicUrl;
-
-      console.log('Public URL generated:', publicUrl);
-
-      // 4. Save to Database (include user_id for RLS policy)
-      console.log('Saving payment record to database...');
-      const { error: dbError } = await supabase.from('payments').insert([
-        {
-          user_id: user.id, // Required for RLS policy
-          user_email: user.email, // Keep for display/notification purposes
-          plan_name: plan.name,
-          amount: plan.price,
-          screenshot_url: publicUrl,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-        },
-      ]);
-
-      if (dbError) {
-        console.error('Database insert error:', dbError);
-        throw dbError;
-      }
-
-      console.log('Database record saved. Triggering notification and pixel...');
-
-      // 4. Notify Backend (which notifies Discord)
-      try {
-        console.log('API module loaded, sending payment notification...');
-        const notificationResult = await aiClient.callProAI(
-          JSON.stringify({
-            planName: plan.name,
-            price: plan.price,
-            userEmail: user.email,
-          }),
-          '',
-          'payment',
-        );
-        if (!notificationResult.ok) {
-          console.error('Failed to send payment notification:', notificationResult.error);
-        } else {
-          console.log('Payment notification sent successfully!');
-        }
-      } catch (err) {
-        console.error('Backend notification signal failed:', err);
-        // Don't block the user flow, but log it
-      }
-
-      // 5. Track Facebook Pixel (Non-blocking)
-      if (window.fbq) {
-        try {
-          window.fbq('track', 'Purchase', {
-            value: plan.price,
-            currency: 'NPR',
-            content_name: plan.name,
+    appRuntime.runPromise(
+      Effect.gen(function* () {
+        // 1. Get User ID for RLS policies
+        const user = yield* Effect.gen(function* () {
+          if (passedUser) return passedUser;
+          console.log('No user prop, fetching user...');
+          const {
+            data: { user: fetchedUser },
+            error: authError,
+          } = yield* Effect.tryPromise({
+            try: () => supabase.auth.getUser(),
+            catch: (err) => new Error(`Auth fetch failed: ${err}`),
           });
-        } catch (fbError) {
-          console.error('FB Pixel tracking failed:', fbError);
-        }
-      }
+          if (authError || !fetchedUser) {
+            return yield* Effect.fail(
+              new Error('User authentication failed. Please try logging in again.'),
+            );
+          }
+          return fetchedUser;
+        });
 
-      console.log('Process complete! Moving to success screen.');
-      setStep(3);
-    } catch (error: unknown) {
-      console.error('Critical upload flow failure:', error);
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      alert(
-        `Upload failed: ${message}. Please try again or contact support if the issue persists.`,
-      );
-    } finally {
-      console.log('Setting isUploading to false');
-      setIsUploading(false);
-    }
+        console.log('Authenticated as:', user.email, 'id:', user.id);
+
+        // 2. Upload to Supabase Storage
+        const fileExt = file.name.split('.').pop() || 'png';
+        const uniqueFileName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
+        const filePath = `screenshots/${user.id}/${uniqueFileName}`;
+
+        console.log('Uploading to storage path:', filePath);
+        const { error: uploadError } = yield* Effect.tryPromise({
+          try: () => supabase.storage.from('payments').upload(filePath, file),
+          catch: (err) => new Error(`Storage upload failed: ${err}`),
+        });
+
+        if (uploadError) {
+          console.error('Storage upload error:', uploadError);
+          return yield* Effect.fail(uploadError);
+        }
+
+        console.log('Upload successful, getting public URL...');
+
+        // 3. Get Public URL
+        const {
+          data: { publicUrl },
+        } = yield* Effect.sync(() => supabase.storage.from('payments').getPublicUrl(filePath));
+
+        console.log('Public URL generated:', publicUrl);
+
+        // 4. Save to Database
+        console.log('Saving payment record to database...');
+        const { error: dbError } = yield* Effect.tryPromise({
+          try: () =>
+            supabase.from('payments').insert([
+              {
+                user_id: user.id,
+                user_email: user.email,
+                plan_name: plan.name,
+                amount: plan.price,
+                screenshot_url: publicUrl,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+              },
+            ]),
+          catch: (err) => new Error(`Database insert failed: ${err}`),
+        });
+
+        if (dbError) {
+          console.error('Database insert error:', dbError);
+          return yield* Effect.fail(dbError);
+        }
+
+        console.log('Database record saved. Triggering notification and pixel...');
+
+        // 5. Notify Backend (Non-blocking)
+        yield* Effect.forkDaemon(
+          aiClient
+            .callProAI(
+              JSON.stringify({
+                planName: plan.name,
+                price: plan.price,
+                userEmail: user.email,
+              }),
+              '',
+              'payment',
+            )
+            .pipe(
+              Effect.tap(() =>
+                Effect.sync(() => console.log('Payment notification sent successfully!')),
+              ),
+              Effect.catchAll((err) => {
+                console.error('Backend notification signal failed:', err);
+                return Effect.succeed(void 0);
+              }),
+            ),
+        );
+
+        // 6. Track Facebook Pixel (Non-blocking)
+        if (window.fbq) {
+          yield* Effect.try({
+            try: () =>
+              window.fbq?.('track', 'Purchase', {
+                value: plan.price,
+                currency: 'NPR',
+                content_name: plan.name,
+              }),
+            catch: (fbError) => {
+              console.error('FB Pixel tracking failed:', fbError);
+              return new Error('FB Pixel tracking failed');
+            },
+          }).pipe(Effect.catchAll(() => Effect.succeed(void 0)));
+        }
+
+        console.log('Process complete! Moving to success screen.');
+        setStep(3);
+      }).pipe(
+        Effect.catchAll((error) => {
+          console.error('Critical upload flow failure:', error);
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          alert(
+            `Upload failed: ${message}. Please try again or contact support if the issue persists.`,
+          );
+          return Effect.succeed(void 0);
+        }),
+        Effect.ensuring(
+          Effect.sync(() => {
+            setIsUploading(false);
+          }),
+        ),
+      ),
+    );
   };
 
   return (
