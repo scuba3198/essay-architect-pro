@@ -45,11 +45,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
-      console.log('No file selected');
       return;
     }
-
-    console.log('Starting upload process for:', file.name, 'Size:', file.size);
     setIsUploading(true);
     setFileName(file.name);
 
@@ -58,7 +55,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         // 1. Get User ID for RLS policies
         const user = yield* Effect.gen(function* () {
           if (passedUser) return passedUser;
-          console.log('No user prop, fetching user...');
           const {
             data: { user: fetchedUser },
             error: authError,
@@ -74,35 +70,26 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           return fetchedUser;
         });
 
-        console.log('Authenticated as:', user.email, 'id:', user.id);
-
         // 2. Upload to Supabase Storage
         const fileExt = file.name.split('.').pop() || 'png';
         const uniqueFileName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
         const filePath = `screenshots/${user.id}/${uniqueFileName}`;
-
-        console.log('Uploading to storage path:', filePath);
         const { error: uploadError } = yield* Effect.tryPromise({
           try: () => supabase.storage.from('payments').upload(filePath, file),
           catch: (err) => new Error(`Storage upload failed: ${err}`),
         });
 
         if (uploadError) {
-          console.error('Storage upload error:', uploadError);
+          yield* Effect.logError('Storage upload error', { error: uploadError });
           return yield* Effect.fail(uploadError);
         }
-
-        console.log('Upload successful, getting public URL...');
 
         // 3. Get Public URL
         const {
           data: { publicUrl },
         } = yield* Effect.sync(() => supabase.storage.from('payments').getPublicUrl(filePath));
 
-        console.log('Public URL generated:', publicUrl);
-
         // 4. Save to Database
-        console.log('Saving payment record to database...');
         const { error: dbError } = yield* Effect.tryPromise({
           try: () =>
             supabase.from('payments').insert([
@@ -120,11 +107,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         });
 
         if (dbError) {
-          console.error('Database insert error:', dbError);
+          yield* Effect.logError('Database insert error', { error: dbError });
           return yield* Effect.fail(dbError);
         }
-
-        console.log('Database record saved. Triggering notification and pixel...');
 
         // 5. Notify Backend (Non-blocking)
         yield* Effect.forkDaemon(
@@ -139,13 +124,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               'payment',
             )
             .pipe(
-              Effect.tap(() =>
-                Effect.sync(() => console.log('Payment notification sent successfully!')),
+              Effect.tap(() => Effect.logInfo('Payment notification sent successfully!')),
+              Effect.catchAll((err) =>
+                Effect.logError('Backend notification signal failed', { error: err }),
               ),
-              Effect.catchAll((err) => {
-                console.error('Backend notification signal failed:', err);
-                return Effect.succeed(void 0);
-              }),
             ),
         );
 
@@ -159,17 +141,21 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 content_name: plan.name,
               }),
             catch: (fbError) => {
-              console.error('FB Pixel tracking failed:', fbError);
-              return new Error('FB Pixel tracking failed');
+              return new Error(`FB Pixel tracking failed: ${fbError}`);
             },
-          }).pipe(Effect.catchAll(() => Effect.succeed(void 0)));
+          }).pipe(
+            Effect.catchAll((err) =>
+              Effect.logError('FB Pixel tracking failed', { error: err }),
+            ),
+          );
         }
 
-        console.log('Process complete! Moving to success screen.');
         setStep(3);
       }).pipe(
         Effect.catchAll((error) => {
-          console.error('Critical upload flow failure:', error);
+          void Effect.runSync(
+            Effect.logError('Critical upload flow failure', { error }),
+          );
           const message = error instanceof Error ? error.message : 'Unknown error';
           alert(
             `Upload failed: ${message}. Please try again or contact support if the issue persists.`,

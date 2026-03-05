@@ -247,7 +247,9 @@ const App: React.FC = () => {
           });
 
           if (error) {
-            console.error('Payment check fetch error:', error);
+            appRuntime.runSync(
+              Effect.logError('Payment check fetch error', { error }),
+            );
             // On network error, keep current state to avoid UI flicker
             return;
           }
@@ -334,16 +336,17 @@ const App: React.FC = () => {
             }
           }
         }).pipe(
-          Effect.catchAll((err) => {
-            console.error('Critical verifyAccess error:', err);
-            const message = err.message;
-            if (!isSilent)
-              setNotification({
-                message: `Failed to verify access: ${message}. Please refresh the page.`,
-                type: 'error',
-              });
-            return Effect.succeed(void 0);
-          }),
+          Effect.catchAll((err) =>
+            Effect.gen(function* () {
+              yield* Effect.logError('Critical verifyAccess error', { error: err });
+              const message = err.message;
+              if (!isSilent)
+                setNotification({
+                  message: `Failed to verify access: ${message}. Please refresh the page.`,
+                  type: 'error',
+                });
+            }),
+          ),
         ),
       ),
     [],
@@ -371,7 +374,9 @@ const App: React.FC = () => {
         });
 
         if (error) {
-          console.error('Recovery token verification failed:', error);
+          appRuntime.runSync(
+            Effect.logError('Recovery token verification failed', { error }),
+          );
           setNotification({
             message:
               'Failed to verify recovery link. It may have expired. Please request a new one.',
@@ -782,7 +787,7 @@ const App: React.FC = () => {
   };
 
   const incrementFreeUsage = () =>
-    Effect.runPromise(
+    appRuntime.runPromise(
       Effect.gen(function* () {
         if (!visitorID) return;
 
@@ -799,20 +804,24 @@ const App: React.FC = () => {
         });
 
         if (error) {
-          console.error('RPC Error (AI Usage):', error.message, error.details);
+          yield* Effect.logError('RPC Error (AI Usage)', {
+            message: error.message,
+            details: error.details,
+          });
           setAiUsageCount((prev) => prev - 1);
         }
       }).pipe(
-        Effect.catchAll((err) => {
-          console.error(err.message);
-          setAiUsageCount((prev) => prev - 1);
-          return Effect.succeed(void 0);
-        }),
+        Effect.catchAll((err) =>
+          Effect.gen(function* () {
+            yield* Effect.logError('AI usage increment failure', { error: err });
+            setAiUsageCount((prev) => prev - 1);
+          }),
+        ),
       ),
     );
 
   const incrementExaminerUsage = () =>
-    Effect.runPromise(
+    appRuntime.runPromise(
       Effect.gen(function* () {
         if (!visitorID || isPaid) return;
 
@@ -829,15 +838,19 @@ const App: React.FC = () => {
         });
 
         if (error) {
-          console.error('RPC Error (Examiner Usage):', error.message, error.details);
+          yield* Effect.logError('RPC Error (Examiner Usage)', {
+            message: error.message,
+            details: error.details,
+          });
           setExaminerUsageCount((prev) => prev - 1);
         }
       }).pipe(
-        Effect.catchAll((err) => {
-          console.error(err.message);
-          setExaminerUsageCount((prev) => prev - 1);
-          return Effect.succeed(void 0);
-        }),
+        Effect.catchAll((err) =>
+          Effect.gen(function* () {
+            yield* Effect.logError('Examiner usage increment failure', { error: err });
+            setExaminerUsageCount((prev) => prev - 1);
+          }),
+        ),
       ),
     );
 
@@ -851,7 +864,7 @@ const App: React.FC = () => {
   const totalWordCount = calculateWordCount(generateFullEssay());
 
   const copyToClipboard = () =>
-    Effect.runPromise(
+    appRuntime.runPromise(
       Effect.gen(function* () {
         const text = generateFullEssay();
         const textArea = document.createElement('textarea');
@@ -878,25 +891,22 @@ const App: React.FC = () => {
 
         document.body.removeChild(textArea);
       }).pipe(
-        Effect.catchAll((err) => {
-          console.error(err.message);
-          return Effect.succeed(void 0);
-        }),
+        Effect.catchAll((err) =>
+          Effect.logError('Copy to clipboard failed', { error: err }),
+        ),
       ),
     );
 
   const handleLogout = () =>
-    Effect.runPromise(
+    appRuntime.runPromise(
       Effect.gen(function* () {
         if (user) {
-          console.log('Deactivating session for user:', user.id);
+          yield* Effect.logInfo('Deactivating session for user', { userId: user.id });
           yield* deactivateSessionUseCase.execute(user.id).pipe(
-            Effect.tapError((error) =>
-              Effect.sync(() => console.warn('Session deactivation failed:', error)),
-            ),
+            Effect.tapError((error) => Effect.logWarning('Session deactivation failed', { error })),
             Effect.catchAll(() => Effect.succeed(void 0)),
           );
-          console.log('Session deactivated successfully');
+          yield* Effect.logInfo('Session deactivated successfully', { userId: user.id });
         }
 
         yield* Effect.tryPromise({

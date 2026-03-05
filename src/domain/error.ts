@@ -1,14 +1,19 @@
-import { Data } from 'effect';
+import { Schema } from '@effect/schema';
 
 /**
  * Base Application Error class.
- * All domain-specific errors should extend this class.
+ *
+ * Uses Schema.TaggedError so errors are serializable and type-safe while
+ * preserving the existing constructor ergonomics used throughout the app.
  */
-export class AppError extends Data.TaggedError('AppError')<{
-  readonly message: string;
-  readonly code: string;
-  readonly shouldLog: boolean;
-}> {
+export class AppError extends Schema.TaggedError<AppError>()(
+  'AppError',
+  {
+    message: Schema.String,
+    code: Schema.String,
+    shouldLog: Schema.Boolean,
+  },
+) {
   constructor(
     args: { message: string; code?: string; shouldLog?: boolean } | string,
     code?: string,

@@ -14,7 +14,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     /* Types */
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "plugins": [{ "name": "@effect/language-service" }]
   },
   "include": ["src", "api"]
 }

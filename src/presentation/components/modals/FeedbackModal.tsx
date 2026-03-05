@@ -68,10 +68,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
         }),
       catch: (err) => new Error(`Discord notification failed: ${err}`),
     }).pipe(
-      Effect.catchAll((err) => {
-        console.error(err);
-        return Effect.succeed(void 0);
-      }),
+      Effect.catchAll((err) => Effect.logError('Discord notification failed', { error: err })),
     );
   };
 
@@ -113,11 +110,12 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           }),
         );
       }).pipe(
-        Effect.catchAll((err) => {
-          console.error('Feedback submission error:', err);
-          setError('Failed to send feedback. Please try again later.');
-          return Effect.succeed(void 0);
-        }),
+        Effect.catchAll((err) =>
+          Effect.gen(function* () {
+            yield* Effect.logError('Feedback submission error', { error: err });
+            setError('Failed to send feedback. Please try again later.');
+          }),
+        ),
         Effect.ensuring(Effect.sync(() => setIsSubmitting(false))),
       ),
     );

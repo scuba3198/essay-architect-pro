@@ -132,14 +132,14 @@ export const getTurnstileToken = (): Effect.Effect<string, AppError> =>
 
       // Cleanup mechanism that Effect runs if interrupted or finished
       return Effect.sync(() => {
-        if (widgetId !== null && window.turnstile) {
-          Effect.runSync(
-            Effect.try({
-              try: () => window.turnstile?.remove(widgetId),
-              catch: () => void 0,
-            }).pipe(Effect.catchAll(() => Effect.succeed(void 0))),
-          );
+        try {
+          if (widgetId !== null && window.turnstile) {
+            window.turnstile.remove(widgetId);
+          }
+        } catch {
+          // ignore cleanup errors
         }
+
         if (container.parentNode) {
           container.parentNode.removeChild(container);
         }

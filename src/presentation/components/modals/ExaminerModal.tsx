@@ -132,15 +132,16 @@ Essay:
         setFeedback(validatedData);
         if (!isPaid) onIncrementUsage();
       }).pipe(
-        Effect.catchAll((err) => {
-          console.error(err);
-          const message =
-            err instanceof Error
-              ? err.message
-              : 'The examiner is currently unavailable. Please try again.';
-          setError(message);
-          return Effect.succeed(void 0);
-        }),
+        Effect.catchAll((err) =>
+          Effect.gen(function* () {
+            yield* Effect.logError('Examiner feedback error', { error: err });
+            const message =
+              err instanceof Error
+                ? err.message
+                : 'The examiner is currently unavailable. Please try again.';
+            setError(message);
+          }),
+        ),
         Effect.ensuring(Effect.sync(() => setLoading(false))),
       ),
     );

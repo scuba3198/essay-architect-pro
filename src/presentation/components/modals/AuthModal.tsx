@@ -120,13 +120,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
           );
         }
       }).pipe(
-        Effect.catchAll((err) => {
-          console.error('Auth error:', err);
-          const msg =
-            err instanceof Error ? err.message : 'An error occurred during authentication.';
-          setError(msg);
-          return Effect.succeed(void 0);
-        }),
+        Effect.catchAll((err) =>
+          Effect.gen(function* () {
+            yield* Effect.logError('Auth error', { error: err });
+            const msg =
+              err instanceof Error ? err.message : 'An error occurred during authentication.';
+            setError(msg);
+          }),
+        ),
         Effect.ensuring(Effect.sync(() => setIsLoading(false))),
       ),
     );
