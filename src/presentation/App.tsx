@@ -5,514 +5,70 @@
  * Unauthorized copying, modification, or distribution is strictly prohibited.
  */
 
-// Essay Architect Pro Version Branch
-import {
-  Award,
-  Clock,
-  Facebook,
-  Github,
-  HelpCircle,
-  Menu,
-  PenTool,
-  RefreshCw,
-  RotateCcw,
-  X,
-  Zap,
-} from 'lucide-react';
 import type React from 'react';
-import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react';
-import { Effect, Match, Schedule, Fiber, Ref } from 'effect';
-
-const WhatsAppIcon: React.FC<{ size?: number; className?: string }> = ({
-  size = 24,
-  className = '',
-}) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
-    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
-  </svg>
-);
-
-import { LogOut, User } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
-import FeedbackButton from './components/FeedbackButton';
-import PreviewSection from './components/PreviewSection';
-import StepWizard from './components/StepWizard';
-import TestimonialSection from './components/TestimonialSection';
-import TourTooltip from './components/TourTooltip';
-
-// Lazy load modals to improve initial bundle size and FCP
-const AboutModal = lazy(() => import('./components/modals/AboutModal'));
-const AuthModal = lazy(() => import('./components/modals/AuthModal'));
-const ExaminerModal = lazy(() => import('./components/modals/ExaminerModal'));
-const FeedbackModal = lazy(() => import('./components/modals/FeedbackModal'));
-const LimitExhaustedModal = lazy(() => import('./components/modals/LimitExhaustedModal'));
-const PaymentModal = lazy(() => import('./components/modals/PaymentModal'));
-const PricingModal = lazy(() => import('./components/modals/PricingModal'));
-const PrivacyModal = lazy(() => import('./components/modals/PrivacyModal'));
-const ToSModal = lazy(() => import('./components/modals/ToSModal'));
-import { generateSecureToken } from '../infrastructure/security/crypto-utils';
-import { DeviceService } from '../infrastructure/device/device-id';
-import { RegisterSessionUseCase } from '../application/session/RegisterSessionUseCase';
-import { ValidateSessionUseCase } from '../application/session/ValidateSessionUseCase';
-import { DeactivateSessionUseCase } from '../application/session/DeactivateSessionUseCase';
-import { AIClient } from '../infrastructure/api/api';
-import { supabase } from '../infrastructure/db/supabase';
+import { Effect } from 'effect';
 import { appRuntime } from '../infrastructure/runtime';
+import { supabase } from '../infrastructure/db/supabase';
+import type { Plan, Topic } from '../domain/types';
+import { topics } from '../domain/data/topics';
 
-// Service Instantiation (DI Container logic)
-const deviceService = new DeviceService();
-const aiClient = new AIClient(supabase);
-const registerSessionUseCase = new RegisterSessionUseCase(supabase, deviceService);
-const validateSessionUseCase = new ValidateSessionUseCase(supabase, deviceService);
-const deactivateSessionUseCase = new DeactivateSessionUseCase(supabase);
+// Composition root
+import {
+  deviceService,
+  aiClient,
+  registerSessionUseCase,
+  validateSessionUseCase,
+  deactivateSessionUseCase,
+} from './composition';
 
-import type {
-  Essay,
-  EssaySectionKey,
-  Notification,
-  Plan,
-  Topic,
-  TourProps,
-  User as UserType,
-} from '../domain/types';
+// Hooks
+import { useNotification } from './hooks/useNotification';
+import { useModals } from './hooks/useModals';
+import { useTimer } from './hooks/useTimer';
+import { useTour } from './hooks/useTour';
+import { useEssay } from './hooks/useEssay';
+import { useUsage } from './hooks/useUsage';
+import { useAuth } from './hooks/useAuth';
 
-const LearnCard: React.FC<{ title: string; desc: string; number: string }> = ({
-  title,
-  desc,
-  number,
-}) => (
-  <div className="group border-2 border-stone-900 bg-white hover:bg-stone-900 hover:text-white transition-all cursor-default relative overflow-hidden p-6 flex flex-col justify-between min-h-[220px]">
-    <div className="absolute top-4 right-4 text-4xl font-black font-serif text-stone-100 group-hover:text-stone-800 transition-colors z-0">
-      {number}
-    </div>
-
-    <div className="relative z-10">
-      <h3 className="font-black text-2xl font-serif mb-4 uppercase tracking-tight">{title}</h3>
-      <div className="w-12 h-1 bg-yellow-400 mb-4 group-hover:bg-white transition-colors"></div>
-      <p className="text-sm font-medium leading-relaxed opacity-90">{desc}</p>
-    </div>
-  </div>
-);
-
-const topics = [
-  {
-    id: 1,
-    type: 'Opinion',
-    question:
-      'Some people believe that unpaid community service should be a compulsory part of high school programs. To what extent do you agree or disagree?',
-  },
-  {
-    id: 2,
-    type: 'Discussion',
-    question:
-      'Computers are being used more and more in education. Some say this is positive, while others argue it leads to negative consequences. Discuss both sides.',
-  },
-  {
-    id: 3,
-    type: 'Problem / Solution',
-    question:
-      'In many countries, the gap between the rich and the poor is becoming wider. What are the causes of this problem and what measures can be taken?',
-  },
-  {
-    id: 4,
-    type: 'Discussion',
-    question:
-      'Some people think that the government should invest more in public services like trains and libraries. Others believe that money should be spent on repairing roads and highways. Discuss both views and give your opinion.',
-  },
-  {
-    id: 5,
-    type: 'Advantage / Disadvantage',
-    question:
-      'In many countries, paying for goods and services using mobile phone apps is becoming increasingly common. Do the advantages of this trend outweigh the disadvantages?',
-  },
-  {
-    id: 6,
-    type: 'Opinion',
-    question:
-      "The best way to solve the world's environmental problems is to increase the price of fuel. To what extent do you agree or disagree?",
-  },
-  {
-    id: 7,
-    type: 'Direct Question',
-    question:
-      'Many museums and historical sites are mainly visited by tourists, but not local people. Why is this the case? What can be done to attract more local people?',
-  },
-  {
-    id: 8,
-    type: 'Opinion',
-    question:
-      'In the future, nobody will buy printed newspapers or books because they will be able to read everything they want online without paying. To what extent do you agree or disagree?',
-  },
-  {
-    id: 9,
-    type: 'Discussion',
-    question:
-      'Some people think that university students should study whatever they like. Others believe they should only be allowed to study subjects that will be useful in the future, such as science and technology. Discuss both views.',
-  },
-  {
-    id: 10,
-    type: 'Causes / Effects',
-    question:
-      'Nowadays many people choose to be self-employed, rather than to work for a company or organisation. Why is this the case? What could be the disadvantages of being self-employed?',
-  },
-];
+// Components
+import { NotificationToast } from './components/NotificationToast';
+import { AppHeader } from './components/AppHeader';
+import { AppFooter } from './components/AppFooter';
+import { ModalsGate } from './components/ModalsGate';
+import { LearnTab } from './components/LearnTab';
+import { PracticeTab } from './components/PracticeTab';
+import FeedbackButton from './components/FeedbackButton';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('learn');
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [mobilePracticeTab, setMobilePracticeTab] = useState<'wizard' | 'preview'>('wizard');
   const [topic, setTopic] = useState<Topic | null>(null);
-  const [timer, setTimer] = useState<number>(0);
-  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
-  const [showAbout, setShowAbout] = useState<boolean>(false);
-  const [showPrivacy, setShowPrivacy] = useState<boolean>(false);
-  const [showAuth, setShowAuth] = useState<boolean>(false);
-  const [authMode, setAuthMode] = useState<
-    'login' | 'signup' | 'forgot_password' | 'update_password'
-  >('login');
-  const [showExaminer, setShowExaminer] = useState<boolean>(false);
-  const [showToS, setShowToS] = useState<boolean>(false);
 
-  // Auth & Monetization State
-  const [user, setUser] = useState<UserType | null>(null);
-  const [isPaid, setIsPaid] = useState<boolean>(false);
-  const [userEmail, setUserEmail] = useState<string>('');
-  const [activePlan, setActivePlan] = useState<string | null>(null);
-  const [showPayment, setShowPayment] = useState<boolean>(false);
-  const [showPricing, setShowPricing] = useState<boolean>(false);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [visitorID, setVisitorID] = useState<string | null>(null);
-  const [aiUsageCount, setAiUsageCount] = useState<number>(0);
-  const [examinerUsageCount, setExaminerUsageCount] = useState<number>(0);
-  const [showLimitModal, setShowLimitModal] = useState<boolean>(false);
-  const [showFeedback, setShowFeedback] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification | null>(null);
-
-  const [tourStep, setTourStep] = useState<number>(() => {
-    // Check if user has completed the tour from localStorage
-    const tourCompleted = localStorage.getItem('essay-architect-tour-completed');
-    return tourCompleted === 'true' ? -1 : -1; // Start at -1, will be set to 0 on first theory tab visit
-  });
-  const [hasSeenTour, setHasSeenTour] = useState<boolean>(() => {
-    const tourCompleted = localStorage.getItem('essay-architect-tour-completed');
-    return tourCompleted === 'true';
-  });
-
-  const promptRef = useRef<HTMLTextAreaElement>(null);
-
-  const [essay, setEssay] = useState<Essay>({
-    intro: { paraphrase: '', thesis: '' },
-    body1: { topicSentence: '', explanation: '', example: '', concluding: '' },
-    body2: { topicSentence: '', explanation: '', example: '', concluding: '' },
-    conclusion: { summary: '', finalThought: '' },
-  });
-
-  const verifyAccess = useCallback(
-    (user: UserType | null, isSilent: boolean = false) =>
-      appRuntime.runPromise(
-        Effect.gen(function* () {
-          if (!user) {
-            setIsPaid(false);
-            setActivePlan(null);
-            setUserEmail('');
-            return;
-          }
-
-          // Always set the user's email when they're logged in
-          setUserEmail(user.email || '');
-
-          const { data, error } = yield* Effect.tryPromise({
-            try: () =>
-              supabase
-                .from('payments')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('status', 'approved')
-                .order('created_at', { ascending: false })
-                .limit(1),
-            catch: (err) => new Error(`Payment fetch check error: ${err}`),
-          });
-
-          if (error) {
-            appRuntime.runSync(
-              Effect.logError('Payment check fetch error', { error }),
-            );
-            // On network error, keep current state to avoid UI flicker
-            return;
-          }
-
-          if (data && data.length > 0) {
-            const latest = data[0];
-
-            const createdAt = new Date(latest.created_at).getTime();
-            const now = Date.now();
-            const hoursPassed = (now - createdAt) / (1000 * 60 * 60);
-
-            const planConfig = Match.value(latest.plan_name).pipe(
-              Match.when('Consultancy Killer', () => ({
-                valid: true,
-                msg: 'Welcome back! Your Lifetime access is active.',
-                name: 'Lifetime Pack',
-              })),
-              Match.when('Lifetime Pack', () => ({
-                valid: true,
-                msg: 'Welcome back! Your Lifetime access is active.',
-                name: 'Lifetime Pack',
-              })),
-              Match.when('Preparation Pack', () => {
-                const daysLeft = Math.floor(30 - hoursPassed / 24);
-                return daysLeft >= 0
-                  ? {
-                      valid: true,
-                      msg: `Access Unlocked! You have ${daysLeft} days remaining on your Preparation Pack.`,
-                      name: 'Preparation Pack',
-                    }
-                  : {
-                      valid: false,
-                      msg: 'Your 30-day Preparation Pack has expired.',
-                      name: 'Preparation Pack',
-                    };
-              }),
-              Match.when("Crammer's Pass", () => {
-                const hoursLeft = Math.floor(24 - hoursPassed);
-                return hoursLeft >= 0
-                  ? {
-                      valid: true,
-                      msg: `Access Unlocked! You have ${hoursLeft} hours remaining on your Crammer's Pass.`,
-                      name: "Crammer's Pass",
-                    }
-                  : {
-                      valid: false,
-                      msg: "Your 24-hour Crammer's Pass has expired.",
-                      name: "Crammer's Pass",
-                    };
-              }),
-              Match.orElse(() => ({
-                valid: false,
-                msg: 'Unknown plan type encountered.',
-                name: latest.plan_name,
-              })),
-            );
-
-            if (planConfig.valid) {
-              setIsPaid(true);
-              setActivePlan(planConfig.name);
-              if (!isSilent) setNotification({ message: planConfig.msg, type: 'success' });
-            } else {
-              // Plan expired
-              setIsPaid(false);
-              setActivePlan(null);
-              if (!isSilent)
-                setNotification({
-                  message:
-                    planConfig.msg || 'No active plan found. Your previous plan may have expired.',
-                  type: 'info',
-                });
-            }
-          } else {
-            // No approved record found - Revoke access
-            setIsPaid(false);
-            setActivePlan(null);
-
-            if (!isSilent) {
-              setNotification({
-                message:
-                  'No approved payment found for this email. If you just paid, please wait for manual verification (1-2 hours).',
-                type: 'info',
-              });
-            }
-          }
-        }).pipe(
-          Effect.catchAll((err) =>
-            Effect.gen(function* () {
-              yield* Effect.logError('Critical verifyAccess error', { error: err });
-              const message = err.message;
-              if (!isSilent)
-                setNotification({
-                  message: `Failed to verify access: ${message}. Please refresh the page.`,
-                  type: 'error',
-                });
-            }),
-          ),
-        ),
-      ),
-    [],
-  );
-
+  // Initialize topic
   useEffect(() => {
     setTopic(topics[0] ?? null);
+  }, []);
 
-    const program = Effect.gen(function* () {
-      const isLoggingOutRef = yield* Ref.make(false);
-
-      // Handle PKCE recovery token from URL query params
-      const urlParams = new URLSearchParams(window.location.search);
-      const verificationType = urlParams.get('verification_type');
-      const tokenHash = urlParams.get('token_hash');
-
-      if (verificationType === 'recovery' && tokenHash) {
-        const { error } = yield* Effect.tryPromise({
-          try: () =>
-            supabase.auth.verifyOtp({
-              type: 'recovery',
-              token_hash: tokenHash,
-            }),
-          catch: (err) => new Error(`Verify OTP failed: ${err}`),
-        });
-
-        if (error) {
-          appRuntime.runSync(
-            Effect.logError('Recovery token verification failed', { error }),
-          );
-          setNotification({
-            message:
-              'Failed to verify recovery link. It may have expired. Please request a new one.',
-            type: 'error',
-          });
-        } else {
-          // Token verified, open the update password modal
-          setAuthMode('update_password');
-          setShowAuth(true);
-          // Clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      }
-
-      // Initial session check
-      const {
-        data: { session },
-      } = yield* Effect.tryPromise({
-        try: () => supabase.auth.getSession(),
-        catch: (err) => new Error(`Get session failed: ${err}`),
-      });
-
-      if (session) {
-        // Validate session against two-device limit
-        const { isValid, wasLoggedOut } = yield* validateSessionUseCase.execute(session.user.id);
-
-        if (wasLoggedOut) {
-          // Session was invalidated manually or by a rare database event
-          yield* Ref.set(isLoggingOutRef, true);
-          yield* Effect.tryPromise({
-            try: () => supabase.auth.signOut(),
-            catch: (err) => new Error(`SignOut failed: ${err}`),
-          }).pipe(
-            Effect.catchAll((err) => {
-              appRuntime.runSync(Effect.logError('SignOut error', { err }));
-              return Effect.succeed(void 0);
-            }),
-          );
-
-          setUser(null);
-          setIsPaid(false);
-          setUserEmail('');
-          setActivePlan(null);
-          setNotification({
-            message: 'Your session has expired. Please log in again.',
-            type: 'info',
-          });
-        } else {
-          // If no session record exists, register this session
-          if (!isValid) {
-            const token = session.access_token?.substring(0, 32);
-            const sessionToken = token || (yield* generateSecureToken(16));
-            yield* registerSessionUseCase.execute(session.user.id, sessionToken);
-          }
-
-          setUser(session.user);
-          verifyAccess(session.user, true);
-        }
-      }
-
-      // Auth Listener with two-device session validation
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((event, session) => {
-        appRuntime.runPromise(
-          Effect.gen(function* () {
-            // Skip if we're in the middle of a forced logout
-            const isLoggingOut = yield* Ref.get(isLoggingOutRef);
-            if (isLoggingOut) return;
-
-            if (session) {
-              // For SIGNED_IN event, session is already registered by AuthModal
-              // For TOKEN_REFRESHED, validate the session
-              if (event === 'TOKEN_REFRESHED') {
-                const { wasLoggedOut } = yield* validateSessionUseCase.execute(session.user.id);
-                if (wasLoggedOut) {
-                  yield* Ref.set(isLoggingOutRef, true);
-                  yield* Effect.tryPromise({
-                    try: () => supabase.auth.signOut(),
-                    catch: (err) => new Error(`SignOut failed: ${err}`),
-                  }).pipe(
-                    Effect.catchAll((err) => {
-                      appRuntime.runSync(Effect.logError('SignOut error', { err }));
-                      return Effect.succeed(void 0);
-                    }),
-                  );
-                  setUser(null);
-                  setIsPaid(false);
-                  setUserEmail('');
-                  setActivePlan(null);
-                  setNotification({
-                    message: 'Your session has expired. Please log in again.',
-                    type: 'info',
-                  });
-                  return;
-                }
-              }
-
-              setUser(session.user);
-              verifyAccess(session.user, true);
-            } else {
-              setUser(null);
-              setIsPaid(false);
-              setUserEmail('');
-              setActivePlan(null);
-            }
-
-            if (event === 'PASSWORD_RECOVERY') {
-              setAuthMode('update_password');
-              setShowAuth(true);
-            }
-          }).pipe(
-            Effect.catchAll((err) => {
-              appRuntime.runSync(Effect.logError('Auth state change error', { err }));
-              return Effect.succeed(void 0);
-            }),
-          ),
-        );
-      });
-
-      return subscription;
-    }).pipe(
-      Effect.catchAll((err) => {
-        appRuntime.runSync(Effect.logError('Auth initialization error', { err }));
-        return Effect.fail(err);
-      }),
-    );
-
-    const subscriptionPromise = appRuntime.runPromise(program);
-
-    return () => {
-      subscriptionPromise
-        .then((sub) => sub?.unsubscribe())
-        .catch((err) => appRuntime.runSync(Effect.logError('Unsubscribe error', { err })));
-    };
-  }, [verifyAccess]);
+  // Hooks
+  const notification = useNotification();
+  const modals = useModals();
+  const timer = useTimer();
+  const tour = useTour(activeTab);
+  const essay = useEssay(() => {
+    if (!timer.isTimerRunning) {
+      timer.toggle();
+    }
+  });
+  const auth = useAuth({
+    registerSessionUseCase,
+    validateSessionUseCase,
+    deactivateSessionUseCase,
+    showNotification: notification.show,
+  });
+  const usage = useUsage({ deviceService, isPaid: auth.isPaid });
 
   // Deferred Third-Party Analytics Initialization
   useEffect(() => {
@@ -541,412 +97,108 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Periodic session validation - detect when this device was logged out by another device
+  // Handle password recovery from URL
   useEffect(() => {
-    if (!user) return;
-
-    const checkSession = () =>
-      appRuntime.runPromise(
-        Effect.gen(function* () {
-          const { wasLoggedOut } = yield* validateSessionUseCase.execute(user.id);
-          if (wasLoggedOut) {
-            yield* Effect.tryPromise({
-              try: () => supabase.auth.signOut(),
-              catch: (err) => new Error(`SignOut error: ${err}`),
-            }).pipe(
-              Effect.catchAll((err) => {
-                appRuntime.runSync(Effect.logError('SignOut error during periodic check', { err }));
-                return Effect.succeed(void 0);
-              }),
-            );
-            setUser(null);
-            setIsPaid(false);
-            setUserEmail('');
-            setActivePlan(null);
-            setNotification({
-              message:
-                'You have been logged out because you signed in on another device. (Two-device limit)',
-              type: 'info',
-            });
-          }
-        }).pipe(Effect.catchAll(() => Effect.succeed(void 0))),
-      );
-
-    // Check every 30 seconds
-    const interval = setInterval(checkSession, 30000);
-    return () => clearInterval(interval);
-  }, [user]);
-
-  useEffect(() => {
-    if (activeTab === 'practice' && !hasSeenTour) {
-      setTourStep(0);
-      setHasSeenTour(true);
+    const urlParams = new URLSearchParams(window.location.search);
+    const verificationType = urlParams.get('verification_type');
+    if (verificationType === 'recovery') {
+      modals.setAuthMode('update_password');
+      modals.setShowAuth(true);
     }
-  }, [activeTab, hasSeenTour]);
+  }, [modals]);
 
-  // Auto-resize prompt textarea
-  const adjustHeight = useCallback(() => {
-    if (promptRef.current) {
-      promptRef.current.style.height = 'auto';
-      promptRef.current.style.height = `${promptRef.current.scrollHeight}px`;
-    }
-  }, []);
-
+  // Handle auth state change for password recovery
   useEffect(() => {
-    if (activeTab === 'practice') {
-      adjustHeight();
-      const timer = setTimeout(adjustHeight, 10);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [activeTab, adjustHeight]);
-
-  // Initialize Fingerprint and Sync Usage
-  useEffect(() => {
-    const initTracking = () =>
-      appRuntime.runPromise(
-        Effect.gen(function* () {
-          const vid = yield* deviceService.getVisitorID();
-          setVisitorID(vid);
-
-          // Fetch current usage from Supabase
-          const { data, error } = yield* Effect.tryPromise({
-            try: () =>
-              supabase
-                .from('usage_tracking')
-                .select('usage_count, examiner_count')
-                .eq('visitor_id', vid)
-                .maybeSingle(),
-            catch: (err) => new Error(`Usage fetch failed: ${err}`),
-          });
-
-          if (error) {
-            // PGRST116 means no row found, which is handled in the 'else' block
-            if (error.code !== 'PGRST116') {
-              appRuntime.runSync(
-                Effect.logError('Usage fetch failed', { code: error.code, msg: error.message }),
-              );
-              // Fallback to 0 if record missing or inaccessible
-              setAiUsageCount(0);
-              setExaminerUsageCount(0);
-            }
-          }
-
-          if (data) {
-            setAiUsageCount(data.usage_count || 0);
-            setExaminerUsageCount(data.examiner_count || 0);
-          } else if (!error || error.code === 'PGRST116') {
-            // Record truly doesn't exist, create it with upsert to handle race conditions
-            setAiUsageCount(0);
-            setExaminerUsageCount(0);
-
-            const { error: upsertError } = yield* Effect.tryPromise({
-              try: () =>
-                supabase.from('usage_tracking').upsert(
-                  [
-                    {
-                      visitor_id: vid,
-                      usage_count: 0,
-                      examiner_count: 0,
-                      alias: null,
-                    },
-                  ],
-                  {
-                    onConflict: 'visitor_id',
-                    ignoreDuplicates: true,
-                  },
-                ),
-              catch: (err) => new Error(`Failed to create initial usage record: ${err}`),
-            });
-
-            if (upsertError) {
-              appRuntime.runSync(
-                Effect.logError('Failed to create initial usage record', {
-                  msg: upsertError.message,
-                }),
-              );
-            }
-          }
-        }).pipe(
-          Effect.catchAll((err) => {
-            appRuntime.runSync(Effect.logError('initTracking failed', { err }));
-            return Effect.succeed(void 0);
-          }),
-        ),
-      );
-    initTracking();
-  }, []);
-
-  useEffect(() => {
-    if (!isTimerRunning) return;
-
-    const fiber = Effect.runFork(
-      Effect.repeat(
-        Effect.gen(function* () {
-          yield* Effect.sleep('1 second');
-          setTimer((prev) => prev + 1);
-        }),
-        Schedule.forever,
-      ),
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        modals.setAuthMode('update_password');
+        modals.setShowAuth(true);
+      }
+    });
 
     return () => {
-      Effect.runFork(Fiber.interrupt(fiber));
+      subscription.unsubscribe();
     };
-  }, [isTimerRunning]);
+  }, [modals]);
 
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
-  const nextTourStep = () => {
-    if (tourStep < 5) {
-      setTourStep(tourStep + 1);
-    } else {
-      setTourStep(-1);
-      setHasSeenTour(true);
-      localStorage.setItem('essay-architect-tour-completed', 'true');
-    }
-  };
-
-  const skipTour = () => {
-    setTourStep(-1);
-    setHasSeenTour(true);
-    localStorage.setItem('essay-architect-tour-completed', 'true');
-  };
-
-  const tourProps: TourProps = {
-    currentStep: tourStep,
-    onNext: nextTourStep,
-    onSkip: skipTour,
-    totalSteps: 6,
-  };
-
-  const getNewRandomTopic = () => {
-    const otherTopics = topics.filter((t) => t.id !== topic?.id);
-    if (otherTopics.length === 0) return;
-    setTopic(otherTopics[Math.floor(Math.random() * otherTopics.length)] ?? null);
-  };
-
-  const handleInputChange = (section: EssaySectionKey, field: string, value: string) => {
-    if (!isTimerRunning) setIsTimerRunning(true);
-    setEssay((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section as EssaySectionKey],
-        [field]: value,
-      },
-    }));
-  };
-
-  const handleTopicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newQuestion = e.target.value;
-    setTopic((prev) =>
-      prev
-        ? { ...prev, question: newQuestion }
-        : ({ question: newQuestion, id: 0, type: 'default' } as Topic),
-    );
-  };
-
-  const generateFullEssay = () => {
-    const { intro, body1, body2, conclusion } = essay;
-    const text = `${intro.paraphrase} ${intro.thesis}\n\n${body1.topicSentence} ${body1.explanation} ${body1.example} ${body1.concluding}\n\n${body2.topicSentence} ${body2.explanation} ${body2.example} ${body2.concluding}\n\n${conclusion.summary} ${conclusion.finalThought}`;
-    return text.replace(/\s+/g, ' ').trim() === '' ? '' : text;
-  };
-
-  const handleExaminerOpen = () => {
-    if (!isPaid && examinerUsageCount >= 1) {
-      setShowLimitModal(true);
+  const handleExaminerOpen = useCallback(() => {
+    if (!auth.isPaid && usage.examinerUsageCount >= 1) {
+      modals.setShowLimitModal(true);
       return;
     }
-    setShowExaminer(true);
-  };
+    modals.setShowExaminer(true);
+  }, [auth.isPaid, usage.examinerUsageCount, modals]);
 
-  const handleUpgradeFromLimit = (planName: string | null) => {
-    setShowLimitModal(false);
+  const handleUpgradeFromLimit = useCallback(
+    (planName: string | null) => {
+      modals.setShowLimitModal(false);
 
-    if (planName) {
-      // "Get 24h Access Now" - requires login immediately to proceed to payment
-      if (!user) {
-        setShowAuth(true);
-        return;
+      if (planName) {
+        // "Get 24h Access Now" - requires login immediately to proceed to payment
+        if (!auth.user) {
+          modals.setShowAuth(true);
+          return;
+        }
+        const plan: Plan = {
+          name: "Crammer's Pass",
+          price: 'Rs. 50',
+          duration: '24 Hours',
+        };
+        modals.setSelectedPlan(plan);
+        modals.setShowPayment(true);
+      } else {
+        // "View All Plans" - show pricing modal, login not required yet
+        modals.setShowPricing(true);
       }
-      const plan: Plan = {
-        name: "Crammer's Pass",
-        price: 'Rs. 50',
-        duration: '24 Hours',
-      };
-      setSelectedPlan(plan);
-      setShowPayment(true);
-    } else {
-      // "View All Plans" - show pricing modal, login not required yet
-      setShowPricing(true);
-    }
-  };
+    },
+    [auth.user, modals],
+  );
 
-  const incrementFreeUsage = () =>
-    appRuntime.runPromise(
-      Effect.gen(function* () {
-        if (!visitorID) return;
+  const copyToClipboard = useCallback(
+    () =>
+      appRuntime.runPromise(
+        Effect.gen(function* () {
+          const text = essay.generateFullEssay();
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          document.body.appendChild(textArea);
+          textArea.select();
 
-        const newCount = aiUsageCount + 1;
-        setAiUsageCount(newCount);
-
-        const { error } = yield* Effect.tryPromise({
-          try: () =>
-            supabase.rpc('increment_usage_count', {
-              target_visitor_id: visitorID,
-              counter_type: 'ai',
-            }),
-          catch: (err) => new Error(`Failed to sync AI usage: ${err}`),
-        });
-
-        if (error) {
-          yield* Effect.logError('RPC Error (AI Usage)', {
-            message: error.message,
-            details: error.details,
+          yield* Effect.try({
+            try: () => document.execCommand('copy'),
+            catch: (err) => new Error(`Unable to copy: ${err}`),
           });
-          setAiUsageCount((prev) => prev - 1);
-        }
-      }).pipe(
-        Effect.catchAll((err) =>
-          Effect.gen(function* () {
-            yield* Effect.logError('AI usage increment failure', { error: err });
-            setAiUsageCount((prev) => prev - 1);
-          }),
+
+          const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+          if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="uppercase font-black">Copied!</span>';
+            yield* Effect.forkDaemon(
+              Effect.gen(function* () {
+                yield* Effect.sleep('2 seconds');
+                btn.innerHTML = originalText;
+              }),
+            );
+          }
+
+          document.body.removeChild(textArea);
+        }).pipe(
+          Effect.catchAll((err) =>
+            Effect.logError('Copy to clipboard failed', { error: err }),
+          ),
         ),
       ),
-    );
-
-  const incrementExaminerUsage = () =>
-    appRuntime.runPromise(
-      Effect.gen(function* () {
-        if (!visitorID || isPaid) return;
-
-        const newCount = examinerUsageCount + 1;
-        setExaminerUsageCount(newCount);
-
-        const { error } = yield* Effect.tryPromise({
-          try: () =>
-            supabase.rpc('increment_usage_count', {
-              target_visitor_id: visitorID,
-              counter_type: 'examiner',
-            }),
-          catch: (err) => new Error(`Failed to sync examiner usage: ${err}`),
-        });
-
-        if (error) {
-          yield* Effect.logError('RPC Error (Examiner Usage)', {
-            message: error.message,
-            details: error.details,
-          });
-          setExaminerUsageCount((prev) => prev - 1);
-        }
-      }).pipe(
-        Effect.catchAll((err) =>
-          Effect.gen(function* () {
-            yield* Effect.logError('Examiner usage increment failure', { error: err });
-            setExaminerUsageCount((prev) => prev - 1);
-          }),
-        ),
-      ),
-    );
-
-  const calculateWordCount = (text: string): number => {
-    return text
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0).length;
-  };
-
-  const totalWordCount = calculateWordCount(generateFullEssay());
-
-  const copyToClipboard = () =>
-    appRuntime.runPromise(
-      Effect.gen(function* () {
-        const text = generateFullEssay();
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-
-        yield* Effect.try({
-          try: () => document.execCommand('copy'),
-          catch: (err) => new Error(`Unable to copy: ${err}`),
-        });
-
-        const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
-        if (btn) {
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '<span class="uppercase font-black">Copied!</span>';
-          yield* Effect.forkDaemon(
-            Effect.gen(function* () {
-              yield* Effect.sleep('2 seconds');
-              btn.innerHTML = originalText;
-            }),
-          );
-        }
-
-        document.body.removeChild(textArea);
-      }).pipe(
-        Effect.catchAll((err) =>
-          Effect.logError('Copy to clipboard failed', { error: err }),
-        ),
-      ),
-    );
-
-  const handleLogout = () =>
-    appRuntime.runPromise(
-      Effect.gen(function* () {
-        if (user) {
-          yield* Effect.logInfo('Deactivating session for user', { userId: user.id });
-          yield* deactivateSessionUseCase.execute(user.id).pipe(
-            Effect.tapError((error) => Effect.logWarning('Session deactivation failed', { error })),
-            Effect.catchAll(() => Effect.succeed(void 0)),
-          );
-          yield* Effect.logInfo('Session deactivated successfully', { userId: user.id });
-        }
-
-        yield* Effect.tryPromise({
-          try: () => supabase.auth.signOut(),
-          catch: (err) => new Error(`Logout error: ${err}`),
-        });
-
-        // Manual state reset to ensure UI updates immediately
-        setUser(null);
-        setIsPaid(false);
-        setUserEmail('');
-        setActivePlan(null);
-
-        // Force a complete page reload to clear all library and browser states
-        window.location.href = window.location.origin;
-      }),
-    );
+    [essay],
+  );
 
   return (
     <div className="h-[100dvh] bg-[#f4f1ea] text-stone-900 font-sans flex flex-col overflow-hidden selection:bg-yellow-300 selection:text-stone-900">
-      {/* Notification Toast */}
-      {notification && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300">
-          <div
-            className={`px-6 py-3 border-2 border-stone-900 bg-white flex items-center gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
-          >
-            <div
-              className={`w-3 h-3 ${notification.type === 'error' ? 'bg-red-500' : notification.type === 'success' ? 'bg-green-500' : 'bg-yellow-400'}`}
-            ></div>
-            <p className="text-sm font-bold uppercase tracking-tight">{notification.message}</p>
-            <button
-              type="button"
-              onClick={() => setNotification(null)}
-              className="ml-4 text-stone-400 hover:text-stone-900 transition-colors"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-      )}
+      <NotificationToast
+        notification={notification.notification}
+        onDismiss={notification.dismiss}
+      />
       <Helmet>
         <title>
           {activeTab === 'learn'
@@ -971,685 +223,115 @@ const App: React.FC = () => {
           content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder"
         />
       </Helmet>
-      <header className="bg-[#f4f1ea] border-b-2 border-stone-900 px-4 md:px-6 py-4 md:py-5 flex justify-between items-center z-50 sticky top-0">
-        <div
-          className="flex items-center gap-3 md:gap-6 shrink-1 md:shrink-0 min-w-0 cursor-pointer"
-          onClick={() => window.location.reload()}
-        >
-          <div className="bg-stone-900 text-white w-8 h-8 md:w-10 md:h-10 flex items-center justify-center font-serif font-black text-lg md:text-xl shrink-0">
-            E
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-lg md:text-2xl font-serif font-black tracking-tighter text-stone-900 flex items-center gap-2 md:gap-3 leading-none truncate">
-              ESSAY ARCHITECT PRO
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAbout(true);
-                }}
-                className="text-stone-400 hover:text-stone-900 transition-colors"
-              >
-                <HelpCircle size={18} />
-              </button>
-            </h1>
-            <p className="hidden md:block text-[10px] font-bold text-stone-500 tracking-widest uppercase mt-1">
-              v0.4.0-ts • IELTS & PTE Edition
-            </p>
-          </div>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8 shrink-0">
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={() => setActiveTab('learn')}
-              className={`text-sm font-bold uppercase tracking-wider transition-all duration-300 relative mr-4 ${activeTab === 'learn' ? 'text-stone-900 after:content-[""] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-0.5 after:bg-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
-            >
-              The Guide
-            </button>
-
-            <div className="w-4 h-8 relative flex flex-col items-center justify-end">
-              <TourTooltip
-                stepIndex={0}
-                text="Switch between The Guide (Theory) and The Wizard (Practice)."
-                position="bottom"
-                {...tourProps}
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('practice')}
-              className={`text-sm font-bold uppercase tracking-wider transition-all duration-300 relative ml-4 ${activeTab === 'practice' ? 'text-stone-900 after:content-[""] after:absolute after:-bottom-2 after:left-0 after:w-full after:h-0.5 after:bg-stone-900' : 'text-stone-400 hover:text-stone-600'}`}
-            >
-              The Wizard
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3 border-l-2 border-stone-300 pl-6 relative">
-            <div className="flex items-center gap-2 text-stone-900">
-              <Clock
-                size={16}
-                strokeWidth={3}
-                className={isTimerRunning ? 'text-red-500 animate-pulse' : 'text-stone-400'}
-              />
-              <span className="font-mono font-bold w-[3rem] text-center text-sm">
-                {formatTime(timer)}
-              </span>
-            </div>
-
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => setIsTimerRunning(!isTimerRunning)}
-                className={`w-6 h-6 flex items-center justify-center border border-stone-900 hover:bg-stone-900 hover:text-white transition-colors`}
-                title={isTimerRunning ? 'Pause' : 'Start'}
-              >
-                {isTimerRunning ? (
-                  <div className="flex gap-[2px]">
-                    <div className="w-0.5 h-2 bg-current" />
-                    <div className="w-0.5 h-2 bg-current" />
-                  </div>
-                ) : (
-                  <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-current border-b-[4px] border-b-transparent ml-0.5" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsTimerRunning(false);
-                  setTimer(0);
-                }}
-                className="w-6 h-6 flex items-center justify-center border border-stone-900 text-stone-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors"
-                title="Reset"
-              >
-                <RotateCcw size={10} />
-              </button>
-            </div>
-
-            <TourTooltip
-              stepIndex={2}
-              text="Time is of the essence. Track it here."
-              position="bottomLeft"
-              {...tourProps}
-            />
-          </div>
-
-          <div className="relative flex items-center gap-3">
-            {user ? (
-              <div className="flex items-center gap-2">
-                <div className="hidden lg:flex flex-col items-end mr-2">
-                  <span className="text-[10px] font-black uppercase text-stone-900 tracking-widest truncate max-w-[120px]">
-                    {user.user_metadata?.['full_name'] || user.email}
-                  </span>
-                  {isPaid && (
-                    <span className="text-[8px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1">
-                      <Zap size={8} fill="currentColor" /> {activePlan}
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="p-2 border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-all text-stone-900"
-                  title="Logout"
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowAuth(true)}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-stone-900 font-black uppercase text-[10px] tracking-widest bg-white text-stone-900 hover:bg-stone-900 hover:text-white transition-all"
-              >
-                <User size={14} /> Login / Sign Up
-              </button>
-            )}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowPricing(true)}
-                className={`flex items-center gap-2 px-4 py-2 border-2 border-stone-900 font-black uppercase text-[10px] tracking-widest transition-all ${isPaid ? 'bg-green-500 text-white border-green-600' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
-              >
-                {isPaid ? <Award size={14} /> : <Zap size={14} />}
-                {isPaid ? 'Pro Access' : 'Upgrade'}
-              </button>
-              <TourTooltip
-                stepIndex={5}
-                text="Unlock unlimited AI grading and premium features here."
-                position="bottomRight"
-                {...tourProps}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu Toggle */}
-        <button
-          type="button"
-          className="md:hidden text-stone-900 p-2 shrink-0"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-
-        {/* Mobile Menu Overlay */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-[#f4f1ea] border-b-2 border-stone-900 z-40 flex flex-col p-6 gap-6 shadow-xl animate-in slide-in-from-top-5 max-h-[calc(100dvh-5rem)] overflow-y-auto pb-24">
-            <div className="flex flex-col gap-4 border-b border-stone-300 pb-6">
-              <div className="flex items-center justify-between">
-                <span className="font-serif font-bold text-lg">Navigation</span>
-              </div>
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('learn');
-                    setIsMenuOpen(false);
-                  }}
-                  className={`text-left p-3 border-2 ${activeTab === 'learn' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 text-stone-500'} font-bold uppercase tracking-wider transition-all`}
-                >
-                  The Guide (Theory)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('practice');
-                    setIsMenuOpen(false);
-                  }}
-                  className={`text-left p-3 border-2 ${activeTab === 'practice' ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 text-stone-500'} font-bold uppercase tracking-wider transition-all`}
-                >
-                  The Wizard (Practice)
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4 border-b border-stone-300 pb-6">
-              <span className="font-serif font-bold text-lg">Timer</span>
-              <div className="flex items-center justify-between bg-white p-4 border border-stone-200">
-                <div className="flex items-center gap-2 text-stone-900">
-                  <Clock
-                    size={20}
-                    strokeWidth={3}
-                    className={isTimerRunning ? 'text-red-500 animate-pulse' : 'text-stone-400'}
-                  />
-                  <span className="font-mono font-bold text-xl">{formatTime(timer)}</span>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsTimerRunning(!isTimerRunning)}
-                    className={`w-10 h-10 flex items-center justify-center border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-colors`}
-                  >
-                    {isTimerRunning ? (
-                      <div className="flex gap-[3px]">
-                        <div className="w-1 h-3 bg-current" />
-                        <div className="w-1 h-3 bg-current" />
-                      </div>
-                    ) : (
-                      <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-current border-b-[6px] border-b-transparent ml-1" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsTimerRunning(false);
-                      setTimer(0);
-                    }}
-                    className="w-10 h-10 flex items-center justify-center border-2 border-stone-900 text-stone-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors"
-                  >
-                    <RotateCcw size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {user ? (
-                <>
-                  <div className="flex items-center justify-between p-4 bg-stone-100 border border-stone-200">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-black uppercase text-stone-900 tracking-widest">
-                        {user.user_metadata?.['full_name'] || user.email}
-                      </span>
-                      {isPaid && (
-                        <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1 mt-1">
-                          <Zap size={10} fill="currentColor" /> {activePlan}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className="flex items-center justify-center gap-2 p-3 border-2 border-stone-900 hover:bg-stone-900 hover:text-white transition-all text-stone-900 font-bold uppercase tracking-widest text-xs"
-                  >
-                    <LogOut size={16} /> Logout
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAuth(true);
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center justify-center gap-2 p-3 border-2 border-stone-900 font-black uppercase text-xs tracking-widest bg-white text-stone-900 hover:bg-stone-900 hover:text-white transition-all"
-                >
-                  <User size={16} /> Login / Sign Up
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setShowPricing(true);
-                  setIsMenuOpen(false);
-                }}
-                className={`flex items-center justify-center gap-2 p-3 border-2 border-stone-900 font-black uppercase text-xs tracking-widest transition-all ${isPaid ? 'bg-green-500 text-white border-green-600' : 'bg-yellow-400 text-stone-900 hover:bg-stone-900 hover:text-white'}`}
-              >
-                {isPaid ? <Award size={16} /> : <Zap size={16} />}
-                {isPaid ? 'Pro Access Active' : 'Upgrade to Pro'}
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
-
-      <Suspense fallback={null}>
-        {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
-        {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
-
-        {showAuth && (
-          <AuthModal
-            onClose={() => {
-              setShowAuth(false);
-              setAuthMode('login');
-            }}
-            onAuthSuccess={(user) => verifyAccess(user, true)}
-            initialMode={authMode}
-            registerSessionUseCase={registerSessionUseCase}
-          />
-        )}
-        {showExaminer && (
-          <ExaminerModal
-            isOpen={showExaminer}
-            onClose={() => setShowExaminer(false)}
-            essayText={generateFullEssay()}
-            isPaid={isPaid}
-            onIncrementUsage={incrementExaminerUsage}
-            examinerUsageCount={examinerUsageCount}
-            onLimitReached={() => {
-              setShowExaminer(false);
-              setShowLimitModal(true);
-            }}
-            aiClient={aiClient}
-          />
-        )}
-
-        {showPricing && (
-          <PricingModal
-            onClose={() => setShowPricing(false)}
-            activePlan={activePlan}
-            isLoggedIn={!!user}
-            onSelectPlan={(plan) => {
-              if (!user) {
-                setShowPricing(false);
-                setShowAuth(true);
-              } else {
-                setSelectedPlan(plan);
-                setShowPricing(false);
-                setShowPayment(true);
-              }
-            }}
-            onShowAuth={() => {
-              setShowPricing(false);
-              setShowAuth(true);
-            }}
-          />
-        )}
-
-        {showPayment && (
-          <PaymentModal
-            plan={selectedPlan as Plan}
-            userEmail={userEmail}
-            user={user}
-            onClose={() => setShowPayment(false)}
-            onSuccess={() => {
-              setShowPayment(false);
-              // Removed setPendingEmail (undefined) and setShowPricing (redundant)
-              // User stays on current page after submission
-              alert('Screenshot received! We will verify it within 1-2 hours.');
-            }}
-            aiClient={aiClient}
-          />
-        )}
-
-        <LimitExhaustedModal
-          isOpen={showLimitModal}
-          onClose={() => setShowLimitModal(false)}
-          onUpgrade={handleUpgradeFromLimit}
-        />
-
-        {showFeedback && (
-          <FeedbackModal
-            onClose={() => setShowFeedback(false)}
-            initialEmail={userEmail}
-            deviceService={deviceService}
-          />
-        )}
-
-        {showToS && <ToSModal onClose={() => setShowToS(false)} />}
-      </Suspense>
-
+      <AppHeader
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+        timer={timer.timer}
+        isTimerRunning={timer.isTimerRunning}
+        formatTime={timer.formatTime}
+        toggleTimer={timer.toggle}
+        resetTimer={timer.reset}
+        user={auth.user}
+        isPaid={auth.isPaid}
+        activePlan={auth.activePlan}
+        onLogout={auth.handleLogout}
+        onShowAuth={() => modals.setShowAuth(true)}
+        onShowPricing={() => modals.setShowPricing(true)}
+        onShowAbout={() => modals.setShowAbout(true)}
+        tourProps={tour.tourProps}
+      />
       <main className="flex-1 overflow-hidden relative">
-        <FeedbackButton onClick={() => setShowFeedback(true)} />
-        {activeTab === 'learn' && (
-          <div className="h-full overflow-y-auto custom-scrollbar bg-[#f4f1ea] pb-28 md:pb-0">
-            <div className="max-w-7xl mx-auto p-12">
-              <div className="mb-16 border-b-4 border-stone-900 pb-12">
-                <h2 className="text-5xl sm:text-7xl md:text-8xl font-black font-serif text-stone-900 mb-6 tracking-tighter leading-[0.8]">
-                  MASTER <br />
-                  <span
-                    className="text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-stone-600"
-                    style={{ WebkitTextStroke: '2px #1c1917' }}
-                  >
-                    THE
-                  </span>{' '}
-                  <br />
-                  ARCHITECT PRO
-                </h2>
-                <p className="text-stone-900 text-xl font-serif max-w-2xl border-l-4 border-yellow-400 pl-6 italic">
-                  Essay Architect Pro isn't just a wizard—it's a comprehensive training ground. Here
-                  is how to get the most out of it.
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-4 gap-6 mb-16">
-                <LearnCard
-                  title="The Wizard"
-                  desc="Breaks your essay into manageable chunks (Intro, Body, Conclusion) to enforce perfect structure."
-                  number="01"
-                />
-                <LearnCard
-                  title="AI Refiner"
-                  desc="Stuck? Experience hyper-smart autocompletion and sentence polishing powered by our custom Next-Gen Pro AI engine."
-                  number="02"
-                />
-                <LearnCard
-                  title="The Examiner"
-                  desc="Receive instant, strict grading and feedback based on official IELTS/PTE criteria."
-                  number="03"
-                />
-                <LearnCard
-                  title="Premium Access"
-                  desc="No API keys or complex setups. Get instant, centralized AI grading optimized for the Nepali academic market."
-                  number="04"
-                />
-              </div>
-
-              <div className="mb-16 grid md:grid-cols-2 gap-12 text-stone-900">
-                <div>
-                  <h3 className="font-serif font-bold text-2xl mb-4">
-                    The Ultimate IELTS & PTE Writing Tool
-                  </h3>
-                  <p className="font-medium leading-relaxed opacity-80 mb-6">
-                    Achieving a high band score in IELTS or PTE requires more than just
-                    vocabulary—it requires structure. Essay Architect PRO is the specialized tool
-                    that forces you to plan your essay paragraph by paragraph before you write.
-                  </p>
-                  <p className="font-medium leading-relaxed opacity-80">
-                    Stop practicing blindly. With our{' '}
-                    <strong className="font-bold text-stone-900">advanced AI examiner</strong>, you
-                    receive instant feedback on your coherence, cohesion, and lexical resource,
-                    tailored specifically to the marking criteria of international English exams.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-serif font-bold text-2xl mb-4">Why Structure Matters</h3>
-                  <ul className="space-y-3 font-medium opacity-80">
-                    <li className="flex gap-3 items-start">
-                      <span className="text-stone-900 font-bold">•</span>
-                      <span>Eliminate writer's block with our step-by-step wizard.</span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="text-stone-900 font-bold">•</span>
-                      <span>Ensure every paragraph has a clear topic sentence and example.</span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="text-stone-900 font-bold">•</span>
-                      <span>
-                        Master opinion, discussion, and advantage/disadvantage essay types.
-                      </span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="text-stone-900 font-bold">•</span>
-                      <span>Get band score estimates instantly.</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <TestimonialSection />
-
-            <div className="bg-stone-900 text-white p-12 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-12 opacity-10">
-                <Award size={200} />
-              </div>
-              <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                  <h3 className="font-serif font-black text-4xl mb-4">
-                    Ready to draft your first piece?
-                  </h3>
-                  <p className="text-stone-400 mb-8 max-w-md">
-                    Put the theory into practice with our live wizard. Real-time preview, word
-                    counting, and structure enforcement included.
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('practice')}
-                    className="bg-yellow-400 text-stone-900 px-8 py-4 font-black uppercase tracking-widest hover:bg-white transition-colors"
-                  >
-                    Start Writing
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div className="border border-stone-700 p-4">
-                    <span className="text-yellow-400 font-bold uppercase text-xs tracking-wider mb-1 block">
-                      Opinion Essays
-                    </span>
-                    <p className="font-serif text-xl">"To what extent do you agree?"</p>
-                  </div>
-                  <div className="border border-stone-700 p-4">
-                    <span className="text-yellow-400 font-bold uppercase text-xs tracking-wider mb-1 block">
-                      Discussion Essays
-                    </span>
-                    <p className="font-serif text-xl">
-                      "Discuss both views and give your opinion."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeTab === 'practice' && (
-          <div className="flex flex-col md:flex-row h-full">
-            {/* Mobile Tab Switcher - only visible on mobile */}
-            <div className="md:hidden flex border-b-2 border-stone-900 bg-white sticky top-0 z-30">
-              <button
-                type="button"
-                onClick={() => setMobilePracticeTab('wizard')}
-                className={`flex-1 py-3 text-xs font-black uppercase tracking-widest transition-all ${
-                  mobilePracticeTab === 'wizard'
-                    ? 'bg-stone-900 text-white'
-                    : 'bg-white text-stone-400 hover:text-stone-900'
-                }`}
-              >
-                ✏️ Write
-              </button>
-              <button
-                onClick={() => setMobilePracticeTab('preview')}
-                className={`flex-1 py-3 text-xs font-black uppercase tracking-widest transition-all border-l-2 border-stone-900 ${
-                  mobilePracticeTab === 'preview'
-                    ? 'bg-stone-900 text-white'
-                    : 'bg-white text-stone-400 hover:text-stone-900'
-                }`}
-              >
-                👁️ Preview ({totalWordCount}w)
-              </button>
-            </div>
-
-            {/* Wizard Section - hidden on mobile if preview tab is active */}
-            <div
-              className={`w-full md:w-3/5 p-0 overflow-y-auto custom-scrollbar bg-[#f4f1ea] md:border-r-2 border-stone-900 ${mobilePracticeTab !== 'wizard' ? 'hidden md:block' : ''}`}
-            >
-              <div className="p-8 pb-4">
-                <div className="border-2 border-stone-900 bg-white p-6 relative shadow-[8px_8px_0px_0px_rgba(28,25,23,0.1)] hover:shadow-[8px_8px_0px_0px_rgba(28,25,23,1)] transition-shadow duration-300">
-                  <div className="flex justify-between items-start mb-4 border-b border-stone-200 pb-4">
-                    <span className="text-[10px] font-black text-stone-900 uppercase tracking-widest flex items-center gap-2">
-                      <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
-                      Topic: {topic?.type}
-                    </span>
-                    <div className="relative z-20">
-                      <button
-                        type="button"
-                        onClick={getNewRandomTopic}
-                        className="text-stone-400 hover:text-stone-900 transition-colors flex items-center gap-1 text-xs font-bold uppercase tracking-wider"
-                        title="Get new random topic"
-                      >
-                        <RefreshCw size={12} /> New Prompt
-                      </button>
-                      <TourTooltip
-                        stepIndex={1}
-                        text="This is your prompt. Auto-resizes as you type. Click 'New Prompt' to shuffle."
-                        position="bottomLeft"
-                        {...tourProps}
-                      />
-                    </div>
-                  </div>
-                  <div className="relative group">
-                    <textarea
-                      ref={promptRef}
-                      className={`w-full text-stone-900 font-serif font-bold leading-tight bg-transparent border-0 p-0 resize-none outline-none placeholder:text-stone-300 overflow-hidden ${
-                        (topic?.question?.length || 0) > 150
-                          ? 'text-xs'
-                          : (topic?.question?.length || 0) > 80
-                            ? 'text-sm'
-                            : 'text-lg'
-                      }`}
-                      value={topic?.question || ''}
-                      onChange={handleTopicChange}
-                      rows={1}
-                      placeholder="Type your essay question here..."
-                    />
-                    <div className="absolute right-0 bottom-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                      <PenTool size={14} className="text-stone-300" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pb-28 md:pb-0 min-h-[500px] p-8 pt-0">
-                <StepWizard
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  essay={essay}
-                  handleInputChange={handleInputChange}
-                  tourProps={tourProps}
-                  topic={topic}
-                  isPaid={isPaid}
-                  freeUsageCount={aiUsageCount}
-                  onIncrementUsage={incrementFreeUsage}
-                  onLimitReached={() => setShowLimitModal(true)}
-                  aiClient={aiClient}
-                />
-              </div>
-            </div>
-
-            {/* Preview Section - hidden on mobile if wizard tab is active, full height on mobile when visible */}
-            <div
-              className={`w-full md:w-2/5 md:h-auto border-t-2 md:border-t-0 border-stone-900 relative z-10 bg-white ${mobilePracticeTab !== 'preview' ? 'hidden md:block' : 'flex-1'}`}
-            >
-              <PreviewSection
-                essay={essay}
-                totalWordCount={totalWordCount}
-                setShowExaminer={handleExaminerOpen}
-                copyToClipboard={copyToClipboard}
-                tourProps={tourProps}
-                isPaid={isPaid}
-                examinerUsageCount={examinerUsageCount}
-              />
-            </div>
-          </div>
+        <FeedbackButton onClick={() => modals.setShowFeedback(true)} />
+        {activeTab === 'learn' ? (
+          <LearnTab onGoToPractice={() => setActiveTab('practice')} />
+        ) : (
+          <PracticeTab
+            essay={essay.essay}
+            handleInputChange={essay.handleInputChange}
+            totalWordCount={essay.totalWordCount}
+            tourProps={tour.tourProps}
+            topic={topic}
+            setTopic={setTopic}
+            isPaid={auth.isPaid}
+            aiUsageCount={usage.aiUsageCount}
+            examinerUsageCount={usage.examinerUsageCount}
+            incrementFreeUsage={usage.incrementFreeUsage}
+            onLimitReached={() => modals.setShowLimitModal(true)}
+            onExaminerOpen={handleExaminerOpen}
+            copyToClipboard={copyToClipboard}
+            aiClient={aiClient}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+          />
         )}
       </main>
-
-      <footer
-        className={`bg-[#f4f1ea] border-t-2 border-stone-900 py-3 px-6 flex flex-col md:flex-row justify-between items-center shrink-0 z-50 gap-2 fixed bottom-0 w-full md:static ${activeTab === 'practice' ? 'hidden md:flex' : ''}`}
-      >
-        <div className="flex items-center gap-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
-            Architected by{' '}
-            <a
-              href="https://scuba3198.github.io/mumukshu-portfolio/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-stone-900 font-black border-b-2 border-yellow-400 hover:bg-yellow-400 transition-colors cursor-pointer"
-            >
-              Mumukshu D.C.
-            </a>
-          </p>
-          <div className="flex items-center gap-3">
-            <a
-              href="https://wa.me/9779862329617"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-stone-400 hover:text-green-500 transition-colors"
-              aria-label="WhatsApp"
-            >
-              <WhatsAppIcon size={16} />
-            </a>
-            <a
-              href="https://github.com/scuba3198"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-stone-400 hover:text-stone-900 transition-colors"
-              aria-label="GitHub"
-            >
-              <Github size={16} />
-            </a>
-            <a
-              href="https://www.facebook.com/profile.php?id=61585812331891"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-stone-400 hover:text-blue-600 transition-colors"
-              aria-label="Facebook"
-            >
-              <Facebook size={16} />
-            </a>
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <button
-            onClick={() => setShowPrivacy(true)}
-            className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors"
-          >
-            Privacy Policy
-          </button>
-          <button
-            onClick={() => setShowToS(true)}
-            className="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors"
-          >
-            Terms of Service
-          </button>
-        </div>
-      </footer>
+      <AppFooter
+        activeTab={activeTab}
+        onShowPrivacy={() => modals.setShowPrivacy(true)}
+        onShowToS={() => modals.setShowToS(true)}
+      />
+      <ModalsGate
+        showAbout={modals.showAbout}
+        showPrivacy={modals.showPrivacy}
+        showAuth={modals.showAuth}
+        authMode={modals.authMode}
+        showExaminer={modals.showExaminer}
+        showToS={modals.showToS}
+        showPayment={modals.showPayment}
+        showPricing={modals.showPricing}
+        showLimitModal={modals.showLimitModal}
+        showFeedback={modals.showFeedback}
+        onCloseAbout={() => modals.setShowAbout(false)}
+        onClosePrivacy={() => modals.setShowPrivacy(false)}
+        onCloseAuth={() => {
+          modals.setShowAuth(false);
+          modals.setAuthMode('login');
+        }}
+        onCloseExaminer={() => modals.setShowExaminer(false)}
+        onCloseToS={() => modals.setShowToS(false)}
+        onClosePayment={() => modals.setShowPayment(false)}
+        onClosePricing={() => modals.setShowPricing(false)}
+        onCloseLimitModal={() => modals.setShowLimitModal(false)}
+        onCloseFeedback={() => modals.setShowFeedback(false)}
+        onAuthSuccess={(user) => auth.verifyAccess(user, true)}
+        registerSessionUseCase={registerSessionUseCase}
+        selectedPlan={modals.selectedPlan}
+        userEmail={auth.userEmail}
+        user={auth.user}
+        onPaymentSuccess={() => {
+          modals.setShowPayment(false);
+          alert('Screenshot received! We will verify it within 1-2 hours.');
+        }}
+        aiClient={aiClient}
+        activePlan={auth.activePlan}
+        isLoggedIn={!!auth.user}
+        onSelectPlan={(plan) => {
+          if (!auth.user) {
+            modals.setShowPricing(false);
+            modals.setShowAuth(true);
+          } else {
+            modals.setSelectedPlan(plan);
+            modals.setShowPricing(false);
+            modals.setShowPayment(true);
+          }
+        }}
+        onShowAuth={() => {
+          modals.setShowPricing(false);
+          modals.setShowAuth(true);
+        }}
+        essayText={essay.generateFullEssay()}
+        isPaid={auth.isPaid}
+        examinerUsageCount={usage.examinerUsageCount}
+        onIncrementExaminerUsage={usage.incrementExaminerUsage}
+        onExaminerLimitReached={() => {
+          modals.setShowExaminer(false);
+          modals.setShowLimitModal(true);
+        }}
+        onUpgradeFromLimit={handleUpgradeFromLimit}
+        deviceService={deviceService}
+      />
     </div>
   );
 };
