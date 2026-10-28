@@ -68,6 +68,8 @@ graph TD
 
 ## Project Structure
 
+For a fresh Supabase database, follow [Database setup](supabase/README.md). The setup migration includes tables, triggers, RPCs, storage policies, explicit grants, and RLS.
+
 - `src/domain/`: Pure logic, Zod schemas, and interfaces.
 - `src/infrastructure/`: Implementation of external services (APIs, DBs, Loggers).
 - `src/application/`: Orchestration of business logic using Use Cases.

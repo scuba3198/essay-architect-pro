@@ -12,8 +12,10 @@ const getVisitorIDHeader = () => {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
-    headers: {
-      'x-visitor-id': getVisitorIDHeader(),
+    fetch: (input, init) => {
+      const headers = new Headers(init?.headers);
+      headers.set('x-visitor-id', getVisitorIDHeader());
+      return fetch(input, { ...init, headers });
     },
   },
 });
