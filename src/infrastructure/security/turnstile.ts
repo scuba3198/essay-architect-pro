@@ -52,6 +52,9 @@ const loadTurnstileScript = Effect.async<void, AppError>((resume) => {
   };
 
   script.onerror = () => {
+    // Remove the dead tag, otherwise later attempts take the "already loading"
+    // branch above and poll forever instead of retrying the download.
+    script.remove();
     resume(
       Effect.fail(
         new AppError({ message: 'Failed to load Turnstile script', code: 'TURNSTILE_LOAD_ERROR' }),
@@ -83,68 +86,87 @@ export const getTurnstileToken = (): Effect.Effect<string, AppError> =>
   Effect.gen(function* () {
     yield* loadTurnstileScript;
 
-    return yield* Effect.async<string, AppError>((resume) => {
-      if (!window.turnstile || typeof window.turnstile.render !== 'function') {
-        resume(
-          Effect.fail(
-            new AppError({ message: 'Turnstile is not available.', code: 'TURNSTILE_UNAVAILABLE' }),
-          ),
-        );
-        return;
-      }
-
-      // Create a hidden container for the widget
-      const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.top = '-9999px';
-      container.style.left = '-9999px';
-      document.body.appendChild(container);
-
-      const widgetId = window.turnstile.render(container, {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: (token: string) => {
-          resume(Effect.succeed(token));
-        },
-        'error-callback': () => {
-          resume(
-            Effect.fail(
-              new AppError({
-                message: 'Verification failed. Please try again.',
-                code: 'TURNSTILE_VERIFY_ERROR',
-              }),
-            ),
-          );
-        },
-        'expired-callback': () => {
-          resume(
-            Effect.fail(
-              new AppError({
-                message: 'Verification expired. Please try again.',
-                code: 'TURNSTILE_EXPIRED',
-              }),
-            ),
-          );
-        },
-      });
-
-      // We rely on auto-execution (which is default). No need to call window.turnstile.execute()
-      // manually as that throws 'already executing' errors for visible/managed widget types.
-
-      // Cleanup mechanism that Effect runs if interrupted or finished
-      return Effect.sync(() => {
-        try {
-          if (widgetId !== null && window.turnstile) {
-            window.turnstile.remove(widgetId);
+    // acquireUseRelease guarantees the widget and its container are removed on
+    // success, failure and timeout alike. (A finalizer returned from
+    // Effect.async only runs on interruption, which leaked one hidden widget
+    // per successful verification.)
+    return yield* Effect.acquireUseRelease(
+      Effect.sync(() => {
+        // Create a hidden container for the widget
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.top = '-9999px';
+        container.style.left = '-9999px';
+        document.body.appendChild(container);
+        return { container, widgetId: null as string | null };
+      }),
+      (handle) =>
+        Effect.async<string, AppError>((resume) => {
+          if (!window.turnstile || typeof window.turnstile.render !== 'function') {
+            resume(
+              Effect.fail(
+                new AppError({
+                  message: 'Turnstile is not available.',
+                  code: 'TURNSTILE_UNAVAILABLE',
+                }),
+              ),
+            );
+            return;
           }
-        } catch {
-          // ignore cleanup errors
-        }
 
-        if (container.parentNode) {
-          container.parentNode.removeChild(container);
-        }
-      });
-    }).pipe(
+          // We rely on auto-execution (which is default). No need to call
+          // window.turnstile.execute() manually as that throws 'already
+          // executing' errors for visible/managed widget types.
+          try {
+            handle.widgetId = window.turnstile.render(handle.container, {
+              sitekey: TURNSTILE_SITE_KEY,
+              callback: (token: string) => {
+                resume(Effect.succeed(token));
+              },
+              'error-callback': () => {
+                resume(
+                  Effect.fail(
+                    new AppError({
+                      message: 'Verification failed. Please try again.',
+                      code: 'TURNSTILE_VERIFY_ERROR',
+                    }),
+                  ),
+                );
+              },
+              'expired-callback': () => {
+                resume(
+                  Effect.fail(
+                    new AppError({
+                      message: 'Verification expired. Please try again.',
+                      code: 'TURNSTILE_EXPIRED',
+                    }),
+                  ),
+                );
+              },
+            });
+          } catch {
+            resume(
+              Effect.fail(
+                new AppError({
+                  message: 'Verification widget failed to start.',
+                  code: 'TURNSTILE_RENDER_ERROR',
+                }),
+              ),
+            );
+          }
+        }),
+      (handle) =>
+        Effect.sync(() => {
+          try {
+            if (handle.widgetId !== null && window.turnstile) {
+              window.turnstile.remove(handle.widgetId);
+            }
+          } catch {
+            // ignore cleanup errors
+          }
+          handle.container.remove();
+        }),
+    ).pipe(
       Effect.timeout('30 seconds'),
       Effect.mapError((e) =>
         Cause.isTimeoutException(e)

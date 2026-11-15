@@ -61,12 +61,13 @@ export class ValidateSessionUseCase {
         return { isValid: false, wasLoggedOut: true };
       }
 
-      // Update last active
+      // Update last active (both columns: the DB triggers read last_active_at)
+      const nowIso = new Date().toISOString();
       yield* Effect.tryPromise({
         try: () =>
           this.supabase
             .from('user_sessions')
-            .update({ last_active: new Date().toISOString() })
+            .update({ last_active: nowIso, last_active_at: nowIso })
             .eq('id', session.id),
         catch: (err) =>
           new AppError({

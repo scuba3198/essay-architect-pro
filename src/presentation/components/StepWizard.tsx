@@ -107,6 +107,9 @@ const StepWizard: React.FC<StepWizardProps> = ({
   }>({ isOpen: false, text: '', section: '', field: '' });
   const [generatingField, setGeneratingField] = useState<string | null>(null);
   const textareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  // Latest essay, readable from async callbacks that outlive the render
+  const essayRef = useRef(essay);
+  essayRef.current = essay;
 
   const handleVocabularyInsert = (section: EssaySectionKey, field: string, text: string) => {
     const textarea = textareaRefs.current[`${section}-${field}`];
@@ -243,8 +246,12 @@ const StepWizard: React.FC<StepWizardProps> = ({
             Return ONLY the text to be added.`;
 
         const completion = yield* aiClient.callProAI(prompt);
-        const spacer = currentText.length > 0 && !currentText.match(/\s$/) ? ' ' : '';
-        const newVal = currentText + spacer + completion.trim();
+        // Append to what is in the box now, not what was there when the request
+        // started - otherwise anything typed while waiting is overwritten.
+        const latestText =
+          (essayRef.current[section] as unknown as Record<string, string>)[field] ?? currentText;
+        const spacer = latestText.length > 0 && !latestText.match(/\s$/) ? ' ' : '';
+        const newVal = latestText + spacer + completion.trim();
         handleInputChange(section, field, newVal);
 
         // Track usage

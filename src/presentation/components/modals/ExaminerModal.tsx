@@ -127,7 +127,16 @@ Essay:
         });
 
         // Validate with Effect Schema
-        const validatedData = yield* Schema.decodeUnknown(ExaminerFeedbackSchema)(data);
+        // Map the schema failure to a readable message; the raw ParseError is a
+        // multi-line technical dump that would otherwise be shown to the user.
+        const validatedData = yield* Schema.decodeUnknown(ExaminerFeedbackSchema)(data).pipe(
+          Effect.tapError((parseError) =>
+            Effect.logError('Examiner feedback failed validation', { error: String(parseError) }),
+          ),
+          Effect.mapError(
+            () => new Error('The examiner returned an unreadable report. Please try again.'),
+          ),
+        );
 
         setFeedback(validatedData);
         if (!isPaid) onIncrementUsage();

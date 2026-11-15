@@ -16,6 +16,16 @@ import { supabase } from '../../infrastructure/db/supabase';
 import { appRuntime } from '../../infrastructure/runtime';
 import type { Notification } from '../../domain/types';
 
+/**
+ * True when the page was opened from a Supabase e-mail link (signup
+ * confirmation, magic link, implicit-flow recovery). Captured at module load
+ * because supabase-js strips these parameters from the URL while initialising.
+ */
+const arrivedViaAuthLink =
+  typeof window !== 'undefined' &&
+  (/(^#|&)access_token=/.test(window.location.hash) ||
+    new URLSearchParams(window.location.search).has('code'));
+
 interface UseAuthProps {
   registerSessionUseCase: RegisterSessionUseCase;
   validateSessionUseCase: ValidateSessionUseCase;
@@ -55,8 +65,7 @@ export const useAuth = ({
                 .select('*')
                 .eq('user_id', user.id)
                 .eq('status', 'approved')
-                .order('created_at', { ascending: false })
-                .limit(1),
+                .order('created_at', { ascending: false }),
             catch: (err) => new Error(`Payment fetch check error: ${err}`),
           });
 
@@ -67,57 +76,65 @@ export const useAuth = ({
           }
 
           if (data && data.length > 0) {
-            const latest = data[0];
-
-            const createdAt = new Date(latest.created_at).getTime();
             const now = Date.now();
-            const hoursPassed = (now - createdAt) / (1000 * 60 * 60);
 
-            const planConfig = Match.value(latest.plan_name).pipe(
-              Match.when('Consultancy Killer', () => ({
-                valid: true,
-                msg: 'Welcome back! Your Lifetime access is active.',
-                name: 'Lifetime Pack',
-              })),
-              Match.when('Lifetime Pack', () => ({
-                valid: true,
-                msg: 'Welcome back! Your Lifetime access is active.',
-                name: 'Lifetime Pack',
-              })),
-              Match.when('Preparation Pack', () => {
-                const daysLeft = Math.floor(30 - hoursPassed / 24);
-                return daysLeft >= 0
-                  ? {
-                      valid: true,
-                      msg: `Access Unlocked! You have ${daysLeft} days remaining on your Preparation Pack.`,
-                      name: 'Preparation Pack',
-                    }
-                  : {
-                      valid: false,
-                      msg: 'Your 30-day Preparation Pack has expired.',
-                      name: 'Preparation Pack',
-                    };
-              }),
-              Match.when("Crammer's Pass", () => {
-                const hoursLeft = Math.floor(24 - hoursPassed);
-                return hoursLeft >= 0
-                  ? {
-                      valid: true,
-                      msg: `Access Unlocked! You have ${hoursLeft} hours remaining on your Crammer's Pass.`,
-                      name: "Crammer's Pass",
-                    }
-                  : {
-                      valid: false,
-                      msg: "Your 24-hour Crammer's Pass has expired.",
-                      name: "Crammer's Pass",
-                    };
-              }),
-              Match.orElse(() => ({
-                valid: false,
-                msg: 'Unknown plan type encountered.',
-                name: latest.plan_name,
-              })),
-            );
+            const evaluatePlan = (payment: { created_at: string; plan_name: string }) => {
+              const createdAt = new Date(payment.created_at).getTime();
+              const hoursPassed = (now - createdAt) / (1000 * 60 * 60);
+
+              return Match.value(payment.plan_name).pipe(
+                Match.when('Consultancy Killer', () => ({
+                  valid: true,
+                  msg: 'Welcome back! Your Lifetime access is active.',
+                  name: 'Lifetime Pack',
+                })),
+                Match.when('Lifetime Pack', () => ({
+                  valid: true,
+                  msg: 'Welcome back! Your Lifetime access is active.',
+                  name: 'Lifetime Pack',
+                })),
+                Match.when('Preparation Pack', () => {
+                  const daysLeft = Math.floor(30 - hoursPassed / 24);
+                  return daysLeft >= 0
+                    ? {
+                        valid: true,
+                        msg: `Access Unlocked! You have ${daysLeft} days remaining on your Preparation Pack.`,
+                        name: 'Preparation Pack',
+                      }
+                    : {
+                        valid: false,
+                        msg: 'Your 30-day Preparation Pack has expired.',
+                        name: 'Preparation Pack',
+                      };
+                }),
+                Match.when("Crammer's Pass", () => {
+                  const hoursLeft = Math.floor(24 - hoursPassed);
+                  return hoursLeft >= 0
+                    ? {
+                        valid: true,
+                        msg: `Access Unlocked! You have ${hoursLeft} hours remaining on your Crammer's Pass.`,
+                        name: "Crammer's Pass",
+                      }
+                    : {
+                        valid: false,
+                        msg: "Your 24-hour Crammer's Pass has expired.",
+                        name: "Crammer's Pass",
+                      };
+                }),
+                Match.orElse(() => ({
+                  valid: false,
+                  msg: 'Unknown plan type encountered.',
+                  name: payment.plan_name,
+                })),
+              );
+            };
+
+            // A newer, expired pass must not hide an older plan that is still
+            // valid (e.g. Lifetime bought before a Crammer's Pass), so check
+            // every approved payment and fall back to the newest for messaging.
+            const planConfigs = data.map(evaluatePlan);
+            const planConfig = planConfigs.find((plan) => plan.valid) ?? planConfigs[0];
+            if (!planConfig) return;
 
             if (planConfig.valid) {
               setIsPaid(true);
@@ -151,7 +168,10 @@ export const useAuth = ({
               yield* Effect.logError('Critical verifyAccess error', { error: err });
               const message = err.message;
               if (!isSilent)
-                showNotification(`Failed to verify access: ${message}. Please refresh the page.`, 'error');
+                showNotification(
+                  `Failed to verify access: ${message}. Please refresh the page.`,
+                  'error',
+                );
             }),
           ),
         ),
@@ -168,6 +188,7 @@ export const useAuth = ({
       const urlParams = new URLSearchParams(window.location.search);
       const verificationType = urlParams.get('verification_type');
       const tokenHash = urlParams.get('token_hash');
+      let isFreshAuthLink = arrivedViaAuthLink;
 
       if (verificationType === 'recovery' && tokenHash) {
         const { error } = yield* Effect.tryPromise({
@@ -186,8 +207,8 @@ export const useAuth = ({
             'error',
           );
         } else {
-          // Token verified, will be handled by onAuthStateChange
-          // Clean up URL
+          // Token verified - clean up URL
+          isFreshAuthLink = true;
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       }
@@ -200,9 +221,26 @@ export const useAuth = ({
         catch: (err) => new Error(`Get session failed: ${err}`),
       });
 
-      if (session) {
+      if (session && isFreshAuthLink) {
+        // The session was just created by an e-mail link, so this is a new
+        // login: register this device instead of validating it. Validating
+        // would find no session row, sign the user straight back out, and make
+        // password recovery / e-mail confirmation impossible to complete.
+        const token = session.access_token?.substring(0, 32);
+        const sessionToken = token || (yield* generateSecureToken(16));
+        yield* registerSessionUseCase
+          .execute(session.user.id, sessionToken)
+          .pipe(
+            Effect.catchAll((error) =>
+              Effect.logError('Session registration after auth link failed', { error }),
+            ),
+          );
+
+        setUser(session.user);
+        verifyAccess(session.user, true);
+      } else if (session) {
         // Validate session against two-device limit
-        const { isValid, wasLoggedOut } = yield* validateSessionUseCase.execute(session.user.id);
+        const { wasLoggedOut } = yield* validateSessionUseCase.execute(session.user.id);
 
         if (wasLoggedOut) {
           // Session was invalidated manually or by a rare database event
@@ -222,14 +260,9 @@ export const useAuth = ({
           setUserEmail('');
           setActivePlan(null);
           showNotification('Your session has expired. Please log in again.', 'info');
+          // Re-arm the listener, otherwise a later login in this tab is ignored
+          yield* Ref.set(isLoggingOutRef, false);
         } else {
-          // If no session record exists, register this session
-          if (!isValid) {
-            const token = session.access_token?.substring(0, 32);
-            const sessionToken = token || (yield* generateSecureToken(16));
-            yield* registerSessionUseCase.execute(session.user.id, sessionToken);
-          }
-
           setUser(session.user);
           verifyAccess(session.user, true);
         }
@@ -266,6 +299,7 @@ export const useAuth = ({
                   setUserEmail('');
                   setActivePlan(null);
                   showNotification('Your session has expired. Please log in again.', 'info');
+                  yield* Ref.set(isLoggingOutRef, false);
                   return;
                 }
               }
@@ -346,7 +380,9 @@ export const useAuth = ({
           if (user) {
             yield* Effect.logInfo('Deactivating session for user', { userId: user.id });
             yield* deactivateSessionUseCase.execute(user.id).pipe(
-              Effect.tapError((error) => Effect.logWarning('Session deactivation failed', { error })),
+              Effect.tapError((error) =>
+                Effect.logWarning('Session deactivation failed', { error }),
+              ),
               Effect.catchAll(() => Effect.succeed(void 0)),
             );
             yield* Effect.logInfo('Session deactivated successfully', { userId: user.id });

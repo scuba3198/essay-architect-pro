@@ -103,8 +103,8 @@ export const useUsage = ({ deviceService, isPaid }: UseUsageProps) => {
         Effect.gen(function* () {
           if (!visitorID) return;
 
-          const newCount = aiUsageCount + 1;
-          setAiUsageCount(newCount);
+          // Functional update: two calls from the same render must both count
+          setAiUsageCount((prev) => prev + 1);
 
           const { error } = yield* Effect.tryPromise({
             try: () =>
@@ -131,7 +131,7 @@ export const useUsage = ({ deviceService, isPaid }: UseUsageProps) => {
           ),
         ),
       ),
-    [visitorID, aiUsageCount],
+    [visitorID],
   );
 
   const incrementExaminerUsage = useCallback(
@@ -140,8 +140,7 @@ export const useUsage = ({ deviceService, isPaid }: UseUsageProps) => {
         Effect.gen(function* () {
           if (!visitorID || isPaid) return;
 
-          const newCount = examinerUsageCount + 1;
-          setExaminerUsageCount(newCount);
+          setExaminerUsageCount((prev) => prev + 1);
 
           const { error } = yield* Effect.tryPromise({
             try: () =>
@@ -168,7 +167,7 @@ export const useUsage = ({ deviceService, isPaid }: UseUsageProps) => {
           ),
         ),
       ),
-    [visitorID, examinerUsageCount, isPaid],
+    [visitorID, isPaid],
   );
 
   return {

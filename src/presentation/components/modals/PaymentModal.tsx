@@ -43,10 +43,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   }, []);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) {
       return;
     }
+    // Clear the input so picking the same file again after a failed upload
+    // still fires onChange.
+    input.value = '';
     setIsUploading(true);
     setFileName(file.name);
 
@@ -100,7 +104,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 amount: plan.price,
                 screenshot_url: publicUrl,
                 status: 'pending',
-                created_at: new Date().toISOString(),
+                // created_at is left to the database: plan expiry is computed
+                // from it, so it must not come from the device clock.
               },
             ]),
           catch: (err) => new Error(`Database insert failed: ${err}`),
@@ -136,7 +141,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           yield* Effect.try({
             try: () =>
               window.fbq?.('track', 'Purchase', {
-                value: plan.price,
+                // Pixel expects a number, plan.price is display text ("Rs. 50")
+                value: Number(plan.price.replace(/[^0-9.]/g, '')) || 0,
                 currency: 'NPR',
                 content_name: plan.name,
               }),
@@ -144,18 +150,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               return new Error(`FB Pixel tracking failed: ${fbError}`);
             },
           }).pipe(
-            Effect.catchAll((err) =>
-              Effect.logError('FB Pixel tracking failed', { error: err }),
-            ),
+            Effect.catchAll((err) => Effect.logError('FB Pixel tracking failed', { error: err })),
           );
         }
 
         setStep(3);
       }).pipe(
         Effect.catchAll((error) => {
-          void Effect.runSync(
-            Effect.logError('Critical upload flow failure', { error }),
-          );
+          void Effect.runSync(Effect.logError('Critical upload flow failure', { error }));
           const message = error instanceof Error ? error.message : 'Unknown error';
           alert(
             `Upload failed: ${message}. Please try again or contact support if the issue persists.`,

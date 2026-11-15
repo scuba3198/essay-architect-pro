@@ -57,11 +57,8 @@ const App: React.FC = () => {
   const modals = useModals();
   const timer = useTimer();
   const tour = useTour(activeTab);
-  const essay = useEssay(() => {
-    if (!timer.isTimerRunning) {
-      timer.toggle();
-    }
-  });
+  // Set (not toggle) so two keystrokes in one render cannot switch it back off
+  const essay = useEssay(() => timer.setIsTimerRunning(true));
   const auth = useAuth({
     registerSessionUseCase,
     validateSessionUseCase,
@@ -82,8 +79,11 @@ const App: React.FC = () => {
       // 1. Google Analytics (gtag.js)
       const dataLayer = window.dataLayer || [];
       window.dataLayer = dataLayer;
-      function gtag(...args: unknown[]) {
-        dataLayer.push(args);
+      // gtag.js only processes the `arguments` object itself; a plain array
+      // pushed onto dataLayer is silently ignored.
+      function gtag(..._args: unknown[]) {
+        // oxlint-disable-next-line prefer-rest-params
+        dataLayer.push(arguments);
       }
       window.gtag = gtag;
       gtag('js', new Date());
@@ -97,15 +97,19 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // `modals` is a new object on every render, so effects must depend on the
+  // stable state setters instead - otherwise they re-run after every render.
+  const { setAuthMode, setShowAuth } = modals;
+
   // Handle password recovery from URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const verificationType = urlParams.get('verification_type');
     if (verificationType === 'recovery') {
-      modals.setAuthMode('update_password');
-      modals.setShowAuth(true);
+      setAuthMode('update_password');
+      setShowAuth(true);
     }
-  }, [modals]);
+  }, [setAuthMode, setShowAuth]);
 
   // Handle auth state change for password recovery
   useEffect(() => {
@@ -113,15 +117,15 @@ const App: React.FC = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
-        modals.setAuthMode('update_password');
-        modals.setShowAuth(true);
+        setAuthMode('update_password');
+        setShowAuth(true);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [modals]);
+  }, [setAuthMode, setShowAuth]);
 
   const handleExaminerOpen = useCallback(() => {
     if (!auth.isPaid && usage.examinerUsageCount >= 1) {
@@ -169,25 +173,25 @@ const App: React.FC = () => {
           yield* Effect.try({
             try: () => document.execCommand('copy'),
             catch: (err) => new Error(`Unable to copy: ${err}`),
-          });
+          }).pipe(Effect.ensuring(Effect.sync(() => document.body.removeChild(textArea))));
 
           const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
-          if (btn) {
+          // Skip if the "Copied!" label is already showing, otherwise a second
+          // click would capture it as the text to restore and it would stick.
+          if (btn && !btn.dataset['copied']) {
             const originalText = btn.innerHTML;
+            btn.dataset['copied'] = 'true';
             btn.innerHTML = '<span class="uppercase font-black">Copied!</span>';
             yield* Effect.forkDaemon(
               Effect.gen(function* () {
                 yield* Effect.sleep('2 seconds');
                 btn.innerHTML = originalText;
+                delete btn.dataset['copied'];
               }),
             );
           }
-
-          document.body.removeChild(textArea);
         }).pipe(
-          Effect.catchAll((err) =>
-            Effect.logError('Copy to clipboard failed', { error: err }),
-          ),
+          Effect.catchAll((err) => Effect.logError('Copy to clipboard failed', { error: err })),
         ),
       ),
     [essay],
@@ -216,8 +220,8 @@ const App: React.FC = () => {
           content="Master your essay writing with real-time AI feedback and professional grading structure."
         />
         <meta property="og:url" content="https://pro.essay-architect.uk/" />
-        <meta property="og:image" content="https://pro.essay-architect.uk/og-image.svg" />
-        <meta name="twitter:image" content="https://pro.essay-architect.uk/og-image.svg" />
+        <meta property="og:image" content="https://pro.essay-architect.uk/og-image.png" />
+        <meta name="twitter:image" content="https://pro.essay-architect.uk/og-image.png" />
         <meta
           name="keywords"
           content="IELTS writing tool, PTE essay grader, AI essay feedback, academic writing assistant, essay structure builder"
