@@ -44,7 +44,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           if (password !== confirmPassword) {
             return yield* Effect.fail(new Error('Passwords do not match'));
           }
-          const { error: signUpError } = yield* Effect.tryPromise({
+          const { data: signUpData, error: signUpError } = yield* Effect.tryPromise({
             try: () =>
               supabase.auth.signUp({
                 email,
@@ -59,6 +59,19 @@ const AuthModal: React.FC<AuthModalProps> = ({
             catch: (err) => new Error(`Sign up failed: ${err}`),
           });
           if (signUpError) return yield* Effect.fail(signUpError);
+
+          // With e-mail confirmation disabled Supabase signs the user in right
+          // away. Register the device like a normal login, otherwise the
+          // periodic session check finds no row and logs them out again.
+          if (signUpData.session && signUpData.user) {
+            const token = signUpData.session.access_token?.substring(0, 32);
+            const sessionToken = token || (yield* generateSecureToken(16));
+            yield* registerSessionUseCase.execute(signUpData.user.id, sessionToken);
+            if (onAuthSuccess) onAuthSuccess(signUpData.user);
+            onClose();
+            return;
+          }
+
           setMessage(
             'Sign up successful! Please check your email (including spam folder) for a verification link.',
           );

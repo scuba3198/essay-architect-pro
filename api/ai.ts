@@ -164,14 +164,20 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   // Get client IP for rate limiting and Turnstile verification
+  // x-forwarded-for is a comma-separated chain; only the first hop is the client.
+  // Using the whole header would break Turnstile's remoteip check and let a
+  // client dodge the rate limit by varying the rest of the chain.
   const clientIP =
-    request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'unknown';
 
   // --- AUTHENTICATION CHECK ---
   const authHeader = request.headers.get('Authorization');
   const turnstileToken = request.headers.get('X-Turnstile-Token');
 
   let isAuthenticated = false;
+  let authenticatedUser: SupabaseUser | null = null;
 
   // Option 1: Check Supabase JWT (for logged-in users)
   if (authHeader?.startsWith('Bearer ')) {
@@ -179,6 +185,7 @@ export default async function handler(request: Request): Promise<Response> {
     const user = await verifySupabaseToken(jwtToken);
     if (user) {
       isAuthenticated = true;
+      authenticatedUser = user;
     }
   }
 
@@ -235,6 +242,13 @@ export default async function handler(request: Request): Promise<Response> {
       );
     }
 
+    if (systemInstruction !== undefined && typeof systemInstruction !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request: systemInstruction must be a string' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    }
+
     if (systemInstruction && systemInstruction.length > MAX_SYSTEM_LENGTH) {
       return new Response(
         JSON.stringify({
@@ -249,6 +263,13 @@ export default async function handler(request: Request): Promise<Response> {
     const windowMs = 60000; // 1 minute window
     const maxRequests = 30; // 30 requests per minute per IP
 
+    // Drop expired entries so the map cannot grow without bound on a warm instance
+    if (rateLimitMap.size > 5000) {
+      for (const [ip, entry] of rateLimitMap) {
+        if (now > entry.resetTime) rateLimitMap.delete(ip);
+      }
+    }
+
     const clientData = rateLimitMap.get(clientIP) || { count: 0, resetTime: now + windowMs };
 
     if (now > clientData.resetTime) {
@@ -262,6 +283,93 @@ export default async function handler(request: Request): Promise<Response> {
     if (clientData.count > maxRequests) {
       return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please wait a moment.' }), {
         status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // --- PAYMENT NOTIFICATION ---
+    // Handled before (and instead of) the Gemini call: the payload is not an AI
+    // prompt, and the notification must not depend on Gemini being available.
+    if (type === 'payment') {
+      // Only a logged-in user can have submitted a payment. Anonymous
+      // (Turnstile-only) callers must not be able to post to the webhook.
+      if (!authenticatedUser) {
+        return new Response(JSON.stringify({ error: 'Unauthorized. Please log in.' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+
+      if (webhookUrl) {
+        let paymentData: { planName?: unknown; price?: unknown } | null = null;
+        try {
+          paymentData = JSON.parse(prompt);
+        } catch (e) {
+          log('ERROR', 'Failed to parse payment JSON payload', {
+            code: 'PAYMENT_PARSE_ERROR',
+            correlationId,
+            error: String(e),
+          });
+        }
+
+        if (paymentData && paymentData.planName && paymentData.price) {
+          // Discord rejects embeds whose field values are not strings
+          const planName = String(paymentData.planName).slice(0, 100);
+          const price = String(paymentData.price).slice(0, 50);
+          // Take the e-mail from the verified token, not from the request body
+          const userEmail = authenticatedUser.email ?? 'unknown';
+
+          const embed = {
+            title: '💳 New Payment Submitted!',
+            color: 0x10b981,
+            fields: [
+              { name: 'Plan', value: planName, inline: true },
+              { name: 'Amount', value: price, inline: true },
+              { name: 'Email', value: userEmail, inline: false },
+            ],
+            footer: { text: 'Essay Architect Pro - Payment Verification' },
+            timestamp: new Date().toISOString(),
+          };
+
+          const discordPayload = {
+            content: '🔔 **New payment screenshot uploaded!** Please verify in Supabase.',
+            embeds: [embed],
+          };
+
+          log('INFO', 'Sending payment notification to Discord', { correlationId, planName });
+          try {
+            // MUST await - Edge Function terminates as soon as we return
+            const discordResponse = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(discordPayload),
+            });
+
+            if (!discordResponse.ok) {
+              const errorText = await discordResponse.text();
+              log('ERROR', 'Discord webhook error', {
+                code: 'DISCORD_WEBHOOK_ERROR',
+                correlationId,
+                status: discordResponse.status,
+                error: errorText,
+              });
+            } else {
+              log('INFO', 'Discord payment notification sent', { correlationId });
+            }
+          } catch (err) {
+            log('ERROR', 'Discord webhook request failed', {
+              code: 'DISCORD_WEBHOOK_FAILED',
+              correlationId,
+              error: String(err),
+            });
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({ text: 'ok' }), {
+        status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -327,74 +435,13 @@ export default async function handler(request: Request): Promise<Response> {
     }
 
     const data = (await geminiResponse.json()) as GeminiResponse;
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
-
-    // --- DISCORD NOTIFICATION (If type specified) ---
-    if (type === 'payment' && prompt) {
-      const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-
-      if (webhookUrl) {
-        let paymentData: { planName: string; price: number; userEmail: string } | null = null;
-        try {
-          paymentData = JSON.parse(prompt);
-        } catch (e) {
-          log('ERROR', 'Failed to parse payment JSON payload', {
-            code: 'PAYMENT_PARSE_ERROR',
-            correlationId,
-            error: String(e),
-          });
-        }
-
-        if (paymentData && paymentData.planName && paymentData.price && paymentData.userEmail) {
-          const { planName, price, userEmail } = paymentData;
-
-          const embed = {
-            title: '💳 New Payment Submitted!',
-            color: 0x10b981,
-            fields: [
-              { name: 'Plan', value: planName, inline: true },
-              { name: 'Amount', value: price, inline: true },
-              { name: 'Email', value: userEmail, inline: false },
-            ],
-            footer: { text: 'Essay Architect Pro - Payment Verification' },
-            timestamp: new Date().toISOString(),
-          };
-
-          const discordPayload = {
-            content: '🔔 **New payment screenshot uploaded!** Please verify in Supabase.',
-            embeds: [embed],
-          };
-
-          log('INFO', 'Sending payment notification to Discord', { correlationId, planName });
-          try {
-            // MUST await - Edge Function terminates as soon as we return
-            const discordResponse = await fetch(webhookUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(discordPayload),
-            });
-
-            if (!discordResponse.ok) {
-              const errorText = await discordResponse.text();
-              log('ERROR', 'Discord webhook error', {
-                code: 'DISCORD_WEBHOOK_ERROR',
-                correlationId,
-                status: discordResponse.status,
-                error: errorText,
-              });
-            } else {
-              log('INFO', 'Discord payment notification sent', { correlationId });
-            }
-          } catch (err) {
-            log('ERROR', 'Discord webhook request failed', {
-              code: 'DISCORD_WEBHOOK_FAILED',
-              correlationId,
-              error: String(err),
-            });
-          }
-        }
-      }
-    }
+    // A response can be split across several parts; join them all rather than
+    // returning only the first fragment.
+    const generatedText =
+      data.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text ?? '')
+        .join('')
+        .trim() || null;
 
     return new Response(JSON.stringify({ text: generatedText }), {
       status: 200,

@@ -57,13 +57,17 @@ export class RegisterSessionUseCase {
       const existingSession = sessions?.find((s) => s.visitor_id === visitorId);
       if (existingSession) {
         yield* Effect.logInfo('Updating existing session');
+        const nowIso = new Date().toISOString();
         const { error: updateError } = yield* Effect.tryPromise({
           try: () =>
             this.supabase
               .from('user_sessions')
               .update({
                 session_token: sessionToken,
-                last_active: new Date().toISOString(),
+                // The DB triggers (LRU eviction, profile last_seen sync) read
+                // last_active_at, so both activity columns must stay in step.
+                last_active: nowIso,
+                last_active_at: nowIso,
                 is_active: true,
               })
               .eq('id', existingSession.id),
@@ -94,7 +98,7 @@ export class RegisterSessionUseCase {
           yield* Effect.logInfo('Enforcing 2-device limit, removing oldest session', {
             oldestSessionId: oldestSession.id,
           });
-          yield* Effect.tryPromise({
+          const { error: deleteError } = yield* Effect.tryPromise({
             try: () => this.supabase.from('user_sessions').delete().eq('id', oldestSession.id),
             catch: (error) =>
               new AppError({
@@ -103,6 +107,18 @@ export class RegisterSessionUseCase {
                 shouldLog: true,
               }),
           });
+
+          // Without this check a failed eviction would silently let a third
+          // device in.
+          if (deleteError) {
+            return yield* Effect.fail(
+              new AppError({
+                message: deleteError.message,
+                code: 'DATABASE_ERROR',
+                shouldLog: true,
+              }),
+            );
+          }
         }
       }
 

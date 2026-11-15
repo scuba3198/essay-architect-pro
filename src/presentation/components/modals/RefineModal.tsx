@@ -1,6 +1,6 @@
 import { Sparkles, Wand2, X } from 'lucide-react';
 import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Effect } from 'effect';
 import { appRuntime } from '../../../infrastructure/runtime';
 import { AIClient } from '../../../infrastructure/api/api';
@@ -26,6 +26,12 @@ const RefineModal: React.FC<RefineModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Callers pass a fresh onUsage closure on every render. Reading it through a
+  // ref keeps generateSuggestion stable, so a parent re-render (timer tick,
+  // usage counter update) cannot re-trigger the AI request.
+  const onUsageRef = useRef(onUsage);
+  onUsageRef.current = onUsage;
+
   const generateSuggestion = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -35,8 +41,8 @@ const RefineModal: React.FC<RefineModalProps> = ({
         const prompt = `Rewrite the following sentence to be formal and concise, suitable for an IELTS/PTE essay, using 10th-grade reading level vocabulary (clear and accessible). Do not change the meaning. Return ONLY the rewritten sentence.\n\nOriginal: "${originalText}"`;
         const suggestionText = yield* aiClient.callProAI(prompt);
         setSuggestion(suggestionText ? suggestionText.trim() : 'Could not generate suggestion.');
-        if (suggestionText && onUsage) {
-          onUsage();
+        if (suggestionText) {
+          onUsageRef.current?.();
         }
       }).pipe(
         Effect.catchAll((err) => {
@@ -46,7 +52,7 @@ const RefineModal: React.FC<RefineModalProps> = ({
         Effect.ensuring(Effect.sync(() => setLoading(false))),
       ),
     );
-  }, [originalText, onUsage, aiClient]);
+  }, [originalText, aiClient]);
 
   useEffect(() => {
     if (isOpen && originalText) {
